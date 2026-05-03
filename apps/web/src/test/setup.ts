@@ -1,2 +1,2 @@
-// Matchers jest-dom pour Vitest (import spécifique Vitest, pas le générique)
+// Matchers jest-dom pour les tests unitaires (environment node)
 import "@testing-library/jest-dom/vitest";

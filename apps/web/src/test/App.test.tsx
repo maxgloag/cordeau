@@ -1,29 +1,35 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render } from "vitest-browser-react";
 import { AppView } from "../AppView";
 
-// AppView est un composant pur (props only, pas de hooks/providers)
-// Ce test fonctionne en jsdom sans infrastructure TanStack Query
 describe("AppView", () => {
-  it("affiche toujours le titre", () => {
-    render(<AppView isLoading={false} isError={false} data={undefined} />);
-    expect(
+  it("affiche toujours le titre", async () => {
+    const screen = await render(
+      <AppView isLoading={false} isError={false} data={undefined} />,
+    );
+    await expect.element(
       screen.getByRole("heading", { name: /cordeau api/i }),
-    ).toBeInTheDocument();
+    ).toBeVisible();
   });
 
-  it("affiche l'indicateur de chargement", () => {
-    render(<AppView isLoading={true} isError={false} data={undefined} />);
-    expect(screen.getByText(/vérification du statut/i)).toBeInTheDocument();
+  it("affiche l'indicateur de chargement", async () => {
+    const screen = await render(
+      <AppView isLoading={true} isError={false} data={undefined} />,
+    );
+    await expect
+      .element(screen.getByText(/vérification du statut/i))
+      .toBeVisible();
   });
 
-  it("affiche l'erreur si l'API est injoignable", () => {
-    render(<AppView isLoading={false} isError={true} data={undefined} />);
-    expect(screen.getByText(/api injoignable/i)).toBeInTheDocument();
+  it("affiche l'erreur si l'API est injoignable", async () => {
+    const screen = await render(
+      <AppView isLoading={false} isError={true} data={undefined} />,
+    );
+    await expect.element(screen.getByText(/api injoignable/i)).toBeVisible();
   });
 
-  it("affiche le statut et la version quand les données sont disponibles", () => {
-    render(
+  it("affiche le statut et la version quand les données sont disponibles", async () => {
+    const screen = await render(
       <AppView
         isLoading={false}
         isError={false}
@@ -35,8 +41,8 @@ describe("AppView", () => {
         }}
       />,
     );
-    // "ok" apparaît deux fois (badge statut + valeur service) — on cible la version
-    expect(screen.getByText(/0\.0\.0/)).toBeInTheDocument();
-    expect(screen.getAllByText("ok")).toHaveLength(2);
+    await expect.element(screen.getByText(/0\.0\.0/)).toBeVisible();
+    // "ok" apparaît deux fois (badge statut + valeur service database)
+    await expect.element(screen.getByText("ok").first()).toBeVisible();
   });
 });

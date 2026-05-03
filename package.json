@@ -17,6 +17,11 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore"
   },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": ["happy-dom", "@vitest/coverage-v8"]
+    }
+  },
   "devDependencies": {
     "@types/node": "^25.6.0",
     "prettier": "^3.8.3",
