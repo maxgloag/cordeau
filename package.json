@@ -1,0 +1,26 @@
+{
+  "name": "cordeau",
+  "version": "0.0.0",
+  "private": true,
+  "description": "SaaS de gestion d'activité pour artisans du bâtiment indépendants — monorepo (api, web, mobile)",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "prettier": "^3.8.3",
+    "turbo": "^2.9.8",
+    "typescript": "^6.0.3"
+  }
+}
