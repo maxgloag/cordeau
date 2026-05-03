@@ -26,11 +26,12 @@ beforeEach(() => {
 });
 
 describe("App — health check", () => {
-  it("affiche le statut de l'API et la version", async () => {
+  it("affiche le titre et le statut de l'API après réponse", async () => {
     render(<App />, { wrapper });
-    await waitFor(() => {
-      expect(screen.getByText("v0.0.0", { exact: false })).toBeInTheDocument();
-    });
     expect(screen.getByRole("heading", { name: /cordeau api/i })).toBeInTheDocument();
+    // "0.0.0" est un nœud texte séparé du "v" dans le JSX — regex pour éviter le split
+    await waitFor(() => {
+      expect(screen.getByText(/0\.0\.0/)).toBeInTheDocument();
+    });
   });
 });
