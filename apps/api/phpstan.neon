@@ -7,9 +7,10 @@ parameters:
     paths:
         - src
         - tests
-    # containerXmlPath ajouté en Phase 1 quand on aura des entités et des services configurés
+    excludePaths:
+        - tests/bootstrap.php
+    # containerXmlPath et objectManagerLoader seront activés en Phase 1
     # symfony:
     #     containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
     # doctrine:
     #     objectManagerLoader: tests/doctrine-object-manager-loader.php
-    ignoreErrors: []

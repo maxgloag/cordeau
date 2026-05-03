@@ -18,6 +18,7 @@ final class HealthControllerTest extends WebTestCase
 
         $response = json_decode((string) $client->getResponse()->getContent(), true);
 
+        self::assertIsArray($response);
         self::assertSame('ok', $response['status']);
         self::assertArrayHasKey('timestamp', $response);
         self::assertArrayHasKey('version', $response);
