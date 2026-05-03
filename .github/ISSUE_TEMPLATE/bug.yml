@@ -1,0 +1,62 @@
+name: Bug
+description: Comportement anormal constaté
+labels: ["type:bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du bug
+      placeholder: "Quand je fais X, il se passe Y au lieu de Z."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes de reproduction
+      placeholder: |
+        1. Aller sur l'écran Chantiers
+        2. Appuyer sur "Nouveau chantier"
+        3. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Comportement attendu
+    validations:
+      required: true
+
+  - type: textarea
+    id: observe
+    attributes:
+      label: Comportement observé
+    validations:
+      required: true
+
+  - type: dropdown
+    id: env
+    attributes:
+      label: Environnement
+      options:
+        - Mobile iOS (dev)
+        - Mobile Android (dev)
+        - Web (dev)
+        - Mobile iOS (prod/EAS)
+        - Mobile Android (prod/EAS)
+        - Web (prod/Cloudflare Pages)
+        - API (Coolify)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severite
+    attributes:
+      label: Sévérité
+      options:
+        - P0 — Bloquant (perte de données, crash systématique)
+        - P1 — Majeur (feature inutilisable)
+        - P2 — Mineur (workaround possible)
+    validations:
+      required: true

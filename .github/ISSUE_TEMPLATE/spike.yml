@@ -1,0 +1,43 @@
+name: Spike
+description: Investigation timeboxée pour trancher une décision technique
+labels: ["type:spike"]
+body:
+  - type: markdown
+    attributes:
+      value: "⚠️ Un spike sans timebox est une fuite. Définir la durée maximale avant de commencer."
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question à trancher
+      placeholder: "Quelle lib utiliser pour générer les PDFs de devis ?"
+    validations:
+      required: true
+
+  - type: input
+    id: timebox
+    attributes:
+      label: Timebox
+      placeholder: "4h | 1 jour"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: output
+    attributes:
+      label: Output attendu
+      options:
+        - ADR rédigé dans docs/adr/
+        - Prototype jetable (code non mergé)
+        - Document de comparaison dans docs/
+        - Décision dans un commentaire d'issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: contexte
+    attributes:
+      label: Contexte
+      description: Qu'est-ce qui motive cette investigation ?
+    validations:
+      required: true

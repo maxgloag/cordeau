@@ -1,0 +1,29 @@
+name: Chore
+description: Dette technique, refactor, dépendances, infra
+labels: ["type:chore"]
+body:
+  - type: textarea
+    id: objectif
+    attributes:
+      label: Objectif
+      placeholder: "Mettre à jour expo de SDK 54 à SDK 55"
+    validations:
+      required: true
+
+  - type: textarea
+    id: justification
+    attributes:
+      label: Justification
+      description: Pourquoi c'est nécessaire maintenant ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: critere
+    attributes:
+      label: Critère de complétion
+      placeholder: |
+        - [ ] CI verte après changement
+        - [ ] Pas de régression sur les tests existants
+    validations:
+      required: true

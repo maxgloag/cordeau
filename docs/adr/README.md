@@ -34,10 +34,10 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 
 ## Index
 
-(Rédigés en Lot 3 de Phase 0)
-
-- ADR 0001 — Stack technique globale
-- ADR 0002 — Architecture hexagonale pragmatique
-- ADR 0003 — Tokens opaques plutôt que JWT pour l'API mobile
-- ADR 0004 — Cloudflare R2 pour le stockage des photos
-- ADR 0005 — Offline-first sur mobile (SQLite + Drizzle)
+| # | Titre | Status |
+|---|---|---|
+| [0001](0001-stack-technique.md) | Stack technique globale | Accepted |
+| [0002](0002-architecture-hexagonale.md) | Architecture hexagonale pragmatique | Accepted |
+| [0003](0003-tokens-opaques-mobile.md) | Tokens opaques plutôt que JWT pour l'API mobile | Accepted |
+| [0004](0004-cloudflare-r2-stockage.md) | Cloudflare R2 pour le stockage des photos | Accepted |
+| [0005](0005-offline-first-sqlite-drizzle.md) | Offline-first sur mobile (SQLite + Drizzle + Outbox) | Accepted |

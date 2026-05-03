@@ -1,0 +1,67 @@
+name: Feature
+description: Story produit — fonctionnalité à implémenter
+labels: ["type:feature"]
+body:
+  - type: markdown
+    attributes:
+      value: "Lier cette issue à la spec Notion validée avant de commencer l'implémentation."
+
+  - type: textarea
+    id: contexte
+    attributes:
+      label: Contexte / problème
+      description: Quel problème utilisateur cette feature résout-elle ?
+      placeholder: "En tant qu'artisan, je ne peux pas… ce qui me fait perdre du temps car…"
+    validations:
+      required: true
+
+  - type: input
+    id: spec_notion
+    attributes:
+      label: Spec Notion (URL)
+      description: Lien vers la page Notion de spec validée
+      placeholder: "https://notion.so/…"
+    validations:
+      required: false
+
+  - type: textarea
+    id: criteres
+    attributes:
+      label: Critères d'acceptation
+      description: Liste des conditions mesurables pour marquer la feature comme terminée
+      placeholder: |
+        - [ ] L'artisan peut créer un chantier depuis l'écran principal
+        - [ ] Le chantier apparaît dans la liste après création
+        - [ ] L'action fonctionne hors ligne (Phase 3)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: apps
+    attributes:
+      label: App(s) concernée(s)
+      multiple: true
+      options:
+        - API (Symfony)
+        - Web (React)
+        - Mobile (Expo)
+        - Infra / CI
+    validations:
+      required: true
+
+  - type: input
+    id: bounded_context
+    attributes:
+      label: Bounded context
+      placeholder: "chantier | client | auth | photo | devis | metre-ar"
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes_tech
+    attributes:
+      label: Notes techniques
+      description: Décisions structurantes ? ADR à rédiger ?
+      placeholder: "Voir ADR 0002 pour l'archi hexagonale…"
+    validations:
+      required: false

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussion / question ouverte
+    url: https://github.com/maxgloag/cordeau/discussions
+    about: Pour les questions générales et réflexions non liées à un bug ou une feature précise.
