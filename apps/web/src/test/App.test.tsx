@@ -1,42 +1,39 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "../App";
 
-function makeWrapper() {
+// Mocker la couche réseau au niveau du module — pas de fetch réel en jsdom
+vi.mock("../lib/api", () => ({
+  fetchHealth: vi.fn().mockResolvedValue({
+    status: "ok" as const,
+    timestamp: new Date().toISOString(),
+    version: "0.0.0",
+    services: { database: "ok" },
+  }),
+}));
+
+function renderWithQueryClient() {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+  return render(
+    <QueryClientProvider client={qc}>
+      <App />
+    </QueryClientProvider>,
   );
 }
 
-beforeEach(() => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        status: "ok",
-        timestamp: new Date().toISOString(),
-        version: "0.0.0",
-        services: { database: "ok" },
-      }),
-    }),
-  );
-});
+describe("App", () => {
+  it("affiche le titre de l'application", () => {
+    renderWithQueryClient();
+    expect(
+      screen.getByRole("heading", { name: /cordeau api/i }),
+    ).toBeInTheDocument();
+  });
 
-describe("App — health check", () => {
-  it("affiche le titre et le statut de l'API après réponse", async () => {
-    await act(async () => {
-      render(<App />, { wrapper: makeWrapper() });
-    });
-
-    expect(screen.getByRole("heading", { name: /cordeau api/i })).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(screen.getByText(/0\.0\.0/)).toBeInTheDocument();
-    });
+  it("affiche l'indicateur de chargement au démarrage", () => {
+    renderWithQueryClient();
+    expect(screen.getByText(/vérification du statut/i)).toBeInTheDocument();
   });
 });

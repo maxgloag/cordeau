@@ -1,13 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { fetchHealth } from "./lib/api";
 import type { HealthResponse } from "@cordeau/shared";
-
-const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:8000";
-
-async function fetchHealth(): Promise<HealthResponse> {
-  const res = await fetch(`${API_URL}/health`);
-  if (!res.ok) throw new Error("Health check failed");
-  return res.json() as Promise<HealthResponse>;
-}
 
 export default function App() {
   const { data, isLoading, isError } = useQuery({
@@ -68,3 +61,5 @@ export default function App() {
     </main>
   );
 }
+
+export type { HealthResponse };
