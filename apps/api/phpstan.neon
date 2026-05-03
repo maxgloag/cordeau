@@ -7,11 +7,9 @@ parameters:
     paths:
         - src
         - tests
-    symfony:
-        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
-    doctrine:
-        objectManagerLoader: tests/doctrine-object-manager-loader.php
-    ignoreErrors:
-        # False positives dans les controllers Symfony avec les attributs
-        - message: '#Call to an undefined method Symfony\\Component\\HttpFoundation\\Request::#'
-          count: 0
+    # containerXmlPath ajouté en Phase 1 quand on aura des entités et des services configurés
+    # symfony:
+    #     containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    # doctrine:
+    #     objectManagerLoader: tests/doctrine-object-manager-loader.php
+    ignoreErrors: []

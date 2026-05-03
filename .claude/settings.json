@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/MaximeG/Developer/cordeau/scripts/ci-watch.sh",
+            "if": "Bash(git push *)",
+            "asyncRewake": true,
+            "statusMessage": "Surveillance CI GitHub Actions…",
+            "rewakeMessage": "La CI GitHub Actions a terminé. Voici le rapport :",
+            "rewakeSummary": "Résultat CI"
+          }
+        ]
+      }
+    ]
+  }
+}
