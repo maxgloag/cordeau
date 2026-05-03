@@ -1,0 +1,17 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+
+parameters:
+    level: 9
+    paths:
+        - src
+        - tests
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    doctrine:
+        objectManagerLoader: tests/doctrine-object-manager-loader.php
+    ignoreErrors:
+        # False positives dans les controllers Symfony avec les attributs
+        - message: '#Call to an undefined method Symfony\\Component\\HttpFoundation\\Request::#'
+          count: 0
