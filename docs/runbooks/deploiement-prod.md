@@ -1,231 +1,157 @@
 # Runbook — Déploiement Phase 0 (Lot 4)
 
 > Mise en prod gratuite des 3 environnements Cordeau. Critère de sortie Phase 0 : un commit pushé déclenche la CI verte et `/health` répond depuis l'API, le web, et un build EAS preview installable.
+>
+> **Trajectoire d'hébergement** : voir [ADR 0008](../adr/0008-trajectoire-hebergement.md). Ce runbook couvre la phase Fly.io + Neon (gratuite, mai → août 2026). La migration vers un hébergeur français est un Lot dédié à venir avant le lancement bêta.
 
 ## Vue d'ensemble
 
 | Composant | Hébergement | URL cible | Coût |
 |---|---|---|---|
-| API (Symfony) | Oracle Cloud VM ARM (Always Free) + Coolify | `https://cordeau.duckdns.org` | 0€ |
-| Web (Vite/React) | Cloudflare Pages | `https://cordeau-web.pages.dev` | 0€ |
-| Mobile (Expo) | EAS preview build | APK installable (sideload) | 0€ |
-| Erreurs | Sentry × 3 projets | `*.sentry.io` | 0€ |
-| DNS API | DuckDNS (sous-domaine gratuit) | — | 0€ |
+| API (Symfony) | Fly.io région `cdg` (Paris) | `https://cordeau-api.fly.dev` | 0 € |
+| Postgres | Neon (Frankfurt, EU central) | connexion via `DATABASE_URL` | 0 € |
+| Web (Vite/React) | Cloudflare Pages | `https://cordeau-web.pages.dev` | 0 € |
+| Mobile (Expo) | EAS preview build | APK installable (sideload) | 0 € |
+| Erreurs | Sentry × 3 projets | `*.sentry.io` | 0 € |
 
-**Le jour où on achète `cordeau-pro.fr`** : on change uniquement les DNS et les variables `*_API_URL`. Ni le code ni l'infra ne bougent.
+**Le jour où on achète `cordeau-pro.fr`** : on ajoute un certificat custom sur Fly et un domaine custom sur Cloudflare Pages. Pas de changement de code.
 
-## Prérequis (comptes à créer avant de commencer)
+## Prérequis (comptes externes)
 
-À cocher avant chaque étape — chaque compte demande 2-10 min :
+- [x] **Fly.io** — déjà connecté via GitHub
+- [ ] **Neon** — https://console.neon.tech (login GitHub, instantané)
+- [ ] **Cloudflare** — https://dash.cloudflare.com/sign-up (instantané)
+- [ ] **Expo** — https://expo.dev/signup (login GitHub possible)
+- [ ] **Sentry** — https://sentry.io/signup (Developer plan gratuit)
 
-- [ ] **Oracle Cloud** — https://signup.cloud.oracle.com (carte bancaire pour vérification, jamais débitée sur le Free Tier)
-- [ ] **DuckDNS** — https://www.duckdns.org (login GitHub, instantané)
-- [ ] **Cloudflare** — https://dash.cloudflare.com/sign-up (email + mot de passe)
-- [ ] **Expo** — https://expo.dev/signup (free tier inclus)
-- [ ] **Sentry** — https://sentry.io/signup (Developer plan gratuit, 5k events/mois × 3 projets)
-
-**Génération de la paire de clés SSH** (à faire une fois, si pas déjà fait) :
+CLI à installer localement :
 
 ```bash
-# Si tu n'as pas encore de clé SSH dédiée à ce projet
-ssh-keygen -t ed25519 -f ~/.ssh/cordeau_oracle -C "cordeau-oracle"
-# Note : NE PAS mettre de passphrase si tu veux automatiser les déploiements
-cat ~/.ssh/cordeau_oracle.pub  # copier ce contenu pour Oracle Cloud
+# Fly CLI
+brew install flyctl
+fly auth login   # ouvre le navigateur pour confirmer ton login GitHub
+
+# EAS CLI
+pnpm add -g eas-cli  # ou npx eas-cli si tu préfères ne rien installer en global
 ```
 
 ---
 
-## Étape 1 — Oracle Cloud Free Tier (VM ARM Ampere A1)
+## Étape 1 — Neon (PostgreSQL managé, gratuit, EU)
 
-**Objectif** : une VM Ubuntu 22.04 ARM (4 OCPU, 24 Go RAM) sur l'Always Free Tier d'Oracle.
+**Objectif** : une DB Postgres 18 hébergée en Frankfurt, connectée à l'API Fly.
 
-### Création du compte
+### Création du project
 
-1. https://signup.cloud.oracle.com
-2. **Choix de la région** : `eu-paris-1` ou `eu-frankfurt-1` (latence FR optimale)
-   - ⚠️ La région ne pourra plus être changée → bien réfléchir
-3. Vérification carte bancaire (1€ d'autorisation, jamais débité tant qu'on reste sur le Free Tier)
-4. Activation du compte (peut prendre 15 min à 24h selon les checks anti-fraude)
-
-### Création de la VM
-
-1. Console Oracle → **Compute** → **Instances** → **Create Instance**
+1. https://console.neon.tech → **New Project**
 2. Configuration :
-   - **Name** : `cordeau-prod`
-   - **Image** : Canonical Ubuntu 22.04 (ou 24.04 si dispo)
-   - **Shape** : **Ampere** → `VM.Standard.A1.Flex` → **4 OCPU + 24 GB RAM** (le max gratuit)
-   - **Networking** : laisser le défaut (VCN auto-créé), assigner une IP publique
-   - **SSH key** : coller la clé publique `~/.ssh/cordeau_oracle.pub`
-3. Cliquer Create. La VM est prête en ~2 min.
-4. Noter l'**IP publique** affichée (ex: `132.145.X.X`)
+   - **Project name** : `cordeau`
+   - **Postgres version** : `18` (la dernière stable proposée)
+   - **Region** : **AWS Europe (Frankfurt)** — `eu-central-1`. ⚠️ Non modifiable a posteriori
+   - **Database name** : `cordeau`
+3. À la fin, Neon affiche une **connection string** :
+   ```
+   postgresql://cordeau_owner:<password>@ep-xxxx.eu-central-1.aws.neon.tech/cordeau?sslmode=require
+   ```
+   → la **copier dans un endroit safe** (1Password, fichier local non committé). On en aura besoin à l'Étape 2.
 
-### Premier accès SSH
-
-```bash
-ssh -i ~/.ssh/cordeau_oracle ubuntu@<IP_PUBLIQUE>
-# Accepter le fingerprint
-```
-
-### Ouverture des ports (sécurité réseau Oracle)
-
-Par défaut, Oracle bloque tout sauf le 22 (SSH). Il faut ouvrir 80 et 443 pour Coolify et Let's Encrypt :
-
-1. Console Oracle → **Networking** → **Virtual Cloud Networks** → ton VCN
-2. **Security Lists** → `Default Security List for vcn-...`
-3. **Add Ingress Rules** :
-   - Source : `0.0.0.0/0` · Protocol : TCP · Destination Port : `80`
-   - Source : `0.0.0.0/0` · Protocol : TCP · Destination Port : `443`
-   - Source : `0.0.0.0/0` · Protocol : TCP · Destination Port : `8000` (Coolify dashboard, à fermer après setup)
-
-Sur la VM, ouvrir aussi les ports côté firewall Ubuntu :
+### Vérification (optionnel)
 
 ```bash
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
-sudo netfilter-persistent save
+# Si tu as psql installé localement
+psql "postgresql://cordeau_owner:...@ep-xxxx.eu-central-1.aws.neon.tech/cordeau?sslmode=require" -c "SELECT version();"
 ```
 
-**Anti-reclaim Oracle** : Oracle reclame les VMs Free Tier inactives 7 jours. Notre `/health` consommé toutes les 10s par le web nous protège. En backup, ajouter un cron toutes les heures :
+### Notes Neon
 
-```bash
-echo '0 * * * * curl -s https://cordeau.duckdns.org/health > /dev/null' | crontab -
-```
+- **Suspension auto** : Neon suspend la DB après 5 min sans connexion (free tier). La 1ère requête après suspension prend ~1-2 s. Acceptable.
+- **Branches DB** : Neon permet de créer une branche DB par PR (gratuit). On l'activera en Phase 1 quand on aura des migrations.
+- **Backup** : sur le free tier, Neon garde 7 jours d'historique (PITR). Aucun backup manuel à faire en Phase 0.
 
 ---
 
-## Étape 2 — DuckDNS (sous-domaine API gratuit)
+## Étape 2 — Fly.io (API Symfony)
 
-**Objectif** : `cordeau.duckdns.org` pointe vers l'IP de la VM Oracle.
+**Objectif** : déployer `apps/api` sur Fly, accessible en HTTPS sur `https://cordeau-api.fly.dev`.
 
-1. https://www.duckdns.org → login GitHub
-2. Dans `domains` : taper `cordeau` (ou `cordeau-api` si pris) → **add domain**
-3. Renseigner l'IP publique Oracle dans le champ `current ip` → **update ip**
-4. Noter le **token** affiché en haut de page (sera utile pour le renouvellement auto)
+### Création de l'app Fly
+
+Le `Dockerfile` et `fly.toml` sont déjà commités dans `apps/api/`. On ne lance **pas** `fly launch` (qui les écraserait) — on crée l'app à la main puis on déploie.
+
+```bash
+cd apps/api
+
+# Crée l'app sur Fly (sans déployer, juste l'enregistrement)
+fly apps create cordeau-api --org personal
+```
+
+Si le nom `cordeau-api` est déjà pris (espace de noms global Fly.io), prendre `cordeau-api-<initiales>` ou similaire et **mettre à jour `fly.toml` en conséquence** (champ `app = ...`).
+
+### Injection des secrets
+
+```bash
+# Génère un APP_SECRET cryptographiquement sûr
+APP_SECRET=$(openssl rand -hex 32)
+
+# Renseigne tout d'un coup (déclenche un seul redeploy au lieu de deux)
+fly secrets set \
+  APP_SECRET="$APP_SECRET" \
+  DATABASE_URL="postgresql://cordeau_owner:...@ep-xxxx.eu-central-1.aws.neon.tech/cordeau?sslmode=require&serverVersion=18" \
+  --app cordeau-api
+```
+
+⚠️ **Important** : ajouter `&serverVersion=18` à la fin de la connection string Neon — Doctrine en a besoin pour ne pas faire un round-trip de détection.
+
+### Premier déploiement
+
+```bash
+fly deploy --app cordeau-api
+```
+
+Le build Dockerfile prend ~3-5 min (premier run, sans cache). Les suivants : ~1-2 min grâce au cache de layers Fly.
 
 ### Vérification
 
 ```bash
-dig +short cordeau.duckdns.org   # doit retourner l'IP Oracle
+curl https://cordeau-api.fly.dev/health
+# Attendu : {"status":"ok","timestamp":"...","version":"...","services":{...}}
 ```
 
-### Mise à jour automatique de l'IP (optionnel mais recommandé)
+Si erreur 502/503 : `fly logs --app cordeau-api` pour voir le démarrage.
 
-L'IP Oracle peut théoriquement changer (rarement). Sur la VM :
+### Déploiement continu (CI GitHub Actions)
+
+À ajouter dans `.github/workflows/ci.yml` après que la première deploy manuelle ait fonctionné :
+
+```yaml
+deploy-api:
+  name: deploy / api
+  needs: api  # Attend que les tests API passent
+  if: github.ref == 'refs/heads/main'
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v6
+    - uses: superfly/flyctl-actions/setup-flyctl@master
+    - run: flyctl deploy --remote-only --config apps/api/fly.toml
+      working-directory: apps/api
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+```
+
+Pour générer le token :
 
 ```bash
-mkdir ~/duckdns && cd ~/duckdns
-echo 'echo url="https://www.duckdns.org/update?domains=cordeau&token=TON_TOKEN&ip=" | curl -k -o ~/duckdns/duck.log -K -' > duck.sh
-chmod 700 duck.sh
-(crontab -l ; echo "*/5 * * * * ~/duckdns/duck.sh >/dev/null 2>&1") | crontab -
+fly tokens create deploy --app cordeau-api --expiry 8760h  # 1 an
+# Copier la sortie et l'ajouter dans GitHub :
+# Settings → Secrets and variables → Actions → New repository secret
+# Nom : FLY_API_TOKEN
 ```
 
 ---
 
-## Étape 3 — Coolify (déploiement API)
+## Étape 3 — Cloudflare Pages (web)
 
-**Objectif** : Coolify installé sur la VM, déploie automatiquement `apps/api` à chaque push sur `main`.
-
-### Installation
-
-```bash
-# Sur la VM
-curl -fsSL https://cdn.coollabs.io/coolify/install.sh | sudo bash
-```
-
-L'installeur fait :
-- install Docker + Docker Compose
-- pull les images Coolify
-- démarre le dashboard sur `http://<IP>:8000`
-
-### Premier login
-
-1. Ouvrir `http://<IP_PUBLIQUE>:8000` dans le navigateur
-2. Créer le compte admin (utiliser ton email)
-3. **Settings** → **Configuration** → renseigner ton email et la **FQDN** : `cordeau.duckdns.org`
-4. Coolify provisionne automatiquement Let's Encrypt sur cette FQDN
-
-### Connexion à GitHub
-
-1. **Sources** → **GitHub App** → suivre l'assistant
-2. Installer la GitHub App sur le repo `maxgloag/cordeau` (scope : ce repo uniquement)
-3. Coolify peut maintenant lire le repo et écouter les webhooks
-
-### Création du projet API
-
-1. **Projects** → **New Project** → `cordeau`
-2. **Resources** → **New Resource** → **Application** → **Public Repository** ou **GitHub App**
-3. Configuration :
-   - **Repository** : `maxgloag/cordeau`
-   - **Branch** : `main`
-   - **Build Pack** : `Dockerfile` (on en crée un à l'étape suivante)
-   - **Base Directory** : `apps/api`
-   - **Dockerfile Location** : `apps/api/Dockerfile`
-   - **Port** : `80` (FrankenPHP par défaut)
-   - **FQDN** : `https://cordeau.duckdns.org`
-4. **Environment Variables** :
-   ```
-   APP_ENV=prod
-   APP_SECRET=<générer avec : openssl rand -hex 32>
-   DATABASE_URL=postgresql://cordeau:<MDP>@<HOST_PG>:5432/cordeau?serverVersion=18&charset=utf8
-   ```
-5. Sauvegarder, **PAS encore déployer** — il faut d'abord créer le Dockerfile et la DB.
-
-### Création de la DB PostgreSQL managée par Coolify
-
-1. **Resources** → **New Resource** → **Database** → **PostgreSQL** (`postgres:18-alpine`)
-2. Nom : `cordeau-pg`
-3. Récupérer les credentials générés et les coller dans `DATABASE_URL` de l'API
-4. Démarrer la DB
-
-### Création du Dockerfile API
-
-Sur ta machine locale, créer `apps/api/Dockerfile` (à versionner) :
-
-```dockerfile
-FROM dunglas/frankenphp:1-php8.5-alpine
-
-# Extensions PHP requises
-RUN install-php-extensions \
-    pdo_pgsql \
-    redis \
-    intl \
-    opcache \
-    apcu
-
-# Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-WORKDIR /app
-
-# Install deps (cache layer)
-COPY composer.json composer.lock symfony.lock ./
-RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist --optimize-autoloader
-
-# Copy app
-COPY . .
-RUN composer dump-autoload --classmap-authoritative --no-dev
-
-# Permissions
-RUN chown -R www-data:www-data /app/var
-
-ENV SERVER_NAME=:80
-EXPOSE 80
-```
-
-Commit + push : Coolify détecte le webhook et déploie.
-
-### Vérification
-
-```bash
-curl https://cordeau.duckdns.org/health
-# Attendu : {"status":"ok",...}
-```
-
----
-
-## Étape 4 — Cloudflare Pages (déploiement web)
-
-**Objectif** : `https://cordeau-web.pages.dev` rebuild automatiquement à chaque push sur `main`.
+**Objectif** : `https://cordeau-web.pages.dev` rebuild automatiquement à chaque push sur `main`, et consomme l'API Fly.
 
 1. https://dash.cloudflare.com → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
 2. Autoriser Cloudflare sur GitHub → choisir `maxgloag/cordeau`
@@ -235,12 +161,12 @@ curl https://cordeau.duckdns.org/health
    - **Framework preset** : **None** (on configure manuellement, monorepo oblige)
    - **Build command** : `pnpm install --frozen-lockfile && pnpm --filter @cordeau/web build`
    - **Build output directory** : `apps/web/dist`
-   - **Root directory (advanced)** : laisser vide (build depuis la racine pour pnpm workspaces)
+   - **Root directory** : laisser vide (build depuis la racine)
 4. **Environment variables** (Production) :
    ```
    NODE_VERSION=24
    PNPM_VERSION=10.33.2
-   VITE_API_URL=https://cordeau.duckdns.org
+   VITE_API_URL=https://cordeau-api.fly.dev
    ```
 5. **Save and Deploy**
 
@@ -248,25 +174,24 @@ curl https://cordeau.duckdns.org/health
 
 Une fois le build terminé (~2 min) :
 - Ouvrir `https://cordeau-web.pages.dev`
-- La page doit afficher le statut santé en vert (consommé depuis l'API prod)
+- La page doit afficher le statut santé en vert (consommé depuis l'API Fly)
 
 ### Preview deploys
 
-Chaque PR ouverte sur `main` déclenche un preview deploy avec une URL `https://<hash>.cordeau-web.pages.dev` — utile pour reviewer un changement UI sans merger.
+Chaque PR sur `main` déclenche un preview deploy à `https://<hash>.cordeau-web.pages.dev` — utile pour reviewer un changement UI sans merger.
 
 ---
 
-## Étape 5 — EAS preview (build mobile Android)
+## Étape 4 — EAS preview (build mobile Android)
 
-**Objectif** : un APK installable sur ton Android, qui consomme l'API prod.
+**Objectif** : un APK installable sur ton Android, qui consomme l'API Fly prod.
 
 ### Setup
 
 ```bash
 cd apps/mobile
-pnpm add -g eas-cli  # ou npx eas-cli si tu préfères
-eas login            # avec ton compte Expo
-eas init             # crée le projet sur expo.dev et update app.json avec le projectId
+eas login         # avec ton compte Expo
+eas init          # crée le projet sur expo.dev et update app.json avec le projectId
 ```
 
 ### Configuration `eas.json`
@@ -281,14 +206,14 @@ Créer `apps/mobile/eas.json` :
       "distribution": "internal",
       "android": { "buildType": "apk" },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://cordeau.duckdns.org"
+        "EXPO_PUBLIC_API_URL": "https://cordeau-api.fly.dev"
       }
     },
     "production": {
       "distribution": "store",
       "android": { "buildType": "app-bundle" },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://cordeau.duckdns.org"
+        "EXPO_PUBLIC_API_URL": "https://cordeau-api.fly.dev"
       }
     }
   }
@@ -301,21 +226,21 @@ Créer `apps/mobile/eas.json` :
 eas build --profile preview --platform android
 ```
 
-Le build prend 10-20 min sur les serveurs EAS (cloud, gratuit). À la fin, EAS donne :
+Le build prend 10-20 min sur les serveurs EAS (cloud, gratuit, 30 builds/mois). À la fin, EAS donne :
 - une URL de download de l'APK
 - un QR code à scanner depuis l'Android pour installer
 
 ### Vérification
 
-1. Installer l'APK sur ton Android (autoriser sources inconnues)
+1. Installer l'APK sur ton Android (autoriser sources inconnues une seule fois)
 2. Lancer l'app → écran d'accueil affiche le statut santé en vert
 3. Désactiver le wifi → l'écran passe en "API injoignable" (preuve qu'il appelle bien l'URL prod)
 
-**iOS** : différé jusqu'au 1er user payant (Apple Developer Program 99$/an non engagé).
+**iOS** : différé jusqu'au 1er user payant (Apple Developer Program 99 $/an non engagé).
 
 ---
 
-## Étape 6 — Sentry (3 projets)
+## Étape 5 — Sentry (3 projets)
 
 **Objectif** : exceptions remontées dans Sentry depuis l'API, le web et le mobile.
 
@@ -331,41 +256,43 @@ https://sentry.io → **Projects** → **Create Project** ×3 :
 
 Pour chacun, Sentry fournit un **DSN** (`https://<key>@o<org>.ingest.sentry.io/<project>`).
 
-### Injection des DSN
+### Stockage des DSN
 
-**API** (Coolify env vars) :
+**API** (secret Fly) :
+```bash
+fly secrets set SENTRY_DSN="<dsn cordeau-api>" --app cordeau-api
 ```
-SENTRY_DSN=<dsn cordeau-api>
-```
-Puis dans `composer.json` : `composer require sentry/sentry-symfony` (à faire en Phase 1, pas obligatoire pour Phase 0).
 
-**Web** (Cloudflare Pages env vars) :
+**Web** (variable Cloudflare Pages, dashboard) :
 ```
 VITE_SENTRY_DSN=<dsn cordeau-web>
 ```
-Lib à ajouter en Phase 1 : `pnpm --filter @cordeau/web add @sentry/react`.
 
-**Mobile** (`eas.json` → `env`) :
+**Mobile** (`apps/mobile/eas.json` → `env`) :
 ```json
 "EXPO_PUBLIC_SENTRY_DSN": "<dsn cordeau-mobile>"
 ```
-Lib à ajouter en Phase 1 : `pnpm --filter @cordeau/mobile add @sentry/react-native`.
 
-**Note** : les projets et DSN sont créés en Phase 0, mais l'**intégration code** est légitimement reportée en Phase 1 (rien à instrumenter sur `/health` seul). Phase 0 valide juste que les DSN sont stockés et que la chaîne env vars → app fonctionne.
+### Note Phase 0 vs Phase 1
+
+Phase 0 valide juste la **chaîne** : DSN stocké, accessible côté app via env var. L'**intégration code** (lib `@sentry/*` installée + initialisée) est légitimement reportée en Phase 1 — il n'y a rien à instrumenter sur `/health` seul. À Phase 1, ajouter :
+- API : `composer require sentry/sentry-symfony`
+- Web : `pnpm --filter @cordeau/web add @sentry/react`
+- Mobile : `pnpm --filter @cordeau/mobile add @sentry/react-native`
 
 ---
 
 ## Critère de sortie Phase 0 — checklist finale
 
-- [ ] `https://cordeau.duckdns.org/health` répond 200 avec `{"status":"ok",...}` depuis Internet
+- [ ] `https://cordeau-api.fly.dev/health` répond 200 avec `{"status":"ok",...}` depuis Internet
 - [ ] `https://cordeau-web.pages.dev` affiche le statut santé en vert (consommation de l'API prod)
 - [ ] APK EAS preview installé sur un Android, l'écran appelle l'API prod
 - [ ] Push d'un commit anodin sur `main` (ex: doc) déclenche :
   - CI GitHub Actions verte
-  - Re-deploy auto API via Coolify webhook
+  - Re-deploy auto API via `fly deploy` (job CI à câbler)
   - Re-deploy auto web via Cloudflare Pages webhook
 - [ ] 3 projets Sentry créés, DSN stockés dans les env vars correspondantes
-- [ ] Branch protection sur `main` active (PR + CI verte requis)
+- [ ] Branch protection sur `main` active (PR + CI verte requis) — déjà fait
 
 Quand tout est coché → Phase 0 close, on ouvre les premières issues `Phase 1 — Verticale Chantiers`.
 
@@ -373,27 +300,36 @@ Quand tout est coché → Phase 0 close, on ouvre les premières issues `Phase 1
 
 ## Troubleshooting
 
-### Coolify ne déclenche pas le déploiement
+### Fly deploy échoue sur `composer install`
+
+Manque probablement une extension PHP. Lire les logs (`fly logs`), ajouter l'extension dans le `Dockerfile` (`install-php-extensions <ext>`), redéployer.
+
+### `/health` répond 500 — connexion DB refusée
+
+Vérifier le secret `DATABASE_URL` :
 
 ```bash
-# Sur la VM, voir les logs Coolify
-docker logs coolify -f --tail 100
-```
-Vérifier que la GitHub App est bien installée et que le webhook arrive (Settings GitHub → Webhooks → Recent deliveries).
-
-### Let's Encrypt échoue
-
-Souvent : ports 80/443 pas ouverts côté Oracle (Security List), ou DNS pas encore propagé.
-
-```bash
-dig +short cordeau.duckdns.org
-# Si ça retourne pas l'IP Oracle, attendre 5 min et réessayer
+fly ssh console --app cordeau-api
+# Dans le container :
+echo $DATABASE_URL  # doit contenir la chaîne Neon, pas localhost
+php bin/console doctrine:query:sql "SELECT 1"
 ```
 
-### Cloudflare Pages échoue au build (pnpm not found)
+Causes fréquentes :
+- `serverVersion=18` manquant → Doctrine plante en bootstrap
+- IP Fly non whitelist sur Neon → vérifier dans dashboard Neon que les "allowed IPs" sont en `0.0.0.0/0` (par défaut, c'est ouvert sur le free tier)
 
-Vérifier que `PNPM_VERSION` est bien dans les env vars du projet Cloudflare Pages, et que `package.json` a `"packageManager": "pnpm@10.33.2"` (déjà OK).
+### Cloudflare Pages échoue au build (`pnpm not found`)
+
+Vérifier que `PNPM_VERSION` est bien dans les env vars du projet Cloudflare Pages, et que `package.json` racine a `"packageManager": "pnpm@10.33.2"` (déjà OK).
 
 ### EAS build échoue sur "expo prebuild"
 
 Notre `apps/mobile` est en mode managed (pas de `ios/` ni `android/` versionnés, déjà dans `.gitignore`). EAS regénère ces dossiers à la volée — c'est normal. Si erreur : vérifier `app.json` et `package.json` cohérents.
+
+### Cold start Fly trop lent
+
+Si la 1ère requête après inactivité dépasse 5 s, vérifier :
+- OPcache activé (oui, dans le Dockerfile)
+- `auto_stop_machines = "stop"` plutôt que `"suspend"` (suspend = ~3s de plus mais conserve la mémoire). On a choisi `stop` pour rester full-free.
+- Si vraiment gênant, mettre `min_machines_running = 1` dans `fly.toml` (sort du free tier mais garde une machine toujours warm)

@@ -43,3 +43,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0005](0005-offline-first-sqlite-drizzle.md) | Offline-first sur mobile (SQLite + Drizzle + Outbox) | Accepted |
 | [0006](0006-vitest-browser-mode.md) | Vitest Browser Mode + Playwright pour les tests UI React | Accepted |
 | [0007](0007-pattern-container-view.md) | Pattern container / view pour la testabilité React | Accepted |
+| [0008](0008-trajectoire-hebergement.md) | Trajectoire d'hébergement (Fly.io + Neon → Scaleway/Clever Cloud) | Accepted |

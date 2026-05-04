@@ -1,0 +1,39 @@
+# Configuration Fly.io pour l'API Cordeau
+# Doc : https://fly.io/docs/reference/configuration/
+# Cette config est générée puis maintenue manuellement (pas par `fly launch`).
+
+app = "cordeau-api"
+primary_region = "cdg"  # Paris — latence < 30ms depuis France
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  APP_ENV = "prod"
+  # Les secrets (APP_SECRET, DATABASE_URL) sont injectés via `fly secrets set`,
+  # JAMAIS committés ici. Voir docs/runbooks/deploiement-prod.md.
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  # Auto-stop des Machines après période sans trafic — clé pour rester dans le free tier.
+  # Première requête après endormissement : ~1-2s de cold start (acceptable en Phase 0/1).
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0  # 0 en Phase 0/1, passer à 1 quand on a des users payants
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+# Free tier : shared-cpu-1x avec 256 Mo de RAM.
+# À monter vers 512 Mo (~3$/mois) si on voit des OOM en Phase 6+ (génération PDF).
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
