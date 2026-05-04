@@ -16,6 +16,14 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
+# Required in container builds running as root, otherwise Symfony Flex plugin
+# is disabled and `symfony-cmd` auto-scripts fail during post-install.
+ENV COMPOSER_ALLOW_SUPERUSER=1
+# Force Symfony prod env during image build, otherwise auto-scripts may run
+# with APP_ENV=dev (from .env) while dev dependencies are excluded.
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
 # --- Étape de build ---
 # On copie d'abord uniquement les manifests pour profiter du cache Docker :
 # tant que composer.json/lock ne changent pas, les deps sont en cache
@@ -35,7 +43,7 @@ COPY . .
 # Dump de l'autoloader optimisé (classmap authoritatif = lookup direct, pas de filesystem scan)
 # On lance les scripts post-install (cache:clear, assets:install) maintenant que tout est là
 RUN composer dump-autoload --classmap-authoritative --no-dev \
-    && composer run-script post-install-cmd --no-dev
+    && php bin/console cache:warmup --env=prod
 
 # Permissions : FrankenPHP tourne en non-root, www-data doit pouvoir écrire dans var/
 RUN chown -R www-data:www-data /app/var
