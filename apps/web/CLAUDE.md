@@ -2,7 +2,7 @@
 
 ## Stack
 
-Node 24 · Vite 8 · React 19 · TypeScript 6 (strict) · Tailwind v4 + @tailwindcss/vite · TanStack Query v5 · Vitest 4 · @testing-library/react
+Node 24 · Vite 8 · React 19 · TypeScript 6 (strict) · Tailwind v4 + @tailwindcss/vite · TanStack Query v5 · Vitest 4 (Browser Mode) + Playwright/Chromium · vitest-browser-react
 
 **À ajouter en Phase 1** : TanStack Router (type-safe, file-based) · shadcn/ui · React Hook Form + Zod
 
@@ -58,11 +58,20 @@ src/
 
 ## Tests
 
-- Framework : Vitest 4 + @testing-library/react + happy-dom
-- Tests dans `src/test/` ou `src/**/*.test.tsx`
-- `globals: true` dans vitest config (pas besoin d'importer `describe`/`it`)
-- Mocker `fetch` via `vi.stubGlobal('fetch', ...)`
-- Tester le comportement UI (ce que l'utilisateur voit), pas l'implémentation
+Voir [docs/adr/0006-vitest-browser-mode.md](../../docs/adr/0006-vitest-browser-mode.md) et [docs/adr/0007-pattern-container-view.md](../../docs/adr/0007-pattern-container-view.md).
+
+**Deux projets Vitest** déclarés dans `vitest.config.ts` :
+
+- **`unit`** (environnement `node`) : logique pure, fichiers `*.test.ts`. Pas de DOM, pas de browser. Utilisé pour `src/lib/api.ts`, futurs hooks/utils, services.
+- **`browser`** (provider Playwright/Chromium, headless) : composants React, fichiers `*.test.tsx`. Vrai navigateur via `vitest-browser-react`. Pas de jsdom, pas de happy-dom (incompatibles avec React 19 sur CI Linux).
+
+**Conventions** :
+
+- Composants conçus en mode **container/view** : un composant pur (props only) testé isolément en Browser Mode, un container avec hooks/providers monté uniquement en runtime
+- API d'assertion : `await expect.element(screen.getByRole(...)).toBeVisible()` (locators auto-retry, pas de `waitFor`)
+- Mocker `fetch` via `vi.stubGlobal('fetch', ...)` dans les tests `node`. En Browser Mode, préférer un `MSW` ou un mock de la fonction métier importée
+- Identifiants métier en français pour les sélecteurs (`getByRole('heading', { name: /chantiers/i })`)
+- Premier run en CI : `playwright install --with-deps chromium` (déjà câblé dans `.github/workflows/ci.yml`)
 
 ## Variables d'environnement
 

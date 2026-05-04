@@ -29,15 +29,16 @@
 
 - [x] Monorepo Turborepo + pnpm + Node 24 + Postgres 18 / Redis 8 via Docker Compose
 - [x] `CLAUDE.md` racine, `README.md`, `ROADMAP.md`, `.editorconfig`, `.gitignore`
-- [ ] Symfony 7 + API Platform 4 + PHP 8.5 → route `/health`
-- [ ] Vite + React 19 + Tailwind v4 → page qui appelle `/health`
-- [ ] Expo SDK 54+ + expo-router → écran qui appelle `/health`
-- [ ] CI GitHub Actions : lint + test + build (matrix par app, services Postgres/Redis)
-- [ ] Repo GitHub `maxgloag/cordeau` privé + branch protection sur `main`
-- [ ] Organisation GitHub : milestones (1 par phase) + labels + Projects board + templates issues/PR
+- [x] Symfony 7.4 + API Platform 4 + PHP 8.5 → route `/health`
+- [x] Vite 8 + React 19 + Tailwind v4 → page qui appelle `/health`
+- [x] Expo SDK 54 → écran qui appelle `/health` (expo-router à ajouter Phase 1)
+- [x] CI GitHub Actions : lint + test + build (3 jobs api/web/mobile, services Postgres/Redis)
+- [x] Repo GitHub `maxgloag/cordeau` privé + branch protection sur `main`
+- [x] Organisation GitHub : milestones (1 par phase) + labels + Projects board + templates issues/PR
+- [x] ADRs 0001 à 0007 rédigés (incluant Browser Mode + pattern container/view, ajoutés en cours de route)
+- [x] Hook `ci-watch.sh` (asyncRewake) pour surveillance auto post-push
 - [ ] Déploiement : API → Oracle Cloud + Coolify, web → Cloudflare Pages, mobile → EAS preview
 - [ ] Sentry sur les 3 apps
-- [ ] ADRs 0001 à 0005 rédigés
 
 ### Critère de sortie
 

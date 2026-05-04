@@ -86,6 +86,15 @@ Voir [docs/adr/0002-architecture-hexagonale.md](docs/adr/0002-architecture-hexag
 
 Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 0 (fondations).
 
+## Surveillance CI automatique
+
+Un hook Claude Code (`.claude/settings.json` → [scripts/ci-watch.sh](scripts/ci-watch.sh)) se déclenche en `asyncRewake` après chaque `git push`. Il attend le résultat du run GitHub Actions et :
+
+- exit 0 (CI verte) → silence, aucun réveil
+- exit 2 (CI rouge) → réveille la session avec les logs filtrés (≤80 lignes des erreurs)
+
+Conséquence pratique : **après un `git push`, ne jamais lancer manuellement `gh run watch` ou poller**. Le hook fait le travail. Si la CI échoue, Claude est notifié automatiquement avec le contexte d'erreur.
+
 ## Aide-mémoire pour Claude Code
 
 - Avant de proposer une lib externe : vérifier si elle est déjà dans le stack acté (cf ADRs)

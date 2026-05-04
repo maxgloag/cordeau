@@ -19,7 +19,7 @@
   },
   "pnpm": {
     "peerDependencyRules": {
-      "ignoreMissing": ["happy-dom", "@vitest/coverage-v8"]
+      "ignoreMissing": ["@vitest/coverage-v8"]
     }
   },
   "devDependencies": {

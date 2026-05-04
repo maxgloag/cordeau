@@ -41,3 +41,5 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0003](0003-tokens-opaques-mobile.md) | Tokens opaques plutôt que JWT pour l'API mobile | Accepted |
 | [0004](0004-cloudflare-r2-stockage.md) | Cloudflare R2 pour le stockage des photos | Accepted |
 | [0005](0005-offline-first-sqlite-drizzle.md) | Offline-first sur mobile (SQLite + Drizzle + Outbox) | Accepted |
+| [0006](0006-vitest-browser-mode.md) | Vitest Browser Mode + Playwright pour les tests UI React | Accepted |
+| [0007](0007-pattern-container-view.md) | Pattern container / view pour la testabilité React | Accepted |
