@@ -58,5 +58,9 @@ Thumbs.db
 /.env.*.local
 !.env.example
 
+# Vitest Browser Mode artifacts
+apps/web/.vitest-attachments/
+apps/web/src/test/__screenshots__/
+
 # Misc
 *.tsbuildinfo
