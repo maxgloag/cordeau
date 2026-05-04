@@ -16,6 +16,13 @@
 
 **Le jour où on achète `cordeau-pro.fr`** : on ajoute un certificat custom sur Fly et un domaine custom sur Cloudflare Pages. Pas de changement de code.
 
+## Gotchas rencontrés lors du premier déploiement
+
+- **Neon credentials** : la console Neon crée par défaut le rôle `neondb_owner` et la DB `neondb`, pas `cordeau_owner`/`cordeau`. Toujours récupérer la connection string depuis la console Neon (bouton "Connect") plutôt que la construire à la main. Utiliser **single-quotes** dans `fly secrets set` pour éviter que bash interprète les caractères spéciaux (`@`, `&`, `$`) : `fly secrets set 'DATABASE_URL=postgresql://...'`
+- **wrangler-action@v3 incompatible pnpm workspaces** : l'action tente `pnpm exec wrangler` puis `pnpm add wrangler` — les deux échouent dans un workspace root. Utiliser `npx wrangler@latest` dans un step `run:` à la place.
+- **Dockerfile : `composer run-script post-install-cmd`** : les plugins Composer Flex sont désactivés dans le build remote Fly (non-interactif, non-superuser même avec `COMPOSER_ALLOW_SUPERUSER=1`). Remplacer par `php bin/console cache:warmup --env=prod` directement.
+- **EAS login OAuth/GitHub** : `eas login` est interactif. Pour les comptes GitHub, utiliser `eas login --sso` qui ouvre le navigateur.
+
 ## Prérequis (comptes externes)
 
 - [x] **Fly.io** — déjà connecté via GitHub

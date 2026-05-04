@@ -6,7 +6,7 @@
 
 ## Statut actuel
 
-**Phase 0 — Fondations** (en cours, 2026-05-03 →).
+**Phase 1 — Verticale Chantiers** (à démarrer).
 
 ## Rétroplanning indicatif
 
@@ -37,8 +37,8 @@
 - [x] Organisation GitHub : milestones (1 par phase) + labels + Projects board + templates issues/PR
 - [x] ADRs 0001 à 0007 rédigés (incluant Browser Mode + pattern container/view, ajoutés en cours de route)
 - [x] Hook `ci-watch.sh` (asyncRewake) pour surveillance auto post-push
-- [ ] Déploiement : API → Oracle Cloud + Coolify, web → Cloudflare Pages, mobile → EAS preview
-- [ ] Sentry sur les 3 apps
+- [x] Déploiement : API → Fly.io (Paris) + Neon, web → Cloudflare Pages, mobile → EAS preview Android
+- [x] Sentry sur les 3 apps (DSN injectés, intégration code Phase 1)
 
 ### Critère de sortie
 
