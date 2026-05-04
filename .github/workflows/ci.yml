@@ -10,6 +10,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Force les actions GitHub (checkout, setup-node, cache...) à tourner
+# sur Node.js 24 au lieu de la version 20 dépréciée
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   api:
     name: ci / api
