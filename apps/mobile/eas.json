@@ -9,7 +9,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://cordeau-api.fly.dev"
+        "EXPO_PUBLIC_API_URL": "https://cordeau-api.fly.dev",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://9e28a430bfa35f61ed464c5061bc58c2@o4511330969321472.ingest.de.sentry.io/4511331749003344"
       }
     },
     "production": {
@@ -18,7 +19,8 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://cordeau-api.fly.dev"
+        "EXPO_PUBLIC_API_URL": "https://cordeau-api.fly.dev",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://9e28a430bfa35f61ed464c5061bc58c2@o4511330969321472.ingest.de.sentry.io/4511331749003344"
       }
     }
   }

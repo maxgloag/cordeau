@@ -195,6 +195,7 @@ jobs:
         run: pnpm --filter @cordeau/web build
         env:
           VITE_API_URL: https://cordeau-api.fly.dev
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
       - name: Deploy to Cloudflare Pages
         run: npx wrangler@latest pages deploy apps/web/dist --project-name cordeau-web --branch main --commit-dirty=true
