@@ -27,4 +27,4 @@ jobs:
         run: pnpm add -g @commitlint/cli @commitlint/config-conventional
 
       - name: Lint commits
-        run: commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+        run: NODE_PATH=$(pnpm root -g) commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
