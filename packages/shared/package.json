@@ -6,5 +6,11 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "cd ../apps/api && /opt/homebrew/Cellar/php/8.5.5/bin/php bin/console api:openapi:export > ../packages/shared/openapi.json && cd ../packages/shared && openapi-typescript openapi.json -o src/api.generated.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7"
   }
 }

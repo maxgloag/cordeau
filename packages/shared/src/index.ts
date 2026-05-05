@@ -4,3 +4,5 @@ export type HealthResponse = {
   version: string;
   services?: Record<string, string>;
 };
+
+export type { paths, components, operations } from "./api.generated";
