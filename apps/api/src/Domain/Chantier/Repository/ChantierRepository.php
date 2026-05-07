@@ -22,7 +22,7 @@ interface ChantierRepository
     /**
      * @return list<Chantier>
      */
-    public function findAll(): array;
+    public function findAllForUser(Uuid $proprietaireId): array;
 
     public function delete(Uuid $id): void;
 }

@@ -10,6 +10,7 @@ use App\Domain\Chantier\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use App\Infrastructure\Persistence\Doctrine\Chantier\Repository\DoctrineChantierRepository;
 use App\Tests\Factory\ChantierFactory;
+use App\Tests\Factory\UserFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -40,9 +41,10 @@ final class DoctrineChantierRepositoryTest extends KernelTestCase
     #[Test]
     public function il_persiste_un_chantier_et_le_retrouve_par_id(): void
     {
+        $user = UserFactory::createOne();
         $adresse = new Adresse('1 rue Test', '75001', 'Paris');
         $surface = new Surface(42.5);
-        $chantier = Chantier::creer($adresse, $surface);
+        $chantier = Chantier::creer($user->id, $adresse, $surface);
 
         $this->repository->save($chantier);
         $this->entityManager->clear();
@@ -55,12 +57,14 @@ final class DoctrineChantierRepositoryTest extends KernelTestCase
         self::assertNotNull($retrouve->surface);
         self::assertSame(42.5, $retrouve->surface->valeurM2);
         self::assertSame(StatutChantier::EN_PREPARATION, $retrouve->statut);
+        self::assertTrue($user->id->equals($retrouve->proprietaireId));
     }
 
     #[Test]
     public function il_persiste_un_chantier_sans_surface(): void
     {
-        $chantier = Chantier::creer(new Adresse('2 avenue', '69002', 'Lyon'));
+        $user = UserFactory::createOne();
+        $chantier = Chantier::creer($user->id, new Adresse('2 avenue', '69002', 'Lyon'));
 
         $this->repository->save($chantier);
         $this->entityManager->clear();
@@ -82,7 +86,8 @@ final class DoctrineChantierRepositoryTest extends KernelTestCase
     #[Test]
     public function il_met_a_jour_un_chantier_existant_lors_du_save(): void
     {
-        $chantier = Chantier::creer(new Adresse('3 cours', '33000', 'Bordeaux'));
+        $user = UserFactory::createOne();
+        $chantier = Chantier::creer($user->id, new Adresse('3 cours', '33000', 'Bordeaux'));
         $this->repository->save($chantier);
 
         $modifie = $chantier->passerEnCours();
@@ -96,22 +101,28 @@ final class DoctrineChantierRepositoryTest extends KernelTestCase
     }
 
     #[Test]
-    public function il_liste_tous_les_chantiers(): void
+    public function il_liste_les_chantiers_du_user(): void
     {
-        ChantierFactory::createMany(3);
+        $user = UserFactory::createOne();
+        $autreUser = UserFactory::createOne();
 
-        $chantiers = $this->repository->findAll();
+        ChantierFactory::createMany(2, ['proprietaire' => $user]);
+        ChantierFactory::createOne(['proprietaire' => $autreUser]);
 
-        self::assertCount(3, $chantiers);
+        $chantiers = $this->repository->findAllForUser($user->id);
+
+        self::assertCount(2, $chantiers);
         foreach ($chantiers as $chantier) {
             self::assertInstanceOf(Chantier::class, $chantier);
+            self::assertTrue($user->id->equals($chantier->proprietaireId));
         }
     }
 
     #[Test]
     public function il_supprime_un_chantier_par_id(): void
     {
-        $chantier = Chantier::creer(new Adresse('4 rue', '13001', 'Marseille'));
+        $user = UserFactory::createOne();
+        $chantier = Chantier::creer($user->id, new Adresse('4 rue', '13001', 'Marseille'));
         $this->repository->save($chantier);
 
         $this->repository->delete($chantier->id);

@@ -10,6 +10,7 @@ use App\Domain\Chantier\Exception\ChantierIntrouvableException;
 use App\Domain\Chantier\Repository\ChantierRepository;
 use App\Domain\Chantier\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
+use App\Entity\User;
 use App\Infrastructure\Persistence\Doctrine\Chantier\Entity\ChantierDoctrineEntity;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -26,7 +27,9 @@ final class DoctrineChantierRepository implements ChantierRepository
         $existante = $repository->find($chantier->id);
 
         if ($existante === null) {
-            $this->entityManager->persist($this->toDoctrine($chantier));
+            $proprietaire = $this->entityManager->getReference(User::class, $chantier->proprietaireId);
+            \assert($proprietaire instanceof User);
+            $this->entityManager->persist($this->toDoctrine($chantier, $proprietaire));
         } else {
             $existante->adresseRue = $chantier->adresse->rue;
             $existante->adresseCodePostal = $chantier->adresse->codePostal;
@@ -60,15 +63,18 @@ final class DoctrineChantierRepository implements ChantierRepository
         return $chantier;
     }
 
-    public function findAll(): array
+    public function findAllForUser(Uuid $proprietaireId): array
     {
         $entites = $this->entityManager
             ->getRepository(ChantierDoctrineEntity::class)
             ->findBy(
-                ['statut' => array_map(
-                    fn (StatutChantier $s) => $s->value,
-                    [StatutChantier::EN_PREPARATION, StatutChantier::EN_COURS, StatutChantier::TERMINE],
-                )],
+                [
+                    'proprietaire' => $proprietaireId,
+                    'statut' => array_map(
+                        fn (StatutChantier $s) => $s->value,
+                        [StatutChantier::EN_PREPARATION, StatutChantier::EN_COURS, StatutChantier::TERMINE],
+                    ),
+                ],
                 ['creeLe' => 'DESC'],
             );
 
@@ -89,10 +95,11 @@ final class DoctrineChantierRepository implements ChantierRepository
         $this->entityManager->flush();
     }
 
-    private function toDoctrine(Chantier $chantier): ChantierDoctrineEntity
+    private function toDoctrine(Chantier $chantier, User $proprietaire): ChantierDoctrineEntity
     {
         return new ChantierDoctrineEntity(
             id: $chantier->id,
+            proprietaire: $proprietaire,
             adresseRue: $chantier->adresse->rue,
             adresseCodePostal: $chantier->adresse->codePostal,
             adresseVille: $chantier->adresse->ville,
@@ -108,6 +115,7 @@ final class DoctrineChantierRepository implements ChantierRepository
     {
         return new Chantier(
             id: $entite->id,
+            proprietaireId: $entite->proprietaire->id,
             adresse: new Adresse(
                 rue: $entite->adresseRue,
                 codePostal: $entite->adresseCodePostal,
