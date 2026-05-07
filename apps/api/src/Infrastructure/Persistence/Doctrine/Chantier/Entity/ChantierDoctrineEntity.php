@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\Doctrine\Chantier\Entity;
 
 use App\Domain\Chantier\Enum\StatutChantier;
+use App\Entity\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -19,6 +20,9 @@ class ChantierDoctrineEntity
         #[ORM\Id]
         #[ORM\Column(type: UuidType::NAME, unique: true)]
         public readonly Uuid $id,
+        #[ORM\ManyToOne(targetEntity: User::class)]
+        #[ORM\JoinColumn(name: 'proprietaire_id', nullable: false)]
+        public User $proprietaire,
         #[ORM\Column(name: 'adresse_rue', type: Types::STRING, length: 255)]
         public string $adresseRue,
         #[ORM\Column(name: 'adresse_code_postal', type: Types::STRING, length: 20)]

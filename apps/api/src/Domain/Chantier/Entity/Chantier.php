@@ -14,6 +14,7 @@ final readonly class Chantier
 {
     public function __construct(
         public Uuid $id,
+        public Uuid $proprietaireId,
         public Adresse $adresse,
         public ?Surface $surface,
         public StatutChantier $statut,
@@ -23,6 +24,7 @@ final readonly class Chantier
     }
 
     public static function creer(
+        Uuid $proprietaireId,
         Adresse $adresse,
         ?Surface $surface = null,
         ?\DateTimeImmutable $maintenant = null,
@@ -30,12 +32,13 @@ final readonly class Chantier
         $maintenant ??= new \DateTimeImmutable();
 
         return new self(
-            Uuid::v7(),
-            $adresse,
-            $surface,
-            StatutChantier::EN_PREPARATION,
-            $maintenant,
-            $maintenant,
+            id: Uuid::v7(),
+            proprietaireId: $proprietaireId,
+            adresse: $adresse,
+            surface: $surface,
+            statut: StatutChantier::EN_PREPARATION,
+            creeLe: $maintenant,
+            modifieLe: $maintenant,
         );
     }
 
@@ -59,12 +62,13 @@ final readonly class Chantier
         $maintenant ??= new \DateTimeImmutable();
 
         return new self(
-            $this->id,
-            $nouvelleAdresse,
-            $this->surface,
-            $this->statut,
-            $this->creeLe,
-            $maintenant,
+            id: $this->id,
+            proprietaireId: $this->proprietaireId,
+            adresse: $nouvelleAdresse,
+            surface: $this->surface,
+            statut: $this->statut,
+            creeLe: $this->creeLe,
+            modifieLe: $maintenant,
         );
     }
 
@@ -73,12 +77,13 @@ final readonly class Chantier
         $maintenant ??= new \DateTimeImmutable();
 
         return new self(
-            $this->id,
-            $this->adresse,
-            $surface,
-            $this->statut,
-            $this->creeLe,
-            $maintenant,
+            id: $this->id,
+            proprietaireId: $this->proprietaireId,
+            adresse: $this->adresse,
+            surface: $surface,
+            statut: $this->statut,
+            creeLe: $this->creeLe,
+            modifieLe: $maintenant,
         );
     }
 
@@ -95,12 +100,13 @@ final readonly class Chantier
         $maintenant ??= new \DateTimeImmutable();
 
         return new self(
-            $this->id,
-            $this->adresse,
-            $this->surface,
-            $cible,
-            $this->creeLe,
-            $maintenant,
+            id: $this->id,
+            proprietaireId: $this->proprietaireId,
+            adresse: $this->adresse,
+            surface: $this->surface,
+            statut: $cible,
+            creeLe: $this->creeLe,
+            modifieLe: $maintenant,
         );
     }
 }

@@ -18,7 +18,7 @@ final class ChantierTest extends TestCase
     #[Test]
     public function il_se_cree_avec_le_statut_en_preparation(): void
     {
-        $chantier = Chantier::creer(self::adresseValide());
+        $chantier = Chantier::creer(new UuidV7(), self::adresseValide());
 
         self::assertSame(StatutChantier::EN_PREPARATION, $chantier->statut);
     }
@@ -26,7 +26,7 @@ final class ChantierTest extends TestCase
     #[Test]
     public function il_genere_un_uuid_v7_a_la_creation(): void
     {
-        $chantier = Chantier::creer(self::adresseValide());
+        $chantier = Chantier::creer(new UuidV7(), self::adresseValide());
 
         self::assertInstanceOf(UuidV7::class, $chantier->id);
     }
@@ -35,7 +35,7 @@ final class ChantierTest extends TestCase
     public function il_initialise_les_deux_timestamps_a_la_meme_valeur(): void
     {
         $maintenant = new \DateTimeImmutable('2026-05-04 10:00:00');
-        $chantier = Chantier::creer(self::adresseValide(), null, $maintenant);
+        $chantier = Chantier::creer(new UuidV7(), self::adresseValide(), null, $maintenant);
 
         self::assertEquals($maintenant, $chantier->creeLe);
         self::assertEquals($maintenant, $chantier->modifieLe);
@@ -47,7 +47,7 @@ final class ChantierTest extends TestCase
         $maintenant = new \DateTimeImmutable('2026-05-04 10:00:00');
         $apres = new \DateTimeImmutable('2026-05-04 11:00:00');
 
-        $initial = Chantier::creer(self::adresseValide(), null, $maintenant);
+        $initial = Chantier::creer(new UuidV7(), self::adresseValide(), null, $maintenant);
         $modifie = $initial->passerEnCours($apres);
 
         self::assertSame(StatutChantier::EN_COURS, $modifie->statut);
@@ -59,7 +59,7 @@ final class ChantierTest extends TestCase
     #[Test]
     public function il_peut_terminer_depuis_en_cours(): void
     {
-        $chantier = Chantier::creer(self::adresseValide())->passerEnCours()->terminer();
+        $chantier = Chantier::creer(new UuidV7(), self::adresseValide())->passerEnCours()->terminer();
 
         self::assertSame(StatutChantier::TERMINE, $chantier->statut);
     }
@@ -67,20 +67,20 @@ final class ChantierTest extends TestCase
     #[Test]
     public function il_peut_archiver_depuis_n_importe_quel_statut_non_terminal(): void
     {
-        $depuisPreparation = Chantier::creer(self::adresseValide())->archiver();
+        $depuisPreparation = Chantier::creer(new UuidV7(), self::adresseValide())->archiver();
         self::assertSame(StatutChantier::ARCHIVE, $depuisPreparation->statut);
 
-        $depuisCours = Chantier::creer(self::adresseValide())->passerEnCours()->archiver();
+        $depuisCours = Chantier::creer(new UuidV7(), self::adresseValide())->passerEnCours()->archiver();
         self::assertSame(StatutChantier::ARCHIVE, $depuisCours->statut);
 
-        $depuisTermine = Chantier::creer(self::adresseValide())->passerEnCours()->terminer()->archiver();
+        $depuisTermine = Chantier::creer(new UuidV7(), self::adresseValide())->passerEnCours()->terminer()->archiver();
         self::assertSame(StatutChantier::ARCHIVE, $depuisTermine->statut);
     }
 
     #[Test]
     public function il_refuse_de_changer_de_statut_apres_archivage(): void
     {
-        $archive = Chantier::creer(self::adresseValide())->archiver();
+        $archive = Chantier::creer(new UuidV7(), self::adresseValide())->archiver();
 
         self::expectException(TransitionStatutInvalideException::class);
         $archive->passerEnCours();
@@ -89,7 +89,7 @@ final class ChantierTest extends TestCase
     #[Test]
     public function il_refuse_d_archiver_un_chantier_deja_archive(): void
     {
-        $archive = Chantier::creer(self::adresseValide())->archiver();
+        $archive = Chantier::creer(new UuidV7(), self::adresseValide())->archiver();
 
         self::expectException(TransitionStatutInvalideException::class);
         $archive->archiver();
@@ -98,7 +98,7 @@ final class ChantierTest extends TestCase
     #[Test]
     public function il_refuse_de_passer_au_meme_statut(): void
     {
-        $enCours = Chantier::creer(self::adresseValide())->passerEnCours();
+        $enCours = Chantier::creer(new UuidV7(), self::adresseValide())->passerEnCours();
 
         self::expectException(TransitionStatutInvalideException::class);
         $enCours->passerEnCours();
@@ -110,7 +110,7 @@ final class ChantierTest extends TestCase
         $maintenant = new \DateTimeImmutable('2026-05-04 10:00:00');
         $apres = new \DateTimeImmutable('2026-05-04 11:00:00');
 
-        $initial = Chantier::creer(self::adresseValide(), null, $maintenant);
+        $initial = Chantier::creer(new UuidV7(), self::adresseValide(), null, $maintenant);
         $nouvelle = new Adresse('99 boulevard', '69001', 'Lyon');
         $modifie = $initial->modifierAdresse($nouvelle, $apres);
 
@@ -122,7 +122,7 @@ final class ChantierTest extends TestCase
     #[Test]
     public function il_renseigne_la_surface_en_retournant_une_nouvelle_instance(): void
     {
-        $chantier = Chantier::creer(self::adresseValide());
+        $chantier = Chantier::creer(new UuidV7(), self::adresseValide());
         self::assertNull($chantier->surface);
 
         $modifie = $chantier->renseignerSurface(new Surface(75.5));

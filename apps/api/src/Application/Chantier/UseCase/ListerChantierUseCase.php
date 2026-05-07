@@ -6,6 +6,7 @@ namespace App\Application\Chantier\UseCase;
 
 use App\Domain\Chantier\Entity\Chantier;
 use App\Domain\Chantier\Repository\ChantierRepository;
+use Symfony\Component\Uid\Uuid;
 
 final class ListerChantierUseCase
 {
@@ -16,8 +17,8 @@ final class ListerChantierUseCase
     /**
      * @return list<Chantier>
      */
-    public function execute(): array
+    public function execute(Uuid $proprietaireId): array
     {
-        return $this->repository->findAll();
+        return $this->repository->findAllForUser($proprietaireId);
     }
 }

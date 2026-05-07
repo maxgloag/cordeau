@@ -25,6 +25,7 @@ final class ChantierFactory extends PersistentProxyObjectFactory
 
         return [
             'id' => Uuid::v7(),
+            'proprietaire' => UserFactory::new(),
             'adresseRue' => self::faker()->streetAddress(),
             'adresseCodePostal' => self::faker()->numerify('#####'),
             'adresseVille' => self::faker()->city(),
