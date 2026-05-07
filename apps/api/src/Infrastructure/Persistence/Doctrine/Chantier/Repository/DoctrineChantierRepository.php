@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\Doctrine\Chantier\Repository;
 
 use App\Domain\Chantier\Entity\Chantier;
+use App\Domain\Chantier\Enum\StatutChantier;
+use App\Domain\Chantier\Exception\ChantierIntrouvableException;
 use App\Domain\Chantier\Repository\ChantierRepository;
 use App\Domain\Chantier\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
@@ -47,11 +49,28 @@ final class DoctrineChantierRepository implements ChantierRepository
         return $entite !== null ? $this->toDomain($entite) : null;
     }
 
+    public function getById(Uuid $id): Chantier
+    {
+        $chantier = $this->findById($id);
+
+        if ($chantier === null) {
+            throw ChantierIntrouvableException::avecId($id);
+        }
+
+        return $chantier;
+    }
+
     public function findAll(): array
     {
         $entites = $this->entityManager
             ->getRepository(ChantierDoctrineEntity::class)
-            ->findBy([], ['creeLe' => 'DESC']);
+            ->findBy(
+                ['statut' => array_map(
+                    fn (StatutChantier $s) => $s->value,
+                    [StatutChantier::EN_PREPARATION, StatutChantier::EN_COURS, StatutChantier::TERMINE],
+                )],
+                ['creeLe' => 'DESC'],
+            );
 
         return array_map(fn (ChantierDoctrineEntity $e): Chantier => $this->toDomain($e), $entites);
     }

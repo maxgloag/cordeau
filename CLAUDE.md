@@ -95,6 +95,19 @@ Un hook Claude Code (`.claude/settings.json` → [scripts/ci-watch.sh](scripts/c
 
 Conséquence pratique : **après un `git push`, ne jamais lancer manuellement `gh run watch` ou poller**. Le hook fait le travail. Si la CI échoue, Claude est notifié automatiquement avec le contexte d'erreur.
 
+## Automatisation skills
+
+Skills à invoquer automatiquement selon le contexte (sans qu'on ait à le demander) :
+
+- **Avant chaque `gh pr create`** → lancer `/simplify` sur les changements de la branche, puis intégrer les corrections suggérées avant d'ouvrir la PR
+- **Avant de merger une PR liée à l'auth, à la facturation ou au stockage de fichiers** (`ctx:auth`, `ctx:facture`, `ctx:photo`, ou modifs touchant aux secrets/permissions) → lancer `/security-review` et résoudre les findings critiques avant merge
+- **Avant chaque merge** → lancer `/review` pour un second avis sur la PR
+- **Pour toute question DB / Neon / queries / connexion / migration prod** → utiliser le skill `neon-postgres` au lieu de répondre depuis la mémoire
+- **Phase 1.4 et 1.5 (UI web et mobile)** → utiliser le skill `frontend-design` quand on génère des écrans nouveaux pour éviter le rendu "AI générique"
+- **Phase 6 (Devis) et au-delà, queries SQL complexes** → consulter `supabase-postgres-best-practices` (best practices Postgres génériques)
+
+Si une de ces règles s'applique mais que tu juges qu'elle ne sert à rien dans le cas précis, l'expliquer plutôt que de l'appliquer aveuglément.
+
 ## Aide-mémoire pour Claude Code
 
 - Avant de proposer une lib externe : vérifier si elle est déjà dans le stack acté (cf ADRs)
@@ -102,3 +115,4 @@ Conséquence pratique : **après un `git push`, ne jamais lancer manuellement `g
 - Pour explorer le projet : grep > Read > Bash. Pour les versions de libs externes, utiliser le serveur MCP Context7
 - Quand l'utilisateur référence une page Notion, utiliser le serveur MCP Notion (workspace Cordeau uniquement)
 - Conventions FR : tout est en français (UI, doc, identifiants métier comme `Chantier`, `Devis`, `Client`)
+- **Pas de hacks** : si quelque chose ne fonctionne pas, consulter Context7 MCP avant de coder un workaround. Cf [feedback memory](~/.claude/projects/-Users-MaximeG-Developer-cordeau/memory/feedback_no_hacks.md).

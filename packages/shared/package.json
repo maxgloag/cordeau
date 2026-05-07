@@ -6,5 +6,11 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "cd ../../apps/api && symfony php bin/console api:openapi:export > ../../packages/shared/openapi.json && cd - && openapi-typescript openapi.json -o src/api.generated.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7"
   }
 }

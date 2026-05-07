@@ -19,5 +19,8 @@ services:
     App\:
         resource: '../src/'
 
+    App\Domain\Chantier\Repository\ChantierRepository:
+        class: App\Infrastructure\Persistence\Doctrine\Chantier\Repository\DoctrineChantierRepository
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

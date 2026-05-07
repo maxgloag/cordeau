@@ -64,3 +64,4 @@ apps/web/src/test/__screenshots__/
 
 # Misc
 *.tsbuildinfo
+packages/shared/openapi.json
