@@ -8,23 +8,22 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Application\Chantier\UseCase\ObtenirChantierUseCase;
 use App\Presentation\Api\Chantier\Resource\ChantierResource;
-use Symfony\Component\Uid\Uuid;
+use App\Presentation\Api\Support\UuidUriVariableExtractor;
 
 /**
  * @implements ProviderInterface<ChantierResource>
  */
 final class ChantierItemProvider implements ProviderInterface
 {
+    use UuidUriVariableExtractor;
+
     public function __construct(private readonly ObtenirChantierUseCase $useCase)
     {
     }
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?ChantierResource
     {
-        $rawId = $uriVariables['id'] ?? null;
-        \assert(\is_string($rawId));
-        $id = Uuid::fromString($rawId);
-        $chantier = $this->useCase->execute($id);
+        $chantier = $this->useCase->execute($this->extractUuid($uriVariables));
 
         return $chantier !== null ? ChantierResource::fromDomain($chantier) : null;
     }

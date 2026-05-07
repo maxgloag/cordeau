@@ -7,6 +7,7 @@ namespace App\Presentation\Api\Chantier\Provider;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Application\Chantier\UseCase\ListerChantierUseCase;
+use App\Domain\Chantier\Entity\Chantier;
 use App\Presentation\Api\Chantier\Resource\ChantierResource;
 
 /**
@@ -24,7 +25,7 @@ final class ChantierCollectionProvider implements ProviderInterface
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         return array_map(
-            static fn ($chantier) => ChantierResource::fromDomain($chantier),
+            static fn (Chantier $chantier): ChantierResource => ChantierResource::fromDomain($chantier),
             $this->useCase->execute(),
         );
     }

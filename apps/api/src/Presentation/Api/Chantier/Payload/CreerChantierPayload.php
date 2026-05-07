@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\Chantier\Payload;
 
+use App\Domain\Chantier\ValueObject\Adresse;
+use App\Domain\Chantier\ValueObject\Surface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class CreerChantierPayload
@@ -24,5 +26,20 @@ final class CreerChantierPayload
         #[Assert\Positive]
         public readonly ?float $surfaceM2 = null,
     ) {
+    }
+
+    public function toAdresse(): Adresse
+    {
+        return new Adresse(
+            rue: $this->adresseRue,
+            codePostal: $this->adresseCodePostal,
+            ville: $this->adresseVille,
+            pays: $this->adressePays,
+        );
+    }
+
+    public function toSurface(): ?Surface
+    {
+        return $this->surfaceM2 !== null ? new Surface($this->surfaceM2) : null;
     }
 }

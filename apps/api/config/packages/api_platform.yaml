@@ -10,3 +10,5 @@ api_platform:
         jsonld: ['application/ld+json']
     patch_formats:
         json: ['application/merge-patch+json']
+    exception_to_status:
+        App\Domain\Chantier\Exception\ChantierIntrouvableException: 404

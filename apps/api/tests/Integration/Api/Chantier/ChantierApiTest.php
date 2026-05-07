@@ -204,6 +204,12 @@ final class ChantierApiTest extends WebTestCase
         $client->request('DELETE', '/api/chantiers/' . $entite->id->toRfc4122());
 
         self::assertResponseStatusCodeSame(204);
+
+        $client->request('GET', '/api/chantiers/' . $entite->id->toRfc4122(), server: ['HTTP_ACCEPT' => 'application/json']);
+        $response = $client->getResponse()->getContent();
+        \assert($response !== false);
+        $data = self::decodeJson($response);
+        self::assertSame('archive', $data['statut']);
     }
 
     #[Test]
@@ -213,5 +219,39 @@ final class ChantierApiTest extends WebTestCase
         $client->request('DELETE', '/api/chantiers/00000000-0000-7000-8000-000000000001');
 
         self::assertResponseStatusCodeSame(404);
+    }
+
+    #[Test]
+    public function patch_avec_id_inconnu_retourne_404(): void
+    {
+        $client = static::createClient();
+        $client->request(
+            'PATCH',
+            '/api/chantiers/00000000-0000-7000-8000-000000000001',
+            server: [
+                'HTTP_ACCEPT' => 'application/json',
+                'CONTENT_TYPE' => 'application/merge-patch+json',
+            ],
+            content: json_encode(['surfaceM2' => 50.0]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    #[Test]
+    public function get_collection_exclut_les_chantiers_archives(): void
+    {
+        $client = static::createClient();
+        ChantierFactory::createOne(['statut' => \App\Domain\Chantier\Enum\StatutChantier::EN_COURS]);
+        ChantierFactory::createOne(['statut' => \App\Domain\Chantier\Enum\StatutChantier::ARCHIVE]);
+
+        $client->request('GET', '/api/chantiers', server: ['HTTP_ACCEPT' => 'application/json']);
+
+        self::assertResponseStatusCodeSame(200);
+        $response = $client->getResponse()->getContent();
+        \assert($response !== false);
+        $items = json_decode($response, true);
+        \assert(\is_array($items));
+        self::assertCount(1, $items);
     }
 }

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\Chantier\Payload;
 
+use App\Domain\Chantier\ValueObject\Adresse;
+use App\Domain\Chantier\ValueObject\Surface;
+use App\Presentation\Api\Chantier\Resource\ChantierResource;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class ModifierChantierPayload
@@ -24,5 +27,29 @@ final class ModifierChantierPayload
         #[Assert\Positive]
         public readonly ?float $surfaceM2 = null,
     ) {
+    }
+
+    public function toAdresse(ChantierResource $existant): ?Adresse
+    {
+        $aucunChampAdresse = $this->adresseRue === null
+            && $this->adresseCodePostal === null
+            && $this->adresseVille === null
+            && $this->adressePays === null;
+
+        if ($aucunChampAdresse) {
+            return null;
+        }
+
+        return new Adresse(
+            rue: $this->adresseRue ?? $existant->adresseRue,
+            codePostal: $this->adresseCodePostal ?? $existant->adresseCodePostal,
+            ville: $this->adresseVille ?? $existant->adresseVille,
+            pays: $this->adressePays ?? $existant->adressePays,
+        );
+    }
+
+    public function toSurface(): ?Surface
+    {
+        return $this->surfaceM2 !== null ? new Surface($this->surfaceM2) : null;
     }
 }
