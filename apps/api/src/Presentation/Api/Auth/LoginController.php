@@ -9,13 +9,14 @@ use App\Entity\User;
 use App\Infrastructure\Persistence\Doctrine\Auth\Repository\DoctrineAuthTokenRepository;
 use App\Infrastructure\Persistence\Doctrine\Auth\Repository\DoctrineUserRepository;
 use App\Security\TokenGenerator;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Uid\Uuid;
+
 
 final class LoginController
 {
@@ -24,6 +25,7 @@ final class LoginController
         private readonly DoctrineAuthTokenRepository $authTokenRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly TokenGenerator $tokenGenerator,
+        private readonly Security $security,
     ) {
     }
 
@@ -50,7 +52,7 @@ final class LoginController
             return $this->creerReponseToken($user, $request->headers->get('X-Device-Info'));
         }
 
-        $request->getSession()->set('_security_main', serialize($user));
+        $this->security->login($user, firewallName: 'main');
 
         return new JsonResponse(['id' => $user->id->toRfc4122(), 'email' => $user->email]);
     }
