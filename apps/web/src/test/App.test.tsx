@@ -1,48 +1,55 @@
 import { describe, it, expect } from "vitest";
 import { render } from "vitest-browser-react";
-import { AppView } from "../AppView";
+import { useForm } from "react-hook-form";
+import { LoginView } from "../pages/login/LoginView";
+import type { LoginFormValues } from "../pages/login/LoginView";
 
-describe("AppView", () => {
-  it("affiche toujours le titre", async () => {
-    const screen = await render(
-      <AppView isLoading={false} isError={false} data={undefined} />,
-    );
-    await expect.element(
-      screen.getByRole("heading", { name: /cordeau api/i }),
-    ).toBeVisible();
+function LoginViewWrapper({
+  errorMessage,
+}: {
+  errorMessage?: string | undefined;
+}) {
+  const form = useForm<LoginFormValues>({
+    defaultValues: { email: "", motDePasse: "" },
   });
+  return (
+    <LoginView
+      form={form}
+      onSubmit={async () => {}}
+      isPending={false}
+      errorMessage={errorMessage}
+      registerHref="/register"
+    />
+  );
+}
 
-  it("affiche l'indicateur de chargement", async () => {
-    const screen = await render(
-      <AppView isLoading={true} isError={false} data={undefined} />,
-    );
+describe("LoginView", () => {
+  it("affiche le titre de connexion", async () => {
+    const screen = await render(<LoginViewWrapper />);
     await expect
-      .element(screen.getByText(/vérification du statut/i))
+      .element(screen.getByRole("heading", { name: /connexion/i }))
       .toBeVisible();
   });
 
-  it("affiche l'erreur si l'API est injoignable", async () => {
-    const screen = await render(
-      <AppView isLoading={false} isError={true} data={undefined} />,
-    );
-    await expect.element(screen.getByText(/api injoignable/i)).toBeVisible();
+  it("affiche les champs email et mot de passe", async () => {
+    const screen = await render(<LoginViewWrapper />);
+    await expect.element(screen.getByLabelText(/adresse email/i)).toBeVisible();
+    await expect.element(screen.getByLabelText(/mot de passe/i)).toBeVisible();
   });
 
-  it("affiche le statut et la version quand les données sont disponibles", async () => {
+  it("affiche le message d'erreur si fourni", async () => {
     const screen = await render(
-      <AppView
-        isLoading={false}
-        isError={false}
-        data={{
-          status: "ok",
-          timestamp: new Date().toISOString(),
-          version: "0.0.0",
-          services: { database: "ok" },
-        }}
-      />,
+      <LoginViewWrapper errorMessage="Email ou mot de passe incorrect." />,
     );
-    await expect.element(screen.getByText(/0\.0\.0/)).toBeVisible();
-    // "ok" apparaît deux fois (badge statut + valeur service database)
-    await expect.element(screen.getByText("ok").first()).toBeVisible();
+    await expect
+      .element(screen.getByText(/email ou mot de passe incorrect/i))
+      .toBeVisible();
+  });
+
+  it("affiche le lien vers l'inscription", async () => {
+    const screen = await render(<LoginViewWrapper />);
+    await expect
+      .element(screen.getByRole("link", { name: /créer un compte/i }))
+      .toBeVisible();
   });
 });

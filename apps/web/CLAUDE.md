@@ -4,7 +4,7 @@
 
 Node 24 · Vite 8 · React 19 · TypeScript 6 (strict) · Tailwind v4 + @tailwindcss/vite · TanStack Query v5 · Vitest 4 (Browser Mode) + Playwright/Chromium · vitest-browser-react
 
-**À ajouter en Phase 1** : TanStack Router (type-safe, file-based) · shadcn/ui · React Hook Form + Zod
+**Ajouté en Phase 1** : TanStack Router v1 (file-based, plugin Vite) · shadcn/ui (Tailwind v4) · React Hook Form v7 + Zod v4
 
 ## Commandes
 
@@ -18,22 +18,37 @@ pnpm type-check   # tsc --noEmit seul
 pnpm preview      # preview du build prod
 ```
 
-## Structure cible (à partir de Phase 1)
+## Structure (Phase 1)
 
 ```
 src/
-├── routes/           # pages via TanStack Router (file-based)
-│   ├── __root.tsx   # layout racine
-│   ├── index.tsx    # route /
-│   └── chantiers/   # routes /chantiers/*
-├── components/       # composants partagés
-│   └── ui/          # composants shadcn/ui (générés, ne pas modifier)
+├── routes/              # pages via TanStack Router (file-based, généré dans routeTree.gen.ts)
+│   ├── __root.tsx       # layout racine (RouterContext avec QueryClient)
+│   ├── index.tsx        # / → redirect login ou dashboard
+│   ├── login.tsx        # /login
+│   ├── register.tsx     # /register
+│   ├── _authed.tsx      # layout protégé (beforeLoad → /login si 401)
+│   └── _authed/
+│       └── dashboard.tsx # /dashboard
+├── pages/               # container + view par page (pattern ADR 0007)
+│   ├── login/           # LoginPage (container) + LoginView (vue pure)
+│   ├── register/        # RegisterPage + RegisterView
+│   └── dashboard/       # DashboardPage + DashboardView + ChantierFormView
+├── components/
+│   ├── ui/              # composants shadcn/ui (générés, ne pas modifier)
+│   └── layout/          # AppShell (sidebar + main)
 ├── lib/
-│   ├── api/         # fonctions fetch vers l'API + types depuis @cordeau/shared
-│   └── utils/       # utilitaires
-├── hooks/           # custom hooks
-└── test/            # setup Vitest + helpers de test
+│   ├── api.ts           # fonctions fetch (auth + chantiers) + types
+│   └── utils.ts         # cn() helper
+└── test/                # setup Vitest + tests
 ```
+
+## Conventions importantes
+
+- `src/routeTree.gen.ts` est auto-généré par le plugin Vite TanStack Router — ne pas modifier
+- `src/components/ui/` est exclu d'ESLint (fichiers shadcn/ui)
+- Views pures : aucune dépendance de routing (pas d'import `@tanstack/react-router`) — testables en Browser Mode sans mock
+- `@/` alias configuré dans `vite.config.ts` ET `vitest.config.ts` (les deux configs séparées)
 
 ## Conventions TypeScript
 

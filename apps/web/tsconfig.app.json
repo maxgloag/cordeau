@@ -24,6 +24,7 @@
     "erasableSyntaxOnly": true,
 
     "paths": {
+      "@/*": ["./src/*"],
       "@cordeau/shared": ["../../packages/shared/src/index.ts"]
     }
   },
