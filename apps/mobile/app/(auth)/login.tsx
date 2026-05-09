@@ -88,7 +88,7 @@ export default function LoginScreen() {
               </View>
             )}
 
-            <View className="space-y-4">
+            <View>
               <View>
                 <Text className="text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">
                   Adresse email

@@ -89,7 +89,7 @@ export default function RegisterScreen() {
               </View>
             )}
 
-            <View className="space-y-4">
+            <View>
               {(
                 [
                   { name: "email" as const, label: "Adresse email", placeholder: "artisan@exemple.fr", keyboardType: "email-address" as const, secure: false },

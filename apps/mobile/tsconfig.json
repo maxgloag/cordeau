@@ -3,9 +3,18 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./*"],
-      "@cordeau/shared": ["../../packages/shared/src/index.ts"]
+      "@/*": [
+        "./*"
+      ],
+      "@cordeau/shared": [
+        "../../packages/shared/src/index.ts"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "../../packages/shared/src"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/shared/src",
+    "nativewind-env.d.ts"
+  ]
 }

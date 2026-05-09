@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { getToken, setTokens, clearTokens } from "@/lib/auth";
-import { login as apiLogin, register as apiRegister, logout as apiLogout } from "@/lib/api";
+import { login as apiLogin, register as apiRegister, logout as apiLogout, setSessionExpiredCallback } from "@/lib/api";
 import type { AuthResponse } from "@/lib/api";
 
 type AuthState = {
@@ -27,6 +27,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getToken()
       .then((t) => setToken(t))
       .finally(() => setIsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setSessionExpiredCallback(() => setToken(null));
   }, []);
 
   async function handleAuthResponse(res: AuthResponse) {

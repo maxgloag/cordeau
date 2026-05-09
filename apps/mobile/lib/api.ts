@@ -3,6 +3,11 @@ import { getToken, getRefreshToken, clearTokens, setTokens } from "./auth";
 
 const API_URL = process.env["EXPO_PUBLIC_API_URL"] ?? "http://localhost:8000";
 
+let _onSessionExpired: (() => void) | null = null;
+export function setSessionExpiredCallback(cb: () => void): void {
+  _onSessionExpired = cb;
+}
+
 export type Chantier = components["schemas"]["Chantier"] & {
   id: string;
   adresseRue: string;
@@ -47,6 +52,7 @@ async function apiFetch<T>(
     const refreshed = await tryRefresh();
     if (refreshed) return apiFetch<T>(path, init, false);
     await clearTokens();
+    _onSessionExpired?.();
     throw { status: 401, message: "Session expirée" } satisfies ApiError;
   }
 

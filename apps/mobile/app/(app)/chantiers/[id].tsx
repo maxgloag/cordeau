@@ -49,7 +49,7 @@ export default function ChantierDetailScreen() {
 
   useEffect(() => {
     if (chantier) reset(toFormValues(chantier));
-  }, [chantier]);
+  }, [chantier, reset]);
 
   function openEdit() {
     if (chantier) reset(toFormValues(chantier));

@@ -80,7 +80,7 @@ describe("chantiers API", () => {
   });
 
   it("fetchChantier récupère un chantier par ID", async () => {
-    const chantier = { id: "abc", adresseRue: "1 rue Test", statut: "EN_PREPARATION" };
+    const chantier = { id: "abc", adresseRue: "1 rue Test", statut: "en_preparation" };
     mockFetch.mockResolvedValueOnce(mockResponse(200, chantier));
 
     const result = await fetchChantier("abc");
