@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "symfony server:start --no-tls",
-    "lint": "PATH=/opt/homebrew/bin:$PATH ./vendor/bin/phpstan analyse",
+    "lint": "PATH=/opt/homebrew/bin:$PATH ./vendor/bin/phpstan analyse --memory-limit=512M",
     "test": "PATH=/opt/homebrew/bin:$PATH php bin/phpunit",
     "build": "PATH=/opt/homebrew/bin:$PATH composer install --no-dev --optimize-autoloader --no-interaction",
-    "type-check": "PATH=/opt/homebrew/bin:$PATH ./vendor/bin/phpstan analyse --no-progress"
+    "type-check": "PATH=/opt/homebrew/bin:$PATH ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M"
   }
 }
