@@ -18,6 +18,12 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore"
   },
   "pnpm": {
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0",
+      "@types/react": "19.1.8",
+      "@types/react-dom": "19.1.5"
+    },
     "peerDependencyRules": {
       "ignoreMissing": ["@vitest/coverage-v8"]
     }
