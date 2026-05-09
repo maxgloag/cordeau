@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "Cordeau",
     "slug": "cordeau",
+    "scheme": "cordeau",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,13 +26,19 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "extra": {
       "eas": {
         "projectId": "ada0091e-b7e8-41a7-abaf-1dfc845c16aa"
       }
     },
-    "owner": "maximegloaguens-organization"
+    "owner": "maximegloaguens-organization",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ]
   }
 }
