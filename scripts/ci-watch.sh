@@ -7,12 +7,17 @@
 set -euo pipefail
 
 REPO="maxgloag/cordeau"
+LOG="/tmp/ci-watch.log"
+
+echo "[$(date '+%F %T')] ci-watch.sh invoque (pid=$$)" >> "$LOG"
 
 # Lire la commande bash depuis le JSON stdin
 CMD=$(jq -r '.tool_input.command // ""' 2>/dev/null || echo "")
 
+echo "[$(date '+%F %T')] CMD=$CMD" >> "$LOG"
+
 # Ne s'exécuter que sur un git push
-echo "$CMD" | grep -q "git push" || exit 0
+echo "$CMD" | grep -q "git push" || { echo "[$(date '+%F %T')] skip (pas un git push)" >> "$LOG"; exit 0; }
 
 # Détecter la branche pushée depuis la commande
 BRANCH=$(echo "$CMD" | grep -oE '[a-zA-Z0-9_/.-]+$' | tail -1 || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
@@ -73,10 +78,12 @@ URL : https://github.com/$REPO/actions/runs/$RUN_ID
 done
 
 if [ -z "$FAILED_RUNS" ]; then
+  echo "[$(date '+%F %T')] CI OK, exit 2 (rewake)" >> "$LOG"
   echo "## CI OK — branche $BRANCH"
   echo "Tous les runs verts. La PR peut être revue/mergée."
   exit 2  # réveil systématique pour signaler la fin de CI
 fi
+echo "[$(date '+%F %T')] CI FAILED, exit 2 (rewake) — runs:$FAILED_RUNS" >> "$LOG"
 
 {
   echo "## CI FAILED — branche $BRANCH"
