@@ -7,12 +7,14 @@ namespace App\Presentation\Api\Client\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Client\Entity\Client;
+use App\Client\Exception\TelephoneInvalideException;
 use App\Client\Repository\ClientRepository;
 use App\Client\ValueObject\Telephone;
 use App\Entity\User;
 use App\Presentation\Api\Client\Payload\CreerClientPayload;
 use App\Presentation\Api\Client\Resource\ClientResource;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -38,7 +40,7 @@ final class CreerClientProcessor implements ProcessorInterface
             proprietaire: $user,
             nom: $data->nom,
             email: $data->email,
-            telephone: $data->telephone !== null ? (new Telephone($data->telephone))->valeur : null,
+            telephone: $this->normaliserTelephone($data->telephone),
             adresseRue: $data->adresseRue,
             adresseCodePostal: $data->adresseCodePostal,
             adresseVille: $data->adresseVille,
@@ -51,5 +53,18 @@ final class CreerClientProcessor implements ProcessorInterface
         $this->repository->save($client);
 
         return ClientResource::fromEntity($client);
+    }
+
+    private function normaliserTelephone(?string $telephone): ?string
+    {
+        if ($telephone === null) {
+            return null;
+        }
+
+        try {
+            return (new Telephone($telephone))->valeur;
+        } catch (TelephoneInvalideException $e) {
+            throw new UnprocessableEntityHttpException($e->getMessage());
+        }
     }
 }

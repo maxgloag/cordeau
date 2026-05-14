@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Api\Auth;
 
 use App\Tests\Factory\UserFactory;
+use App\Tests\Integration\Api\JsonTestHelper;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -13,19 +14,8 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 final class AuthTest extends WebTestCase
 {
     use Factories;
+    use JsonTestHelper;
     use ResetDatabase;
-
-    /**
-     * @return array<string, mixed>
-     */
-    private static function decodeJson(string $content): array
-    {
-        $decoded = json_decode($content, true);
-        \assert(\is_array($decoded));
-
-        /** @var array<string, mixed> $decoded */
-        return $decoded;
-    }
 
     #[Test]
     public function register_cree_un_compte_et_retourne_201(): void

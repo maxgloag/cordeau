@@ -6,6 +6,7 @@ namespace App\Tests\Integration\Api\Client;
 
 use App\Tests\Factory\ClientFactory;
 use App\Tests\Factory\UserFactory;
+use App\Tests\Integration\Api\JsonTestHelper;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -14,19 +15,8 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 final class ClientApiTest extends WebTestCase
 {
     use Factories;
+    use JsonTestHelper;
     use ResetDatabase;
-
-    /**
-     * @return array<string, mixed>
-     */
-    private static function decodeJson(string $content): array
-    {
-        $decoded = json_decode($content, true);
-        \assert(\is_array($decoded));
-
-        /** @var array<string, mixed> $decoded */
-        return $decoded;
-    }
 
     #[Test]
     public function get_collection_retourne_tableau_vide(): void

@@ -6,12 +6,14 @@ namespace App\Presentation\Api\Client\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Client\Exception\TelephoneInvalideException;
 use App\Client\Repository\ClientRepository;
 use App\Client\ValueObject\Telephone;
 use App\Presentation\Api\Client\Payload\ModifierClientPayload;
 use App\Presentation\Api\Client\Resource\ClientResource;
 use App\Presentation\Api\Support\UuidUriVariableExtractor;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * @implements ProcessorInterface<ModifierClientPayload, ClientResource>
@@ -41,7 +43,11 @@ final class ModifierClientProcessor implements ProcessorInterface
         }
 
         if ($data->telephone !== null) {
-            $client->telephone = (new Telephone($data->telephone))->valeur;
+            try {
+                $client->telephone = (new Telephone($data->telephone))->valeur;
+            } catch (TelephoneInvalideException $e) {
+                throw new UnprocessableEntityHttpException($e->getMessage());
+            }
         }
 
         if ($data->adresseRue !== null) {

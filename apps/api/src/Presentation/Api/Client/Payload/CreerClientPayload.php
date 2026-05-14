@@ -15,10 +15,6 @@ final class CreerClientPayload
         #[Assert\Email]
         #[Assert\Length(max: 255)]
         public readonly ?string $email = null,
-        #[Assert\Regex(
-            pattern: '/^[+0][\d\s.\-]{8,18}$/',
-            message: 'Format de téléphone invalide. Exemples : 0612345678, +33 6 12 34 56 78.',
-        )]
         public readonly ?string $telephone = null,
         #[Assert\NotBlank]
         #[Assert\Length(max: 255)]
