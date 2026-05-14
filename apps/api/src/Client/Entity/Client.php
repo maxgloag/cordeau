@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ORM\Table(name: 'client')]
-#[ORM\Index(columns: ['proprietaire_id'], name: 'idx_client_proprietaire')]
+#[ORM\Index(columns: ['proprietaire_id', 'nom'], name: 'idx_client_proprietaire_nom')]
 class Client
 {
     public function __construct(
