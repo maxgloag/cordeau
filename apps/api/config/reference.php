@@ -1505,6 +1505,34 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         }>,
  *     role_hierarchy?: array<string, string|list<scalar|Param|null>>,
  * }
+ * @psalm-type NelmioCorsConfig = array{
+ *     defaults?: array{
+ *         allow_credentials?: bool|Param, // Default: false
+ *         allow_origin?: list<scalar|Param|null>,
+ *         allow_headers?: list<scalar|Param|null>,
+ *         allow_methods?: list<scalar|Param|null>,
+ *         allow_private_network?: bool|Param, // Default: false
+ *         expose_headers?: list<scalar|Param|null>,
+ *         max_age?: scalar|Param|null, // Default: 0
+ *         hosts?: list<scalar|Param|null>,
+ *         origin_regex?: bool|Param, // Default: false
+ *         forced_allow_origin_value?: scalar|Param|null, // Default: null
+ *         skip_same_as_origin?: bool|Param, // Default: true
+ *     },
+ *     paths?: array<string, array{ // Default: []
+ *             allow_credentials?: bool|Param,
+ *             allow_origin?: list<scalar|Param|null>,
+ *             allow_headers?: list<scalar|Param|null>,
+ *             allow_methods?: list<scalar|Param|null>,
+ *             allow_private_network?: bool|Param,
+ *             expose_headers?: list<scalar|Param|null>,
+ *             max_age?: scalar|Param|null, // Default: 0
+ *             hosts?: list<scalar|Param|null>,
+ *             origin_regex?: bool|Param,
+ *             forced_allow_origin_value?: scalar|Param|null, // Default: null
+ *             skip_same_as_origin?: bool|Param,
+ *         }>,
+ * }
  * @psalm-type ZenstruckFoundryConfig = array{
  *     auto_refresh_proxies?: bool|Param|null, // Deprecated: Since 2.0 auto_refresh_proxies defaults to true and this configuration has no effect. // Whether to auto-refresh proxies by default (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#auto-refresh) // Default: null
  *     enable_auto_refresh_with_lazy_objects?: bool|Param|null, // Enable auto-refresh using PHP 8.4 lazy objects (cannot be enabled if PHP < 8.4). // Default: null
@@ -1558,6 +1586,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     doctrine?: DoctrineConfig,
  *     doctrine_migrations?: DoctrineMigrationsConfig,
  *     security?: SecurityConfig,
+ *     nelmio_cors?: NelmioCorsConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1567,6 +1596,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         security?: SecurityConfig,
+ *         nelmio_cors?: NelmioCorsConfig,
  *         zenstruck_foundry?: ZenstruckFoundryConfig,
  *     },
  *     "when@prod"?: array{
@@ -1578,6 +1608,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         security?: SecurityConfig,
+ *         nelmio_cors?: NelmioCorsConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1588,6 +1619,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         security?: SecurityConfig,
+ *         nelmio_cors?: NelmioCorsConfig,
  *         zenstruck_foundry?: ZenstruckFoundryConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias

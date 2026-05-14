@@ -24,6 +24,11 @@ out/
 /apps/api/.phpunit.result.cache
 /apps/api/.phpunit.cache/
 
+# Composer artifacts à la racine (toujours dans apps/api/)
+/composer.json
+/composer.lock
+/vendor/
+
 # Expo / mobile
 /apps/mobile/.expo/
 /apps/mobile/dist/
