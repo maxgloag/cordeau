@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# ci-watch.sh — surveille tous les runs CI GitHub Actions après un git push
-# Appelé en asyncRewake par le hook PostToolUse de Claude Code.
-# Exit 0 = tout vert (silencieux). Exit 2 = au moins un run échoué (réveille Claude).
+# ci-watch.sh — outil CLI manuel pour surveiller les runs CI GitHub Actions.
+# Usage : echo '{"tool_input":{"command":"git push origin BRANCH"}}' | ./scripts/ci-watch.sh
+#         (ou plus simplement : gh run watch <RUN_ID> --exit-status)
+#
+# Note : le hook PostToolUse asyncRewake configure dans .claude/settings.json
+# ne se declenche pas dans la version Claude Code actuelle. Pour la
+# notification automatique de fin de CI cote Claude, voir le pattern
+# feedback_ci_watch_pattern (gh run watch en run_in_background).
 
 set -euo pipefail
 
@@ -72,7 +77,8 @@ URL : https://github.com/$REPO/actions/runs/$RUN_ID
 done
 
 if [ -z "$FAILED_RUNS" ]; then
-  echo "✓ Tous les runs CI verts sur la branche $BRANCH"
+  echo "## CI OK — branche $BRANCH"
+  echo "Tous les runs verts. La PR peut être revue/mergée."
   exit 0
 fi
 

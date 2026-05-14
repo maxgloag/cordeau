@@ -88,12 +88,33 @@ Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 
 
 ## Surveillance CI automatique
 
-Un hook Claude Code (`.claude/settings.json` → [scripts/ci-watch.sh](scripts/ci-watch.sh)) se déclenche en `asyncRewake` après chaque `git push`. Il attend le résultat du run GitHub Actions et :
+Le hook `.claude/settings.json` + [scripts/ci-watch.sh](scripts/ci-watch.sh) avec `asyncRewake` **ne se déclenche pas** dans la version Claude Code actuelle (testé 2026-05-14, aucun log écrit après push). Le script reste utile en CLI manuel.
 
-- exit 0 (CI verte) → silence, aucun réveil
-- exit 2 (CI rouge) → réveille la session avec les logs filtrés (≤80 lignes des erreurs)
+**Pratique en vigueur** : après chaque `git push`, Claude lance un `gh run watch <RUN_ID> --exit-status` en `run_in_background: true`. Le harness notifie automatiquement à la fin du process (notification courte, ~0 token tant qu'il tourne). Si la CI est rouge, Claude récupère les logs filtrés et propose un fix.
 
-Conséquence pratique : **après un `git push`, ne jamais lancer manuellement `gh run watch` ou poller**. Le hook fait le travail. Si la CI échoue, Claude est notifié automatiquement avec le contexte d'erreur.
+Récupération du RUN_ID après le push :
+
+```bash
+sleep 3 && gh run list --branch <branch> --limit 1 --json databaseId -q '.[0].databaseId'
+```
+
+Cf [memory `feedback_ci_watch_pattern`](~/.claude/projects/-Users-MaximeG-Developer-cordeau/memory/feedback_ci_watch_pattern.md).
+
+## Protocole de démarrage de phase
+
+À dérouler **dans l'ordre** au début de chaque nouvelle phase de [ROADMAP.md](ROADMAP.md). Aucune ligne de code métier tant que les étapes 1 à 5 ne sont pas faites.
+
+1. **Charger le contexte** : `CLAUDE.md` racine + `apps/*/CLAUDE.md` concernés, section de la phase dans `ROADMAP.md`, ADRs liés, memories Serena (`project_overview`, `architecture`, `conventions`) et auto-memories pertinentes
+2. **Explorer le verticale précédent** comme modèle de référence (Serena `get_symbols_overview` / `list_dir`, pas Grep+Read exhaustif)
+3. **Rédiger un plan** dans `~/.claude/plans/` : sous-étapes, fichiers à créer/modifier (chemins précis), patterns à réutiliser, tests prévus, critères de done, estimation par sous-étape, vérification end-to-end, et **mesure de vélocité attendue** vs phase précédente
+4. **Trancher les décisions structurantes ouvertes** avec l'utilisateur (`AskUserQuestion`) — modélisation de domaine, choix de libs, frontières de contexte
+5. **Rédiger les ADRs** correspondants dans `docs/adr/NNNN-titre.md` et mettre à jour [docs/adr/README.md](docs/adr/README.md) — toujours **avant** le code
+6. **Créer la milestone GitHub** de la phase + **une issue par sous-étape** (templates existants), liées à la milestone
+7. **Une branche par sous-étape** : `feat/<n>-<slug>`, squash merge sur `main` après PR + CI verte
+8. **En cours de phase** : à chaque sous-étape, surveiller la duplication révélée ; refactor dès qu'un pattern devient évident, pas à la fin
+9. **Fin de phase** : mise à jour de `ROADMAP.md` (✅), `CLAUDE.md` racine, memories Serena (`architecture`, `conventions`), auto-memories pertinentes. Vérifier le critère de sortie de la phase **avant** de basculer sur la suivante
+
+Si un signal de vélocité ou d'archi se dégrade (cf critère de sortie de chaque phase), **stop** et rétro avant de continuer.
 
 ## Automatisation skills
 
