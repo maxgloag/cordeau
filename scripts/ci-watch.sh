@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ci-watch.sh — surveille tous les runs CI GitHub Actions après un git push
 # Appelé en asyncRewake par le hook PostToolUse de Claude Code.
-# Exit 0 = tout vert (silencieux). Exit 2 = au moins un run échoué (réveille Claude).
+# Exit 2 dans tous les cas (vert ou rouge) → réveille Claude avec un rapport.
+# Vert : message court. Rouge : logs filtrés (≤80 lignes des erreurs).
 
 set -euo pipefail
 
@@ -72,8 +73,9 @@ URL : https://github.com/$REPO/actions/runs/$RUN_ID
 done
 
 if [ -z "$FAILED_RUNS" ]; then
-  echo "✓ Tous les runs CI verts sur la branche $BRANCH"
-  exit 0
+  echo "## CI OK — branche $BRANCH"
+  echo "Tous les runs verts. La PR peut être revue/mergée."
+  exit 2  # réveil systématique pour signaler la fin de CI
 fi
 
 {
