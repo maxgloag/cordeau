@@ -44,3 +44,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0006](0006-vitest-browser-mode.md) | Vitest Browser Mode + Playwright pour les tests UI React | Accepted |
 | [0007](0007-pattern-container-view.md) | Pattern container / view pour la testabilité React | Accepted |
 | [0008](0008-trajectoire-hebergement.md) | Trajectoire d'hébergement (Fly.io + Neon → Scaleway/Clever Cloud) | Accepted |
+| [0009](0009-serena-mcp-outillage-semantique.md) | Adoption de Serena (MCP) pour l'outillage sémantique | Accepted |
