@@ -88,12 +88,17 @@ Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 
 
 ## Surveillance CI automatique
 
-Un hook Claude Code (`.claude/settings.json` → [scripts/ci-watch.sh](scripts/ci-watch.sh)) se déclenche en `asyncRewake` après chaque `git push`. Il attend le résultat du run GitHub Actions et réveille **systématiquement** la session :
+Le hook `.claude/settings.json` + [scripts/ci-watch.sh](scripts/ci-watch.sh) avec `asyncRewake` **ne se déclenche pas** dans la version Claude Code actuelle (testé 2026-05-14, aucun log écrit après push). Le script reste utile en CLI manuel.
 
-- CI verte → message court « CI OK — PR peut être revue/mergée »
-- CI rouge → logs filtrés (≤80 lignes des erreurs)
+**Pratique en vigueur** : après chaque `git push`, Claude lance un `gh run watch <RUN_ID> --exit-status` en `run_in_background: true`. Le harness notifie automatiquement à la fin du process (notification courte, ~0 token tant qu'il tourne). Si la CI est rouge, Claude récupère les logs filtrés et propose un fix.
 
-Conséquence pratique : **après un `git push`, ne jamais lancer manuellement `gh run watch` ou poller**. Le hook fait le travail et notifie quoi qu'il arrive.
+Récupération du RUN_ID après le push :
+
+```bash
+sleep 3 && gh run list --branch <branch> --limit 1 --json databaseId -q '.[0].databaseId'
+```
+
+Cf [memory `feedback_ci_watch_pattern`](~/.claude/projects/-Users-MaximeG-Developer-cordeau/memory/feedback_ci_watch_pattern.md).
 
 ## Protocole de démarrage de phase
 
