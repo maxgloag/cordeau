@@ -8,7 +8,7 @@ use App\Domain\Chantier\Entity\Chantier;
 use App\Domain\Chantier\Enum\StatutChantier;
 use App\Domain\Chantier\Exception\ChantierIntrouvableException;
 use App\Domain\Chantier\Repository\ChantierRepository;
-use App\Domain\Chantier\ValueObject\Adresse;
+use App\Shared\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use App\Entity\User;
 use App\Infrastructure\Persistence\Doctrine\Chantier\Entity\ChantierDoctrineEntity;

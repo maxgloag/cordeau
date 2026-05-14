@@ -6,7 +6,7 @@ namespace App\Application\Chantier\UseCase;
 
 use App\Domain\Chantier\Entity\Chantier;
 use App\Domain\Chantier\Repository\ChantierRepository;
-use App\Domain\Chantier\ValueObject\Adresse;
+use App\Shared\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use Symfony\Component\Uid\Uuid;
 

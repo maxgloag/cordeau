@@ -6,7 +6,7 @@ namespace App\Tests\Integration\Persistence\Chantier;
 
 use App\Domain\Chantier\Entity\Chantier;
 use App\Domain\Chantier\Enum\StatutChantier;
-use App\Domain\Chantier\ValueObject\Adresse;
+use App\Shared\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use App\Infrastructure\Persistence\Doctrine\Chantier\Repository\DoctrineChantierRepository;
 use App\Tests\Factory\ChantierFactory;

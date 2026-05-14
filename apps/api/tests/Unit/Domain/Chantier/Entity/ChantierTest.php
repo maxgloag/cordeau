@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Domain\Chantier\Entity;
 use App\Domain\Chantier\Entity\Chantier;
 use App\Domain\Chantier\Enum\StatutChantier;
 use App\Domain\Chantier\Exception\TransitionStatutInvalideException;
-use App\Domain\Chantier\ValueObject\Adresse;
+use App\Shared\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

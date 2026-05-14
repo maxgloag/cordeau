@@ -6,7 +6,7 @@ namespace App\Domain\Chantier\Entity;
 
 use App\Domain\Chantier\Enum\StatutChantier;
 use App\Domain\Chantier\Exception\TransitionStatutInvalideException;
-use App\Domain\Chantier\ValueObject\Adresse;
+use App\Shared\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use Symfony\Component\Uid\Uuid;
 
