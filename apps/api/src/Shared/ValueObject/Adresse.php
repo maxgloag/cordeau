@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Chantier\ValueObject;
+namespace App\Shared\ValueObject;
 
-use App\Domain\Chantier\Exception\AdresseInvalideException;
+use App\Shared\Exception\AdresseInvalideException;
 
 final readonly class Adresse
 {

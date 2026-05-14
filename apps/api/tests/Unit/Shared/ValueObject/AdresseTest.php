@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Domain\Chantier\ValueObject;
+namespace App\Tests\Unit\Shared\ValueObject;
 
-use App\Domain\Chantier\Exception\AdresseInvalideException;
-use App\Domain\Chantier\ValueObject\Adresse;
+use App\Shared\Exception\AdresseInvalideException;
+use App\Shared\ValueObject\Adresse;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

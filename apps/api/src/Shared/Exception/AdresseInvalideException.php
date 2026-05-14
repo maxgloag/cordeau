@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Chantier\Exception;
+namespace App\Shared\Exception;
 
-final class AdresseInvalideException extends ChantierException
+final class AdresseInvalideException extends \DomainException
 {
     public static function rueVide(): self
     {
