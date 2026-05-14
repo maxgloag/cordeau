@@ -6,7 +6,7 @@
 
 ## Statut actuel
 
-**Phase 1 — Verticale Chantiers** (à démarrer).
+**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** à démarrer.
 
 ## Rétroplanning indicatif
 
