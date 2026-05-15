@@ -14,6 +14,7 @@ use App\Entity\User;
 use App\Presentation\Api\Client\Payload\CreerClientPayload;
 use App\Presentation\Api\Client\Resource\ClientResource;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Uid\Uuid;
 
@@ -35,8 +36,15 @@ final class CreerClientProcessor implements ProcessorInterface
 
         $now = new \DateTimeImmutable();
 
+        $id = $data->uuid !== null ? Uuid::fromString($data->uuid) : Uuid::v7();
+        if ($data->uuid !== null && $this->repository->find($id) !== null) {
+            throw new ConflictHttpException(
+                \sprintf('Un client avec l\'identifiant "%s" existe déjà.', $id->toRfc4122()),
+            );
+        }
+
         $client = new Client(
-            id: Uuid::v7(),
+            id: $id,
             proprietaire: $user,
             nom: $data->nom,
             email: $data->email,

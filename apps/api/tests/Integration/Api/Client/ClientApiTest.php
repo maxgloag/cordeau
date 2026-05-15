@@ -89,6 +89,59 @@ final class ClientApiTest extends WebTestCase
     }
 
     #[Test]
+    public function post_avec_id_fourni_cree_avec_cet_id(): void
+    {
+        $httpClient = static::createClient();
+        $httpClient->loginUser(UserFactory::createOne()->_real());
+
+        $uuidLocal = '0192f5e0-1234-7890-abcd-ef0123456789';
+
+        $httpClient->request(
+            'POST',
+            '/api/clients',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'uuid' => $uuidLocal,
+                'nom' => 'ACME SARL',
+                'adresseRue' => '10 rue de la Paix',
+                'adresseCodePostal' => '75002',
+                'adresseVille' => 'Paris',
+                'adressePays' => 'FR',
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(201);
+        $response = $httpClient->getResponse()->getContent();
+        \assert($response !== false);
+        self::assertSame($uuidLocal, self::decodeJson($response)['id']);
+    }
+
+    #[Test]
+    public function post_avec_id_deja_existant_retourne_409(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $httpClient->loginUser($user->_real());
+        $existant = ClientFactory::createOne(['proprietaire' => $user]);
+
+        $httpClient->request(
+            'POST',
+            '/api/clients',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'uuid' => $existant->id->toRfc4122(),
+                'nom' => 'Doublon',
+                'adresseRue' => '99 avenue Test',
+                'adresseCodePostal' => '75003',
+                'adresseVille' => 'Paris',
+                'adressePays' => 'FR',
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(409);
+    }
+
+    #[Test]
     public function post_sans_nom_retourne_422(): void
     {
         $httpClient = static::createClient();

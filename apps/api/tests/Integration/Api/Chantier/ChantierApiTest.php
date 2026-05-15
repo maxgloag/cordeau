@@ -91,6 +91,90 @@ final class ChantierApiTest extends WebTestCase
     }
 
     #[Test]
+    public function post_avec_id_fourni_cree_avec_cet_id(): void
+    {
+        $client = static::createClient();
+        $user = UserFactory::createOne();
+        $client->loginUser($user->_real());
+
+        $uuidLocal = '0192f5e0-aaaa-7890-abcd-ef0123456789';
+
+        $client->request(
+            'POST',
+            '/api/chantiers',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'uuid' => $uuidLocal,
+                'adresseRue' => '12 rue de la Paix',
+                'adresseCodePostal' => '75002',
+                'adresseVille' => 'Paris',
+                'adressePays' => 'FR',
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(201);
+        $response = $client->getResponse()->getContent();
+        \assert($response !== false);
+        self::assertSame($uuidLocal, self::decodeJson($response)['id']);
+    }
+
+    #[Test]
+    public function post_avec_id_deja_existant_retourne_409(): void
+    {
+        $client = static::createClient();
+        $user = UserFactory::createOne();
+        $client->loginUser($user->_real());
+        $existant = \App\Tests\Factory\ChantierFactory::createOne(['proprietaire' => $user]);
+
+        $client->request(
+            'POST',
+            '/api/chantiers',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'uuid' => $existant->id->toRfc4122(),
+                'adresseRue' => '99 avenue Test',
+                'adresseCodePostal' => '75003',
+                'adresseVille' => 'Paris',
+                'adressePays' => 'FR',
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(409);
+    }
+
+    #[Test]
+    public function post_avec_id_et_clientId_fournis_cree_avec_les_deux(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $httpClient->loginUser($user->_real());
+        $clientExistant = \App\Tests\Factory\ClientFactory::createOne(['proprietaire' => $user]);
+
+        $uuidChantier = '0192f5e0-bbbb-7890-abcd-ef0123456789';
+
+        $httpClient->request(
+            'POST',
+            '/api/chantiers',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'uuid' => $uuidChantier,
+                'adresseRue' => '12 rue de la Paix',
+                'adresseCodePostal' => '75002',
+                'adresseVille' => 'Paris',
+                'adressePays' => 'FR',
+                'clientId' => $clientExistant->id->toRfc4122(),
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(201);
+        $response = $httpClient->getResponse()->getContent();
+        \assert($response !== false);
+        $data = self::decodeJson($response);
+        self::assertSame($uuidChantier, $data['id']);
+        self::assertSame($clientExistant->id->toRfc4122(), $data['clientId']);
+    }
+
+    #[Test]
     public function post_avec_donnees_invalides_retourne_422(): void
     {
         $client = static::createClient();

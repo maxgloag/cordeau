@@ -29,6 +29,8 @@ final class CreerClientPayload
         #[Assert\Regex(pattern: '/^[A-Z]{2}$/')]
         public readonly string $adressePays = 'FR',
         public readonly ?string $notes = null,
+        #[Assert\Uuid]
+        public readonly ?string $uuid = null,
     ) {
     }
 }
