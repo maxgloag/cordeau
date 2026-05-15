@@ -12,7 +12,6 @@ use App\Presentation\Api\Chantier\Processor\ModifierChantierProcessor;
 use App\Presentation\Api\Chantier\Provider\ChantierCollectionProvider;
 use App\Presentation\Api\Chantier\Provider\ChantierItemProvider;
 use App\Domain\Chantier\Entity\Chantier;
-use App\Domain\Chantier\ValueObject\ClientRef;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;

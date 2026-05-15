@@ -1,4 +1,4 @@
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, Pressable } from "react-native";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import type { ChantierFormValues } from "@/lib/chantier";
 import type { Client } from "@/lib/api";
@@ -57,13 +57,18 @@ export function ChantierForm({ control, errors, clients = [] }: Props) {
             render={({ field: { onChange, value } }) => (
               <View className="bg-surface border border-border rounded-xl overflow-hidden">
                 {[{ id: "", nom: "Aucun client" }, ...clients].map((c, i) => (
-                  <Text
+                  <Pressable
                     key={c.id}
-                    className={`px-4 py-3 text-base ${value === c.id ? "text-primary font-semibold" : "text-text"} ${i < clients.length ? "border-b border-border" : ""}`}
                     onPress={() => onChange(c.id)}
+                    accessible
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: value === c.id }}
+                    className={`px-4 py-3 ${i < clients.length ? "border-b border-border" : ""}`}
                   >
-                    {c.id === value ? "✓ " : "  "}{c.nom}
-                  </Text>
+                    <Text className={`text-base ${value === c.id ? "text-primary font-semibold" : "text-text"}`}>
+                      {c.id === value ? "✓ " : "  "}{c.nom}
+                    </Text>
+                  </Pressable>
                 ))}
               </View>
             )}

@@ -7,15 +7,12 @@ namespace App\Presentation\Api\Chantier\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Application\Chantier\UseCase\ModifierChantierUseCase;
-use App\Client\Repository\ClientRepository;
-use App\Domain\Chantier\ValueObject\ClientRef;
 use App\Entity\User;
 use App\Presentation\Api\Chantier\Payload\ModifierChantierPayload;
 use App\Presentation\Api\Chantier\Resource\ChantierResource;
+use App\Presentation\Api\Support\ClientRefResolver;
 use App\Presentation\Api\Support\UuidUriVariableExtractor;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
-use Symfony\Component\Uid\Uuid;
 
 /**
  * @implements ProcessorInterface<ModifierChantierPayload, ChantierResource>
@@ -27,7 +24,7 @@ final class ModifierChantierProcessor implements ProcessorInterface
     public function __construct(
         private readonly ModifierChantierUseCase $useCase,
         private readonly Security $security,
-        private readonly ClientRepository $clientRepository,
+        private readonly ClientRefResolver $clientRefResolver,
     ) {
     }
 
@@ -41,22 +38,11 @@ final class ModifierChantierProcessor implements ProcessorInterface
         $user = $this->security->getUser();
         \assert($user instanceof User);
 
-        $client = $data->clientId !== null ? $this->resolveClientRef($data->clientId, $user->id) : null;
+        $client = $data->clientId !== null ? $this->clientRefResolver->resoudre($data->clientId, $user->id) : null;
 
         $id = $this->extractUuid($uriVariables);
         $chantier = $this->useCase->execute($id, $data->toAdresse($existant), $data->toSurface(), $client);
 
         return ChantierResource::fromDomain($chantier);
-    }
-
-    private function resolveClientRef(string $clientId, Uuid $proprietaireId): ClientRef
-    {
-        $client = $this->clientRepository->find(Uuid::fromString($clientId));
-
-        if ($client === null || !$client->proprietaire->id->equals($proprietaireId)) {
-            throw new UnprocessableEntityHttpException('Client introuvable ou non autorisé.');
-        }
-
-        return new ClientRef(id: $client->id, nomCache: $client->nom);
     }
 }
