@@ -14,6 +14,7 @@ import type { Client } from "@/lib/api";
 import { getAllClients } from "@/db/queries";
 import { refreshClients } from "@/lib/sync";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { SyncStatusBar } from "@/components/SyncStatusBar";
 
 function ClientCard({ item, onPress }: { item: Client; onPress: () => void }) {
   return (
@@ -100,6 +101,8 @@ export default function ClientsListScreen() {
           <Text className="text-sm text-muted">Retour</Text>
         </TouchableOpacity>
       </View>
+
+      <SyncStatusBar />
 
       {clients.length === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
