@@ -1,5 +1,6 @@
 import "../global.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { runMigrations } from "@/db/migrate";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts, BricolageGrotesque_500Medium, BricolageGrotesque_700Bold } from "@expo-google-fonts/bricolage-grotesque";
@@ -35,12 +36,23 @@ export default function RootLayout() {
     BricolageGrotesque_500Medium,
     BricolageGrotesque_700Bold,
   });
+  const [dbReady, setDbReady] = useState(false);
 
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    try {
+      runMigrations();
+    } catch (e) {
+      console.error("[DB] Migration failed:", e);
+    } finally {
+      setDbReady(true);
+    }
+  }, []);
 
-  if (!fontsLoaded) return null;
+  useEffect(() => {
+    if (fontsLoaded && dbReady) SplashScreen.hideAsync();
+  }, [fontsLoaded, dbReady]);
+
+  if (!fontsLoaded || !dbReady) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
