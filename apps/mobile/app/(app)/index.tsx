@@ -16,6 +16,7 @@ import { getAllChantiers } from "@/db/queries";
 import { refreshChantiers } from "@/lib/sync";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/chantier";
+import { SyncStatusBar } from "@/components/SyncStatusBar";
 
 function ChantierCard({ item, onPress }: { item: Chantier; onPress: () => void }) {
   const color = STATUT_COLORS[item.statut] ?? "#9CA3AF";
@@ -126,6 +127,8 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      <SyncStatusBar />
 
       {chantiers.length === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
