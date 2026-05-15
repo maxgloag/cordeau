@@ -1,5 +1,9 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+export type OutboxEntityType = "chantier" | "client";
+export type OutboxOperation = "create" | "update" | "delete";
+export type OutboxStatus = "pending" | "syncing" | "synced" | "error" | "abandoned";
+
 export const chantiers = sqliteTable("chantiers", {
   id: text("id").primaryKey(),
   adresseRue: text("adresse_rue").notNull(),
@@ -30,11 +34,11 @@ export const clients = sqliteTable("clients", {
 
 export const outbox = sqliteTable("outbox", {
   id: text("id").primaryKey(),
-  entityType: text("entity_type").notNull(),
+  entityType: text("entity_type").$type<OutboxEntityType>().notNull(),
   entityId: text("entity_id").notNull(),
-  operation: text("operation").notNull(),
+  operation: text("operation").$type<OutboxOperation>().notNull(),
   payload: text("payload").notNull(),
-  status: text("status").notNull().default("pending"),
+  status: text("status").$type<OutboxStatus>().notNull().default("pending"),
   retryCount: integer("retry_count").notNull().default(0),
   createdAt: integer("created_at").notNull(),
   lastAttemptAt: integer("last_attempt_at"),

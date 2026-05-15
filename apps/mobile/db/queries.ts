@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { db } from "./index";
 import { chantiers, clients } from "./schema";
 import type { Chantier, Client } from "@/lib/api";
@@ -10,10 +11,10 @@ export function getAllChantiers(): Chantier[] {
     adresseCodePostal: r.adresseCodePostal,
     adresseVille: r.adresseVille,
     adressePays: r.adressePays,
-    surfaceM2: r.surfaceM2 ?? null,
+    surfaceM2: r.surfaceM2,
     statut: r.statut,
-    clientId: r.clientId ?? null,
-    clientNom: r.clientNom ?? null,
+    clientId: r.clientId,
+    clientNom: r.clientNom,
   }));
 }
 
@@ -39,14 +40,14 @@ export function upsertChantiers(items: Chantier[]) {
     .onConflictDoUpdate({
       target: chantiers.id,
       set: {
-        adresseRue: chantiers.adresseRue,
-        adresseCodePostal: chantiers.adresseCodePostal,
-        adresseVille: chantiers.adresseVille,
-        adressePays: chantiers.adressePays,
-        surfaceM2: chantiers.surfaceM2,
-        statut: chantiers.statut,
-        clientId: chantiers.clientId,
-        clientNom: chantiers.clientNom,
+        adresseRue: sql`excluded.adresse_rue`,
+        adresseCodePostal: sql`excluded.adresse_code_postal`,
+        adresseVille: sql`excluded.adresse_ville`,
+        adressePays: sql`excluded.adresse_pays`,
+        surfaceM2: sql`excluded.surface_m2`,
+        statut: sql`excluded.statut`,
+        clientId: sql`excluded.client_id`,
+        clientNom: sql`excluded.client_nom`,
         syncedAt: now,
         updatedAt: now,
       },
@@ -59,13 +60,13 @@ export function getAllClients(): Client[] {
   return rows.map((r) => ({
     id: r.id,
     nom: r.nom,
-    email: r.email ?? null,
-    telephone: r.telephone ?? null,
+    email: r.email,
+    telephone: r.telephone,
     adresseRue: r.adresseRue,
     adresseCodePostal: r.adresseCodePostal,
     adresseVille: r.adresseVille,
     adressePays: r.adressePays,
-    notes: r.notes ?? null,
+    notes: r.notes,
   }));
 }
 
@@ -91,14 +92,14 @@ export function upsertClients(items: Client[]) {
     .onConflictDoUpdate({
       target: clients.id,
       set: {
-        nom: clients.nom,
-        email: clients.email,
-        telephone: clients.telephone,
-        adresseRue: clients.adresseRue,
-        adresseCodePostal: clients.adresseCodePostal,
-        adresseVille: clients.adresseVille,
-        adressePays: clients.adressePays,
-        notes: clients.notes,
+        nom: sql`excluded.nom`,
+        email: sql`excluded.email`,
+        telephone: sql`excluded.telephone`,
+        adresseRue: sql`excluded.adresse_rue`,
+        adresseCodePostal: sql`excluded.adresse_code_postal`,
+        adresseVille: sql`excluded.adresse_ville`,
+        adressePays: sql`excluded.adresse_pays`,
+        notes: sql`excluded.notes`,
         syncedAt: now,
         updatedAt: now,
       },
