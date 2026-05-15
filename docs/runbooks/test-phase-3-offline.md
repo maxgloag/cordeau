@@ -2,6 +2,15 @@
 
 Guide pas-à-pas pour valider la verticale offline sur un device physique iOS via Expo Go.
 
+## ⚠️ Limitation Expo Go
+
+Expo Go charge le bundle JS depuis Metro à chaque ouverture de l'app. Donc :
+
+- ✅ **Activer le mode avion APRÈS le lancement de l'app** → tout fonctionne (SQLite, outbox, mutations, sync au retour)
+- ❌ **Killer l'app + la rouvrir en mode avion** → écran rouge "Could not connect to development server" (Metro injoignable)
+
+Le cold start offline complet nécessite un build EAS preview (compte Apple Developer requis). Reporté à plus tard.
+
 ## Prérequis
 
 ### Machine de dev
@@ -59,14 +68,17 @@ Sur l'iPhone : ouvrir l'app **Caméra**, scanner le QR → Expo Go se lance avec
 2. Vérifier qu'on arrive sur l'écran **Chantiers** (vide ou avec données serveur)
 3. **Critère** : aucune barre `SyncStatusBar` visible (état `synced`)
 
-### 4.2 — Reads offline (cache SQLite)
+### 4.2 — Reads offline (cache SQLite + queryFn hybride)
 
-1. Créer 1 chantier + 1 client depuis l'app pendant qu'on est online
-2. **Tuer l'app** (swipe up + push de la card Expo Go vers le haut)
-3. **Activer le mode avion** sur l'iPhone (Centre de contrôle → avion)
-4. Rouvrir Expo Go → relancer Cordeau
-5. **Critère** : les chantiers et clients créés s'affichent immédiatement (lus depuis SQLite)
-6. **Critère** : `SyncStatusBar` apparaît en gris : *"Hors-ligne — vos changements seront synchronisés à la reconnexion"*
+(app déjà ouverte depuis 4.1)
+
+1. Créer 1 chantier + 1 client depuis l'app online
+2. **Activer le mode avion** sur l'iPhone (Centre de contrôle → avion)
+3. Naviguer entre la liste chantiers ↔ liste clients plusieurs fois
+4. **Critère** : navigation instantanée, données toujours visibles (lectures depuis SQLite via TanStack Query cache + `getAllChantiers`/`getAllClients`)
+5. Pull-to-refresh sur la liste chantiers
+6. **Critère** : pas d'erreur visible, la liste reste affichée (le refresh API silencieux échoue mais le cache tient)
+7. **Critère** : `SyncStatusBar` apparaît en gris : *"Hors-ligne — vos changements seront synchronisés à la reconnexion"*
 
 ### 4.3 — Création offline d'un chantier
 
