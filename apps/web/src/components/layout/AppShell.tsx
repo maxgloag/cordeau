@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { HardHat, LayoutDashboard, LogOut } from "lucide-react";
+import { HardHat, LayoutDashboard, LogOut, Users } from "lucide-react";
 import { toast } from "sonner";
 import { fetchMe, logout } from "@/lib/api";
 
@@ -46,6 +46,15 @@ export default function AppShell({ children }: Props) {
           >
             <LayoutDashboard size={15} />
             Chantiers
+          </Link>
+          <Link
+            to="/clients"
+            className="flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors"
+            activeProps={{ style: { background: "var(--color-sidebar-active)", color: "var(--color-sidebar-active-foreground)", fontWeight: 600 } }}
+            inactiveProps={{ style: { color: "var(--color-sidebar-muted)" } }}
+          >
+            <Users size={15} />
+            Clients
           </Link>
         </nav>
 

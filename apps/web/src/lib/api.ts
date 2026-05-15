@@ -113,3 +113,49 @@ export async function modifierChantier(
 export async function archiverChantier(id: string): Promise<void> {
   return apiFetch<void>(`/api/chantiers/${id}`, { method: "DELETE" });
 }
+
+// Clients
+export type Client = components["schemas"]["Client"] & {
+  id: string;
+  nom: string;
+  adresseRue: string;
+  adresseCodePostal: string;
+  adresseVille: string;
+  adressePays: string;
+};
+
+export async function listClients(): Promise<Client[]> {
+  return apiFetch<Client[]>("/api/clients");
+}
+
+export type CreerClientPayload = {
+  nom: string;
+  email?: string | null;
+  telephone?: string | null;
+  adresseRue: string;
+  adresseCodePostal: string;
+  adresseVille: string;
+  adressePays?: string;
+  notes?: string | null;
+};
+
+export async function creerClient(payload: CreerClientPayload): Promise<Client> {
+  return apiFetch<Client>("/api/clients", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export type ModifierClientPayload = Partial<CreerClientPayload>;
+
+export async function modifierClient(id: string, payload: ModifierClientPayload): Promise<Client> {
+  return apiFetch<Client>(`/api/clients/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/merge-patch+json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function supprimerClient(id: string): Promise<void> {
+  return apiFetch<void>(`/api/clients/${id}`, { method: "DELETE" });
+}
