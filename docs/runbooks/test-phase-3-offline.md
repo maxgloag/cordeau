@@ -101,7 +101,7 @@ Sur l'iPhone : ouvrir l'app **Caméra**, scanner le QR → Expo Go se lance avec
 ### 4.5 — Reconnexion → sync automatique
 
 1. **Désactiver le mode avion**
-2. Attendre 2-5 secondes
+2. Attendre 2-5 secondes (le worker poll toutes les 5 s en fallback de l'event natif iOS qui n'est pas fiable)
 3. **Critère** : `SyncStatusBar` disparaît (compteur → 0)
 4. Vérifier côté API que tout est bien remonté :
 
@@ -132,8 +132,18 @@ psql postgresql://cordeau:cordeau@localhost:5432/cordeau \
 1. Couper l'API (`Ctrl-C` sur le terminal `pnpm --filter @cordeau/api dev`)
 2. Créer un chantier depuis l'app (iPhone toujours online)
 3. **Critère** : le chantier apparaît localement, compteur = 1, mais ne se sync pas
-4. Relancer l'API → attendre 2-30s (le backoff exponentiel monte rapidement)
+4. Relancer l'API → attendre 2-30s (backoff capé à 30s, max 10 retries)
 5. **Critère** : compteur → 0, chantier visible côté API
+
+### 4.8 — Idempotence : retry d'une CREATE déjà synced
+
+(ce scénario teste le 409 → synced via UUID stable)
+
+1. Online, créer un client
+2. Bloquer manuellement le retour API (par exemple `kill -STOP <pid-api>` sur le terminal Symfony) avant que la réponse arrive
+3. Côté mobile : le retry va repartir au prochain tick
+4. Reprendre l'API (`kill -CONT <pid-api>`)
+5. **Critère** : un seul client côté API (pas de doublon) — le 2e POST renvoie 409 → marqué synced
 
 ## 5. Inspecter l'état local (debug)
 

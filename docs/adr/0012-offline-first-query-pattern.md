@@ -92,8 +92,34 @@ outbox {
 }
 ```
 
-Backoff exponentiel : délai = `min(2^retryCount * 1000, 604800000)` ms (max 7 jours).
-Au-delà de `retryCount > 20`, statut = `abandoned` (log Sentry + notification utilisateur future).
+Backoff exponentiel : délai = `min(2^retryCount * 1000, 30_000)` ms (cap à 30 s pour ne pas bloquer la résolution).
+Au-delà de `retryCount > 10`, statut = `abandoned`.
+
+**Codes HTTP** :
+- 2xx → `synced`
+- **409 Conflict** → `synced` (idempotence : l'entité existe déjà côté serveur avec ce UUID)
+- 4xx (autres) → `abandoned` (payload invalide, retry inutile)
+- 5xx / network error → `pending` + `retryCount++` (transient)
+
+### Worker de sync (suite)
+
+`useSyncWorker` combine trois triggers (cf [hooks/useSyncWorker.ts](../../apps/mobile/hooks/useSyncWorker.ts)) :
+1. **Event natif** `Network.addNetworkStateListener` — réactif mais peu fiable sur iOS lors d'un toggle mode-avion
+2. **AppState** → `active` — déclenche au retour en premier plan
+3. **Polling 5 s** en complément — garantit que la sync part au plus tard dans les 5 s suivant une reconnexion, même si l'event natif est avalé
+
+Chaque trigger appelle `syncIfOnline` qui re-vérifie l'état réseau directement via `Network.getNetworkStateAsync` (bypass du state React) avant de lancer `processOutbox` puis `refreshAll` **séquentiellement** (sinon race : `refreshAll` peut écraser le cache avant que `processOutbox` ait synced les nouvelles entités optimistes).
+
+### Implémentation API — UUIDs client acceptés
+
+Implémenté en CP3.1 (PR #32). Les Payloads `Creer{Chantier,Client}Payload` acceptent un champ optionnel `uuid` :
+- Si fourni → utilisé tel quel pour l'entité (Doctrine, table `chantier` / `client`)
+- Si absent → généré côté serveur (`Uuid::v7`, rétrocompat web)
+- Si `uuid` existe déjà → **409 Conflict** (idempotence)
+
+> Note : le champ est nommé `uuid` et non `id` parce qu'API Platform throw « Update is not allowed for this operation » dès qu'il voit `id` dans le body d'un POST (protection par défaut d'`ItemNormalizer`). Le champ JSON s'appelle donc `uuid` en requête, mais l'entité créée a bien cet UUID comme `id` ; la réponse expose `id`.
+
+Conséquence côté mobile : `useOfflineMutation` injecte automatiquement `{ ...payload, uuid: id }` pour les CREATE. Aucune logique de « rewriting » d'IDs n'est nécessaire après sync (les UUIDs sont stables des deux côtés). PR #33 a supprimé la dette technique qui compensait l'ancienne incohérence (-70 lignes).
 
 ## Consequences
 
@@ -103,8 +129,8 @@ Au-delà de `retryCount > 20`, statut = `abandoned` (log Sentry + notification u
 - Pattern identique pour toute entité future (Photo, Devis) → réutilisation directe
 
 **Trade-offs** :
-- `staleTime: Infinity` couplé au worker de sync : si le worker est défaillant, les données ne se rafraîchissent plus. Atténué par le trigger sur `AppState active`.
-- Les UUIDs locaux (pre-créés côté client) doivent être stables côté serveur (UUID v4 accepté par l'API — déjà le cas).
+- `staleTime: Infinity` couplé au worker de sync : si le worker est défaillant, les données ne se rafraîchissent plus. Atténué par les triggers multiples (event réseau + AppState + polling 5 s).
+- L'API accepte les UUIDs client (UUID v4/v7) avec idempotence 409 — pattern fragile à respecter pour toute nouvelle entité offline. CRUD léger : check de collision dans le Processor. Full hexagonal : exception domaine `*DejaExistantException` → `ConflictHttpException` dans le Processor.
 - Pas de résolution de conflit UI en V1 : "last write wins" sur timestamp serveur. Acceptable pour usage solo/petite équipe (cible : ≤5 personnes par compte).
 
 **Décision différée** :
