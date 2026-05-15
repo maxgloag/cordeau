@@ -853,6 +853,16 @@
                             "string",
                             "null"
                         ]
+                    },
+                    "uuid": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -1059,6 +1069,16 @@
                         "type": "string"
                     },
                     "notes": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "uuid": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
                         "type": [
                             "string",
                             "null"
