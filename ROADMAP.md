@@ -6,7 +6,7 @@
 
 ## Statut actuel
 
-**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** à démarrer.
+**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** à démarrer.
 
 ## Rétroplanning indicatif
 
@@ -64,11 +64,13 @@
 
 ---
 
-## Phase 2 — Verticale Clients (1-2 semaines)
+## Phase 2 — Verticale Clients (1-2 semaines) ✅
 
-CRUD Clients (entité + relation `Chantier → Client`), CRUD sur les 3 plateformes, écran de liaison client ↔ chantier. Documenter les patterns récurrents dans `CLAUDE.md`.
+CRUD Clients (entité + relation `Chantier → Client`), CRUD sur les 3 plateformes, écran de liaison client ↔ chantier.
 
-**Critère de sortie** : la vélocité est **significativement meilleure** que Phase 1. Sinon → signal que l'archi pose problème → refactor avant Phase 3.
+**Patterns actés** : CRUD léger (ADR 0010), ClientRef VO dénormalisé (ADR 0011), ClientRefResolver, JsonTestHelper trait.
+
+**Critère de sortie atteint** : vélocité ×5 vs Phase 1 (2.1→2.4 en ~2h30 au total vs plusieurs jours en Phase 1).
 
 ---
 
