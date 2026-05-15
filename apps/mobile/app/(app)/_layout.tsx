@@ -1,6 +1,22 @@
+import { useEffect } from "react";
 import { Stack } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { getAllChantiers, getAllClients } from "@/db/queries";
+import { refreshChantiers, refreshClients } from "@/lib/sync";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 export default function AppLayout() {
+  const queryClient = useQueryClient();
+  const isConnected = useNetworkStatus();
+
+  useEffect(() => {
+    if (!isConnected) return;
+    const promises: Promise<void>[] = [];
+    if (getAllChantiers().length === 0) promises.push(refreshChantiers(queryClient));
+    if (getAllClients().length === 0) promises.push(refreshClients(queryClient));
+    if (promises.length > 0) void Promise.all(promises);
+  }, [isConnected, queryClient]);
+
   return (
     <Stack
       screenOptions={{
