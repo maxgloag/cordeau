@@ -12,6 +12,7 @@ use App\Presentation\Api\Chantier\Processor\ModifierChantierProcessor;
 use App\Presentation\Api\Chantier\Provider\ChantierCollectionProvider;
 use App\Presentation\Api\Chantier\Provider\ChantierItemProvider;
 use App\Domain\Chantier\Entity\Chantier;
+use App\Domain\Chantier\ValueObject\ClientRef;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -55,6 +56,8 @@ final class ChantierResource
         public readonly string $statut,
         public readonly string $creeLe,
         public readonly string $modifieLe,
+        public readonly ?string $clientId = null,
+        public readonly ?string $clientNom = null,
     ) {
     }
 
@@ -70,6 +73,8 @@ final class ChantierResource
             statut: $chantier->statut->value,
             creeLe: $chantier->creeLe->format(\DateTimeInterface::ATOM),
             modifieLe: $chantier->modifieLe->format(\DateTimeInterface::ATOM),
+            clientId: $chantier->client?->id->toRfc4122(),
+            clientNom: $chantier->client?->nomCache,
         );
     }
 }

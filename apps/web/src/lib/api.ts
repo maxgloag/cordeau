@@ -9,6 +9,8 @@ export type Chantier = components["schemas"]["Chantier"] & {
   adresseVille: string;
   adressePays: string;
   statut: string;
+  clientId?: string | null;
+  clientNom?: string | null;
 };
 
 export type UserMe = {
@@ -86,6 +88,7 @@ export type CreerChantierPayload = {
   adresseVille: string;
   adressePays?: string;
   surfaceM2?: number | null;
+  clientId?: string | null;
 };
 
 export async function creerChantier(

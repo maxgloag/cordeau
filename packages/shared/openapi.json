@@ -795,6 +795,18 @@
                     },
                     "modifieLe": {
                         "type": "string"
+                    },
+                    "clientId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "clientNom": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -829,6 +841,16 @@
                         "exclusiveMinimum": 0,
                         "type": [
                             "number",
+                            "null"
+                        ]
+                    },
+                    "clientId": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": [
+                            "string",
                             "null"
                         ]
                     }
@@ -874,6 +896,16 @@
                             "number",
                             "null"
                         ]
+                    },
+                    "clientId": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -914,6 +946,18 @@
                             },
                             "modifieLe": {
                                 "type": "string"
+                            },
+                            "clientId": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "clientNom": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             }
                         }
                     }
@@ -991,7 +1035,6 @@
                         ]
                     },
                     "telephone": {
-                        "pattern": "^([+0][\\d\\s.\\-]{8,18})$",
                         "type": [
                             "string",
                             "null"
@@ -1045,7 +1088,6 @@
                         ]
                     },
                     "telephone": {
-                        "pattern": "^([+0][\\d\\s.\\-]{8,18})$",
                         "type": [
                             "string",
                             "null"

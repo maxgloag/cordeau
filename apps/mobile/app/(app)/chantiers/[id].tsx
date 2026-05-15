@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MapPin, Pencil, Archive, Maximize2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { fetchChantier, modifierChantier, archiverChantier } from "@/lib/api";
+import { fetchChantier, modifierChantier, archiverChantier, listClients } from "@/lib/api";
 import type { Chantier, ApiError } from "@/lib/api";
 import { STATUT_LABELS, STATUT_COLORS, chantierSchema, type ChantierFormValues } from "@/lib/chantier";
 import { ChantierForm } from "@/components/ChantierForm";
@@ -27,6 +27,7 @@ function toFormValues(c: Chantier): ChantierFormValues {
     adresseCodePostal: c.adresseCodePostal,
     adresseVille: c.adresseVille,
     surfaceM2: c.surfaceM2 != null ? String(c.surfaceM2) : "",
+    clientId: c.clientId ?? "",
   };
 }
 
@@ -42,9 +43,11 @@ export default function ChantierDetailScreen() {
     queryFn: () => fetchChantier(id),
   });
 
+  const { data: clients = [] } = useQuery({ queryKey: ["clients"], queryFn: listClients });
+
   const { control, handleSubmit, reset, formState: { errors } } = useForm<ChantierFormValues>({
     resolver: zodResolver(chantierSchema),
-    defaultValues: { adresseRue: "", adresseCodePostal: "", adresseVille: "", surfaceM2: "" },
+    defaultValues: { adresseRue: "", adresseCodePostal: "", adresseVille: "", surfaceM2: "", clientId: "" },
   });
 
   useEffect(() => {
@@ -65,6 +68,7 @@ export default function ChantierDetailScreen() {
         adresseCodePostal: values.adresseCodePostal,
         adresseVille: values.adresseVille,
         surfaceM2: values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
+        clientId: values.clientId || null,
       });
       void queryClient.invalidateQueries({ queryKey: ["chantiers"] });
       setIsEditing(false);
@@ -164,7 +168,7 @@ export default function ChantierDetailScreen() {
                 Modifier le chantier
               </Text>
 
-              <ChantierForm control={control} errors={errors} />
+              <ChantierForm control={control} errors={errors} clients={clients} />
 
               <View className="flex-row gap-3">
                 <TouchableOpacity

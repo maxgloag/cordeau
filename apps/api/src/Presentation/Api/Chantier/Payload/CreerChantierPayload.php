@@ -25,6 +25,8 @@ final class CreerChantierPayload
         public readonly string $adressePays = 'FR',
         #[Assert\Positive]
         public readonly ?float $surfaceM2 = null,
+        #[Assert\Uuid]
+        public readonly ?string $clientId = null,
     ) {
     }
 

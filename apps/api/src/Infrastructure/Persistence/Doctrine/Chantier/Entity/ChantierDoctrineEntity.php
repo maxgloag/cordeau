@@ -14,6 +14,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Entity]
 #[ORM\Table(name: 'chantier')]
 #[ORM\Index(columns: ['statut'], name: 'idx_chantier_statut')]
+#[ORM\Index(columns: ['client_id'], name: 'idx_chantier_client')]
 class ChantierDoctrineEntity
 {
     public function __construct(
@@ -39,6 +40,10 @@ class ChantierDoctrineEntity
         public readonly \DateTimeImmutable $creeLe,
         #[ORM\Column(name: 'modifie_le', type: Types::DATETIMETZ_IMMUTABLE)]
         public \DateTimeImmutable $modifieLe,
+        #[ORM\Column(name: 'client_id', type: UuidType::NAME, nullable: true)]
+        public ?Uuid $clientId = null,
+        #[ORM\Column(name: 'client_nom_cache', type: Types::STRING, length: 255, nullable: true)]
+        public ?string $clientNomCache = null,
     ) {
     }
 }

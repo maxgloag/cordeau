@@ -2,6 +2,7 @@ import type { UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { Client } from "@/lib/api";
 
 export type ChantierFormValues = {
   adresseRue: string;
@@ -9,6 +10,7 @@ export type ChantierFormValues = {
   adresseVille: string;
   adressePays: string;
   surfaceM2: string;
+  clientId: string;
 };
 
 type Props = {
@@ -17,9 +19,10 @@ type Props = {
   isPending: boolean;
   onCancel: () => void;
   submitLabel: string;
+  clients?: Client[];
 };
 
-export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLabel }: Props) {
+export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLabel, clients = [] }: Props) {
   const {
     register,
     handleSubmit,
@@ -93,6 +96,25 @@ export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLa
           <p className="text-xs" style={{ color: "var(--color-destructive)" }}>{errors.surfaceM2.message}</p>
         )}
       </div>
+
+      {clients.length > 0 && (
+        <div className="space-y-1.5">
+          <Label htmlFor="clientId" style={{ fontSize: "0.8rem", fontWeight: 500, color: "var(--color-text)" }}>
+            Client <span style={{ color: "var(--color-muted)" }}>— optionnel</span>
+          </Label>
+          <select
+            id="clientId"
+            className="flex h-9 w-full rounded-md border px-3 py-1 text-sm"
+            style={{ borderColor: "var(--color-border)", background: "var(--color-surface)", color: "var(--color-text)" }}
+            {...register("clientId")}
+          >
+            <option value="">Aucun client</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>{c.nom}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>

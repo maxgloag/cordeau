@@ -22,6 +22,7 @@ export const chantierSchema = z.object({
     (v) => v === "" || (!isNaN(parseFloat(v)) && parseFloat(v) > 0),
     { message: "Surface invalide" },
   ),
+  clientId: z.string(),
 });
 
 export type ChantierFormValues = z.infer<typeof chantierSchema>;

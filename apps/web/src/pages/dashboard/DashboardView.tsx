@@ -1,4 +1,4 @@
-import { Plus, Pencil, Archive, MapPin, Maximize2 } from "lucide-react";
+import { Plus, Pencil, Archive, MapPin, Maximize2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -14,7 +14,7 @@ import {
 import { ChantierFormView } from "./ChantierFormView";
 import type { ChantierFormValues } from "./ChantierFormView";
 import type { UseFormReturn } from "react-hook-form";
-import type { Chantier } from "@/lib/api";
+import type { Chantier, Client } from "@/lib/api";
 
 const STATUT_LABELS: Record<string, string> = {
   en_preparation: "En préparation",
@@ -25,6 +25,7 @@ const STATUT_LABELS: Record<string, string> = {
 
 type Props = {
   chantiers: Chantier[];
+  clients: Client[];
   isLoading: boolean;
   isError: boolean;
 
@@ -54,6 +55,7 @@ type Props = {
 
 export function DashboardView({
   chantiers,
+  clients,
   isLoading,
   isError,
   showCreate,
@@ -155,6 +157,9 @@ export function DashboardView({
                   Adresse
                 </th>
                 <th className="px-4 py-2.5 text-left font-medium" style={{ color: "var(--color-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Client
+                </th>
+                <th className="px-4 py-2.5 text-left font-medium" style={{ color: "var(--color-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Surface
                 </th>
                 <th className="px-4 py-2.5 text-left font-medium" style={{ color: "var(--color-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -183,6 +188,16 @@ export function DashboardView({
                         </p>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {c.clientNom ? (
+                      <span className="flex items-center gap-1 text-xs" style={{ color: "var(--color-text)" }}>
+                        <User size={11} style={{ color: "var(--color-primary)" }} />
+                        {c.clientNom}
+                      </span>
+                    ) : (
+                      <span style={{ color: "var(--color-muted)", fontSize: "0.75rem" }}>—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     {c.surfaceM2 != null ? (
@@ -242,6 +257,7 @@ export function DashboardView({
             isPending={isCreating}
             onCancel={onCloseCreate}
             submitLabel="Créer le chantier"
+            clients={clients}
           />
         </DialogContent>
       </Dialog>
@@ -260,6 +276,7 @@ export function DashboardView({
             isPending={isEditing}
             onCancel={onCloseEdit}
             submitLabel="Enregistrer"
+            clients={clients}
           />
         </DialogContent>
       </Dialog>

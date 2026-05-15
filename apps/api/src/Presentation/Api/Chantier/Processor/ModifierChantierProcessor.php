@@ -7,9 +7,15 @@ namespace App\Presentation\Api\Chantier\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Application\Chantier\UseCase\ModifierChantierUseCase;
+use App\Client\Repository\ClientRepository;
+use App\Domain\Chantier\ValueObject\ClientRef;
+use App\Entity\User;
 use App\Presentation\Api\Chantier\Payload\ModifierChantierPayload;
 use App\Presentation\Api\Chantier\Resource\ChantierResource;
 use App\Presentation\Api\Support\UuidUriVariableExtractor;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @implements ProcessorInterface<ModifierChantierPayload, ChantierResource>
@@ -18,8 +24,11 @@ final class ModifierChantierProcessor implements ProcessorInterface
 {
     use UuidUriVariableExtractor;
 
-    public function __construct(private readonly ModifierChantierUseCase $useCase)
-    {
+    public function __construct(
+        private readonly ModifierChantierUseCase $useCase,
+        private readonly Security $security,
+        private readonly ClientRepository $clientRepository,
+    ) {
     }
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ChantierResource
@@ -29,9 +38,25 @@ final class ModifierChantierProcessor implements ProcessorInterface
             throw new \LogicException('previous_data manquant — provider mal configuré sur l\'opération PATCH.');
         }
 
+        $user = $this->security->getUser();
+        \assert($user instanceof User);
+
+        $client = $data->clientId !== null ? $this->resolveClientRef($data->clientId, $user->id) : null;
+
         $id = $this->extractUuid($uriVariables);
-        $chantier = $this->useCase->execute($id, $data->toAdresse($existant), $data->toSurface());
+        $chantier = $this->useCase->execute($id, $data->toAdresse($existant), $data->toSurface(), $client);
 
         return ChantierResource::fromDomain($chantier);
+    }
+
+    private function resolveClientRef(string $clientId, Uuid $proprietaireId): ClientRef
+    {
+        $client = $this->clientRepository->find(Uuid::fromString($clientId));
+
+        if ($client === null || !$client->proprietaire->id->equals($proprietaireId)) {
+            throw new UnprocessableEntityHttpException('Client introuvable ou non autorisé.');
+        }
+
+        return new ClientRef(id: $client->id, nomCache: $client->nom);
     }
 }

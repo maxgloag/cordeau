@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Plus, Users } from "lucide-react-native";
+import { MapPin, Plus, Users, User } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { fetchChantiers } from "@/lib/api";
@@ -42,6 +42,12 @@ function ChantierCard({ item, onPress }: { item: Chantier; onPress: () => void }
                 {item.adresseCodePostal} {item.adresseVille}
               </Text>
             </View>
+            {item.clientNom ? (
+              <View className="flex-row items-center gap-1 mt-1">
+                <User size={11} color="#9B8F85" />
+                <Text className="text-xs text-muted" numberOfLines={1}>{item.clientNom}</Text>
+              </View>
+            ) : null}
           </View>
 
           <View

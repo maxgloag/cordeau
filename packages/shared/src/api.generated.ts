@@ -122,6 +122,8 @@ export interface components {
             statut?: string;
             creeLe?: string;
             modifieLe?: string;
+            clientId?: string | null;
+            clientNom?: string | null;
         };
         "Chantier.CreerChantierPayload": {
             adresseRue: string;
@@ -129,6 +131,8 @@ export interface components {
             adresseVille: string;
             adressePays?: string;
             surfaceM2?: number | null;
+            /** Format: uuid */
+            clientId?: string | null;
         };
         "Chantier.ModifierChantierPayload.jsonMergePatch": {
             adresseRue?: string | null;
@@ -136,6 +140,8 @@ export interface components {
             adresseVille?: string | null;
             adressePays?: string | null;
             surfaceM2?: number | null;
+            /** Format: uuid */
+            clientId?: string | null;
         };
         "Chantier.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string;
@@ -147,6 +153,8 @@ export interface components {
             statut?: string;
             creeLe?: string;
             modifieLe?: string;
+            clientId?: string | null;
+            clientNom?: string | null;
         };
         Client: {
             id?: string;

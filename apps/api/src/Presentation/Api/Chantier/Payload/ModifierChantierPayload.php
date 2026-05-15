@@ -26,6 +26,8 @@ final class ModifierChantierPayload
         public readonly ?string $adressePays = null,
         #[Assert\Positive]
         public readonly ?float $surfaceM2 = null,
+        #[Assert\Uuid]
+        public readonly ?string $clientId = null,
     ) {
     }
 
