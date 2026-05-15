@@ -56,6 +56,58 @@ export interface paths {
         patch: operations["api_chantiers_id_patch"];
         trace?: never;
     };
+    "/api/clients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of Client resources.
+         * @description Retrieves the collection of Client resources.
+         */
+        get: operations["api_clients_get_collection"];
+        put?: never;
+        /**
+         * Creates a Client resource.
+         * @description Creates a Client resource.
+         */
+        post: operations["api_clients_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a Client resource.
+         * @description Retrieves a Client resource.
+         */
+        get: operations["api_clients_id_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Removes the Client resource.
+         * @description Removes the Client resource.
+         */
+        delete: operations["api_clients_id_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Updates the Client resource.
+         * @description Updates the Client resource.
+         */
+        patch: operations["api_clients_id_patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -93,6 +145,54 @@ export interface components {
             adressePays?: string;
             surfaceM2?: number | null;
             statut?: string;
+            creeLe?: string;
+            modifieLe?: string;
+        };
+        Client: {
+            id?: string;
+            nom?: string;
+            email?: string | null;
+            telephone?: string | null;
+            adresseRue?: string;
+            adresseCodePostal?: string;
+            adresseVille?: string;
+            adressePays?: string;
+            notes?: string | null;
+            creeLe?: string;
+            modifieLe?: string;
+        };
+        "Client.CreerClientPayload": {
+            nom: string;
+            /** Format: email */
+            email?: string | null;
+            telephone?: string | null;
+            adresseRue: string;
+            adresseCodePostal: string;
+            adresseVille: string;
+            adressePays?: string;
+            notes?: string | null;
+        };
+        "Client.ModifierClientPayload.jsonMergePatch": {
+            nom?: string | null;
+            /** Format: email */
+            email?: string | null;
+            telephone?: string | null;
+            adresseRue?: string | null;
+            adresseCodePostal?: string | null;
+            adresseVille?: string | null;
+            adressePays?: string | null;
+            notes?: string | null;
+        };
+        "Client.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            nom?: string;
+            email?: string | null;
+            telephone?: string | null;
+            adresseRue?: string;
+            adresseCodePostal?: string;
+            adresseVille?: string;
+            adressePays?: string;
+            notes?: string | null;
             creeLe?: string;
             modifieLe?: string;
         };
@@ -402,6 +502,210 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Chantier"];
                     "application/ld+json": components["schemas"]["Chantier.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_clients_get_collection: {
+        parameters: {
+            query?: {
+                /** @description The collection page number */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Client collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Client"][];
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
+                        member: components["schemas"]["Client.jsonld"][];
+                    };
+                };
+            };
+        };
+    };
+    api_clients_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new Client resource */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Client.CreerClientPayload"];
+                "application/ld+json": components["schemas"]["Client.CreerClientPayload"];
+            };
+        };
+        responses: {
+            /** @description Client resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Client"];
+                    "application/ld+json": components["schemas"]["Client.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_clients_id_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Client identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Client resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Client"];
+                    "application/ld+json": components["schemas"]["Client.jsonld"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_clients_id_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Client identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Client resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_clients_id_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Client identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated Client resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["Client.ModifierClientPayload.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description Client resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Client"];
+                    "application/ld+json": components["schemas"]["Client.jsonld"];
                 };
             };
             /** @description Invalid input */
