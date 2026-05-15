@@ -9,6 +9,7 @@ import {
   creerChantier,
   modifierChantier,
   archiverChantier,
+  listClients,
 } from "@/lib/api";
 import type { Chantier } from "@/lib/api";
 import { DashboardView } from "./DashboardView";
@@ -26,6 +27,7 @@ const chantierSchema = z.object({
     (v) => v === "" || (!isNaN(parseFloat(v)) && parseFloat(v) > 0),
     { message: "Surface invalide" },
   ),
+  clientId: z.string(),
 });
 
 function makeDefaultValues(c?: Chantier): ChantierFormValues {
@@ -35,11 +37,14 @@ function makeDefaultValues(c?: Chantier): ChantierFormValues {
     adresseVille: c?.adresseVille ?? "",
     adressePays: c?.adressePays ?? "FR",
     surfaceM2: c?.surfaceM2 != null ? String(c.surfaceM2) : "",
+    clientId: c?.clientId ?? "",
   };
 }
 
 export default function DashboardPage() {
   const queryClient = useQueryClient();
+
+  const { data: clients = [] } = useQuery({ queryKey: ["clients"], queryFn: listClients });
 
   // Chantiers
   const { data: chantiers = [], isLoading, isError } = useQuery({
@@ -62,6 +67,7 @@ export default function DashboardPage() {
         adresseVille: values.adresseVille,
         adressePays: values.adressePays,
         surfaceM2: values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
+        clientId: values.clientId || null,
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["chantiers"] });
@@ -93,6 +99,7 @@ export default function DashboardPage() {
         adresseVille: values.adresseVille,
         adressePays: values.adressePays,
         surfaceM2: values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
+        clientId: values.clientId || null,
       });
     },
     onSuccess: () => {
@@ -119,6 +126,7 @@ export default function DashboardPage() {
   return (
     <DashboardView
       chantiers={chantiers}
+      clients={clients}
       isLoading={isLoading}
       isError={isError}
       showCreate={showCreate}

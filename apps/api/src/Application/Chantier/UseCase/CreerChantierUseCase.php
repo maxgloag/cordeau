@@ -6,6 +6,7 @@ namespace App\Application\Chantier\UseCase;
 
 use App\Domain\Chantier\Entity\Chantier;
 use App\Domain\Chantier\Repository\ChantierRepository;
+use App\Domain\Chantier\ValueObject\ClientRef;
 use App\Shared\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use Symfony\Component\Uid\Uuid;
@@ -20,8 +21,9 @@ final class CreerChantierUseCase
         Uuid $proprietaireId,
         Adresse $adresse,
         ?Surface $surface = null,
+        ?ClientRef $client = null,
     ): Chantier {
-        $chantier = Chantier::creer($proprietaireId, $adresse, $surface);
+        $chantier = Chantier::creer($proprietaireId, $adresse, $surface, client: $client);
         $this->repository->save($chantier);
 
         return $chantier;

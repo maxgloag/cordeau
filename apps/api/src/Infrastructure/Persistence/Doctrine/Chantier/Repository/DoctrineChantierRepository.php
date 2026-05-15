@@ -8,6 +8,7 @@ use App\Domain\Chantier\Entity\Chantier;
 use App\Domain\Chantier\Enum\StatutChantier;
 use App\Domain\Chantier\Exception\ChantierIntrouvableException;
 use App\Domain\Chantier\Repository\ChantierRepository;
+use App\Domain\Chantier\ValueObject\ClientRef;
 use App\Shared\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use App\Entity\User;
@@ -38,6 +39,8 @@ final class DoctrineChantierRepository implements ChantierRepository
             $existante->surfaceM2 = $chantier->surface !== null ? (string) $chantier->surface->valeurM2 : null;
             $existante->statut = $chantier->statut;
             $existante->modifieLe = $chantier->modifieLe;
+            $existante->clientId = $chantier->client?->id;
+            $existante->clientNomCache = $chantier->client?->nomCache;
         }
 
         $this->entityManager->flush();
@@ -108,11 +111,18 @@ final class DoctrineChantierRepository implements ChantierRepository
             statut: $chantier->statut,
             creeLe: $chantier->creeLe,
             modifieLe: $chantier->modifieLe,
+            clientId: $chantier->client?->id,
+            clientNomCache: $chantier->client?->nomCache,
         );
     }
 
     private function toDomain(ChantierDoctrineEntity $entite): Chantier
     {
+        $clientRef = null;
+        if ($entite->clientId !== null && $entite->clientNomCache !== null) {
+            $clientRef = new ClientRef(id: $entite->clientId, nomCache: $entite->clientNomCache);
+        }
+
         return new Chantier(
             id: $entite->id,
             proprietaireId: $entite->proprietaire->id,
@@ -126,6 +136,7 @@ final class DoctrineChantierRepository implements ChantierRepository
             statut: $entite->statut,
             creeLe: $entite->creeLe,
             modifieLe: $entite->modifieLe,
+            client: $clientRef,
         );
     }
 }

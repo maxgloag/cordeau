@@ -6,6 +6,7 @@ namespace App\Domain\Chantier\Entity;
 
 use App\Domain\Chantier\Enum\StatutChantier;
 use App\Domain\Chantier\Exception\TransitionStatutInvalideException;
+use App\Domain\Chantier\ValueObject\ClientRef;
 use App\Shared\ValueObject\Adresse;
 use App\Domain\Chantier\ValueObject\Surface;
 use Symfony\Component\Uid\Uuid;
@@ -20,6 +21,7 @@ final readonly class Chantier
         public StatutChantier $statut,
         public \DateTimeImmutable $creeLe,
         public \DateTimeImmutable $modifieLe,
+        public ?ClientRef $client = null,
     ) {
     }
 
@@ -28,6 +30,7 @@ final readonly class Chantier
         Adresse $adresse,
         ?Surface $surface = null,
         ?\DateTimeImmutable $maintenant = null,
+        ?ClientRef $client = null,
     ): self {
         $maintenant ??= new \DateTimeImmutable();
 
@@ -39,6 +42,39 @@ final readonly class Chantier
             statut: StatutChantier::EN_PREPARATION,
             creeLe: $maintenant,
             modifieLe: $maintenant,
+            client: $client,
+        );
+    }
+
+    public function lierClient(ClientRef $ref, ?\DateTimeImmutable $maintenant = null): self
+    {
+        $maintenant ??= new \DateTimeImmutable();
+
+        return new self(
+            id: $this->id,
+            proprietaireId: $this->proprietaireId,
+            adresse: $this->adresse,
+            surface: $this->surface,
+            statut: $this->statut,
+            creeLe: $this->creeLe,
+            modifieLe: $maintenant,
+            client: $ref,
+        );
+    }
+
+    public function delierClient(?\DateTimeImmutable $maintenant = null): self
+    {
+        $maintenant ??= new \DateTimeImmutable();
+
+        return new self(
+            id: $this->id,
+            proprietaireId: $this->proprietaireId,
+            adresse: $this->adresse,
+            surface: $this->surface,
+            statut: $this->statut,
+            creeLe: $this->creeLe,
+            modifieLe: $maintenant,
+            client: null,
         );
     }
 
@@ -69,6 +105,7 @@ final readonly class Chantier
             statut: $this->statut,
             creeLe: $this->creeLe,
             modifieLe: $maintenant,
+            client: $this->client,
         );
     }
 
@@ -84,6 +121,7 @@ final readonly class Chantier
             statut: $this->statut,
             creeLe: $this->creeLe,
             modifieLe: $maintenant,
+            client: $this->client,
         );
     }
 
@@ -107,6 +145,7 @@ final readonly class Chantier
             statut: $cible,
             creeLe: $this->creeLe,
             modifieLe: $maintenant,
+            client: $this->client,
         );
     }
 }

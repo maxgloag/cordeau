@@ -8,11 +8,11 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { creerChantier } from "@/lib/api";
+import { creerChantier, listClients } from "@/lib/api";
 import type { ApiError } from "@/lib/api";
 import { chantierSchema, type ChantierFormValues } from "@/lib/chantier";
 import { ChantierForm } from "@/components/ChantierForm";
@@ -25,9 +25,11 @@ export default function NewChantierScreen() {
   const [isPending, setIsPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
+  const { data: clients = [] } = useQuery({ queryKey: ["clients"], queryFn: listClients });
+
   const { control, handleSubmit, formState: { errors } } = useForm<ChantierFormValues>({
     resolver: zodResolver(chantierSchema),
-    defaultValues: { adresseRue: "", adresseCodePostal: "", adresseVille: "", surfaceM2: "" },
+    defaultValues: { adresseRue: "", adresseCodePostal: "", adresseVille: "", surfaceM2: "", clientId: "" },
   });
 
   async function onSubmit(values: ChantierFormValues) {
@@ -40,6 +42,7 @@ export default function NewChantierScreen() {
         adresseVille: values.adresseVille,
         adressePays: "FR",
         surfaceM2: values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
+        clientId: values.clientId || null,
       });
       void queryClient.invalidateQueries({ queryKey: ["chantiers"] });
       router.back();
@@ -67,7 +70,7 @@ export default function NewChantierScreen() {
 
           <ErrorBanner message={errorMessage} />
 
-          <ChantierForm control={control} errors={errors} />
+          <ChantierForm control={control} errors={errors} clients={clients} />
 
           <View className="flex-row gap-3 mt-6">
             <TouchableOpacity

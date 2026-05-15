@@ -55,6 +55,8 @@ final class ChantierResource
         public readonly string $statut,
         public readonly string $creeLe,
         public readonly string $modifieLe,
+        public readonly ?string $clientId = null,
+        public readonly ?string $clientNom = null,
     ) {
     }
 
@@ -70,6 +72,8 @@ final class ChantierResource
             statut: $chantier->statut->value,
             creeLe: $chantier->creeLe->format(\DateTimeInterface::ATOM),
             modifieLe: $chantier->modifieLe->format(\DateTimeInterface::ATOM),
+            clientId: $chantier->client?->id->toRfc4122(),
+            clientNom: $chantier->client?->nomCache,
         );
     }
 }

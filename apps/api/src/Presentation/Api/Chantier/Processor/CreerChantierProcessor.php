@@ -10,6 +10,7 @@ use App\Application\Chantier\UseCase\CreerChantierUseCase;
 use App\Entity\User;
 use App\Presentation\Api\Chantier\Payload\CreerChantierPayload;
 use App\Presentation\Api\Chantier\Resource\ChantierResource;
+use App\Presentation\Api\Support\ClientRefResolver;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -20,6 +21,7 @@ final class CreerChantierProcessor implements ProcessorInterface
     public function __construct(
         private readonly CreerChantierUseCase $useCase,
         private readonly Security $security,
+        private readonly ClientRefResolver $clientRefResolver,
     ) {
     }
 
@@ -28,7 +30,9 @@ final class CreerChantierProcessor implements ProcessorInterface
         $user = $this->security->getUser();
         \assert($user instanceof User);
 
-        $chantier = $this->useCase->execute($user->id, $data->toAdresse(), $data->toSurface());
+        $client = $data->clientId !== null ? $this->clientRefResolver->resoudre($data->clientId, $user->id) : null;
+
+        $chantier = $this->useCase->execute($user->id, $data->toAdresse(), $data->toSurface(), $client);
 
         return ChantierResource::fromDomain($chantier);
     }
