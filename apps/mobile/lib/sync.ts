@@ -1,5 +1,5 @@
 import { fetchChantiers, listClients } from "./api";
-import { getAllChantiers, upsertChantiers, getAllClients, upsertClients } from "@/db/queries";
+import { upsertChantiers, upsertClients } from "@/db/queries";
 import type { QueryClient } from "@tanstack/react-query";
 
 export async function refreshChantiers(queryClient: QueryClient): Promise<void> {
@@ -14,6 +14,14 @@ export async function refreshClients(queryClient: QueryClient): Promise<void> {
   queryClient.setQueryData(["clients"], items);
 }
 
+let isRefreshing = false;
+
 export async function refreshAll(queryClient: QueryClient): Promise<void> {
-  await Promise.all([refreshChantiers(queryClient), refreshClients(queryClient)]);
+  if (isRefreshing) return;
+  isRefreshing = true;
+  try {
+    await Promise.all([refreshChantiers(queryClient), refreshClients(queryClient)]);
+  } finally {
+    isRefreshing = false;
+  }
 }
