@@ -86,9 +86,11 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
         const payload = JSON.parse(fresh.payload) as Record<string, unknown>;
         await pushEntry(fresh.entityType, fresh.entityId, fresh.operation, payload, queryClient);
         db.update(outbox).set({ status: "synced" as OutboxStatus }).where(eq(outbox.id, fresh.id)).run();
-      } catch {
+      } catch (err) {
+        const status = (err as { status?: number }).status ?? 0;
+        const isClientError = status >= 400 && status < 500;
         db.update(outbox).set({
-          status: "pending" as OutboxStatus,
+          status: (isClientError ? "abandoned" : "pending") as OutboxStatus,
           retryCount: fresh.retryCount + 1,
           lastAttemptAt: Date.now(),
         }).where(eq(outbox.id, fresh.id)).run();
