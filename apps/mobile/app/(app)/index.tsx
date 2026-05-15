@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Plus } from "lucide-react-native";
+import { MapPin, Plus, Users } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
 import { fetchChantiers } from "@/lib/api";
@@ -89,12 +89,21 @@ export default function DashboardScreen() {
             </Text>
           )}
         </View>
-        <TouchableOpacity
-          onPress={() => void logout()}
-          className="px-3 py-1.5 rounded-lg border border-border"
-        >
-          <Text className="text-sm text-muted">Déconnexion</Text>
-        </TouchableOpacity>
+        <View className="flex-row gap-2">
+          <TouchableOpacity
+            onPress={() => router.push("/(app)/clients")}
+            className="px-3 py-1.5 rounded-lg border border-border flex-row items-center gap-1.5"
+          >
+            <Users size={14} color="#6B6259" />
+            <Text className="text-sm text-muted">Clients</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => void logout()}
+            className="px-3 py-1.5 rounded-lg border border-border"
+          >
+            <Text className="text-sm text-muted">Déconnexion</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {isLoading ? (
