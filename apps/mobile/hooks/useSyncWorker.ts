@@ -11,15 +11,19 @@ export function useSyncWorker() {
 
   useEffect(() => {
     if (!isConnected) return;
-    void processOutbox(queryClient).catch(() => {});
-    void refreshAll(queryClient).catch(() => {});
+    void (async () => {
+      await processOutbox(queryClient).catch(() => {});
+      await refreshAll(queryClient).catch(() => {});
+    })();
   }, [isConnected, queryClient]);
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
       if (state !== "active" || !isConnected) return;
-      void processOutbox(queryClient).catch(() => {});
-      void refreshAll(queryClient).catch(() => {});
+      void (async () => {
+        await processOutbox(queryClient).catch(() => {});
+        await refreshAll(queryClient).catch(() => {});
+      })();
     });
     return () => sub.remove();
   }, [isConnected, queryClient]);

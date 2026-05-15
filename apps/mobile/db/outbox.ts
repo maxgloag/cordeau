@@ -116,9 +116,12 @@ async function pushEntry(
       const created = await creerChantier(payload as Parameters<typeof creerChantier>[0]);
       rewriteLocalId("chantier", entityId, created.id);
       upsertChantiers([created]);
-      queryClient.setQueryData(["chantiers"], (old: unknown[]) =>
-        (old ?? []).map((c) => ((c as { id: string }).id === entityId ? created : c)),
-      );
+      queryClient.setQueryData(["chantiers"], (old: unknown[] | undefined) => {
+        const list = (old ?? []) as { id: string }[];
+        if (list.some((c) => c.id === created.id)) return list;
+        if (list.some((c) => c.id === entityId)) return list.map((c) => (c.id === entityId ? created : c));
+        return [...list, created];
+      });
     } else if (operation === "update") {
       const updated = await modifierChantier(entityId, payload as Parameters<typeof modifierChantier>[1]);
       upsertChantiers([updated]);
@@ -136,9 +139,12 @@ async function pushEntry(
       const created = await creerClient(payload as Parameters<typeof creerClient>[0]);
       rewriteLocalId("client", entityId, created.id);
       upsertClients([created]);
-      queryClient.setQueryData(["clients"], (old: unknown[]) =>
-        (old ?? []).map((c) => ((c as { id: string }).id === entityId ? created : c)),
-      );
+      queryClient.setQueryData(["clients"], (old: unknown[] | undefined) => {
+        const list = (old ?? []) as { id: string }[];
+        if (list.some((c) => c.id === created.id)) return list;
+        if (list.some((c) => c.id === entityId)) return list.map((c) => (c.id === entityId ? created : c));
+        return [...list, created];
+      });
     } else if (operation === "update") {
       const updated = await modifierClient(entityId, payload as Parameters<typeof modifierClient>[1]);
       upsertClients([updated]);
