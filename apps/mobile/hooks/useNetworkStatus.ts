@@ -14,10 +14,14 @@ export function useNetworkStatus() {
 
     void check();
 
-    const interval = setInterval(() => void check(), 30_000);
+    const sub = Network.addNetworkStateListener((state) => {
+      if (cancelled) return;
+      setIsConnected(state.isConnected ?? false);
+    });
+
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      sub.remove();
     };
   }, []);
 
