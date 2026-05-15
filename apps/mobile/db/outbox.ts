@@ -22,6 +22,24 @@ function rewriteLocalId(entityType: OutboxEntityType, oldId: string, newId: stri
     .run();
   const table = entityType === "chantier" ? chantiers : clients;
   db.delete(table).where(eq(table.id, oldId)).run();
+
+  if (entityType === "client") {
+    const chantierEntries = db.select().from(outbox)
+      .where(and(eq(outbox.entityType, "chantier"), eq(outbox.status, "pending" as OutboxStatus)))
+      .all();
+    for (const ce of chantierEntries) {
+      try {
+        const payload = JSON.parse(ce.payload) as Record<string, unknown>;
+        if (payload.clientId === oldId) {
+          payload.clientId = newId;
+          db.update(outbox).set({ payload: JSON.stringify(payload) }).where(eq(outbox.id, ce.id)).run();
+        }
+      } catch {
+        // payload corrompu, on laisse tomber
+      }
+    }
+    db.update(chantiers).set({ clientId: newId }).where(eq(chantiers.clientId, oldId)).run();
+  }
 }
 
 const MAX_RETRY = 10;
@@ -66,6 +84,7 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
       .where(and(
         eq(outbox.status, "pending" as OutboxStatus),
       ))
+      .orderBy(outbox.createdAt)
       .all();
 
     for (const entry of entries) {
