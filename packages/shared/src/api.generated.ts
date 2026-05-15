@@ -133,6 +133,8 @@ export interface components {
             surfaceM2?: number | null;
             /** Format: uuid */
             clientId?: string | null;
+            /** Format: uuid */
+            uuid?: string | null;
         };
         "Chantier.ModifierChantierPayload.jsonMergePatch": {
             adresseRue?: string | null;
@@ -179,6 +181,8 @@ export interface components {
             adresseVille: string;
             adressePays?: string;
             notes?: string | null;
+            /** Format: uuid */
+            uuid?: string | null;
         };
         "Client.ModifierClientPayload.jsonMergePatch": {
             nom?: string | null;

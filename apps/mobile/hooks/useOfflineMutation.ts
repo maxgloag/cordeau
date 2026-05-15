@@ -22,11 +22,12 @@ export function useOfflineMutation<TPayload extends Record<string, unknown>>(
     try {
       const id = entityId ?? randomUUID();
       options.buildLocal(id, payload);
+      const apiPayload = options.operation === "create" ? { ...payload, uuid: id } : payload;
       pushToOutbox({
         entityType: options.entityType,
         entityId: id,
         operation: options.operation,
-        payload: JSON.stringify(payload),
+        payload: JSON.stringify(apiPayload),
       });
       void processOutbox(queryClient);
       return id;

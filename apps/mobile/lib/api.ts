@@ -128,6 +128,7 @@ export type CreerChantierPayload = {
   adressePays?: string;
   surfaceM2?: number | null;
   clientId?: string | null;
+  uuid?: string | null;
 };
 
 export async function creerChantier(payload: CreerChantierPayload): Promise<Chantier> {
@@ -174,6 +175,7 @@ export type CreerClientPayload = {
   adresseVille: string;
   adressePays?: string;
   notes?: string | null;
+  uuid?: string | null;
 };
 
 export async function creerClient(payload: CreerClientPayload): Promise<Client> {
