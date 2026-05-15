@@ -3,16 +3,18 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { MapPin, Plus, Users, User } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/AuthContext";
-import { fetchChantiers } from "@/lib/api";
 import type { Chantier } from "@/lib/api";
+import { getAllChantiers } from "@/db/queries";
+import { refreshChantiers } from "@/lib/sync";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/chantier";
 
 function ChantierCard({ item, onPress }: { item: Chantier; onPress: () => void }) {
@@ -73,11 +75,26 @@ function ChantierCard({ item, onPress }: { item: Chantier; onPress: () => void }
 export default function DashboardScreen() {
   const router = useRouter();
   const { logout } = useAuth();
+  const queryClient = useQueryClient();
+  const isConnected = useNetworkStatus();
 
-  const { data: chantiers = [], isLoading, isError, refetch, isRefetching } = useQuery({
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const { data: chantiers = [] } = useQuery({
     queryKey: ["chantiers"],
-    queryFn: fetchChantiers,
+    queryFn: () => {
+      const local = getAllChantiers();
+      if (isConnected) void refreshChantiers(queryClient);
+      return local;
+    },
+    staleTime: Infinity,
   });
+
+  function handleRefresh() {
+    if (!isConnected || isSyncing) return;
+    setIsSyncing(true);
+    void refreshChantiers(queryClient).finally(() => setIsSyncing(false));
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -89,11 +106,9 @@ export default function DashboardScreen() {
           >
             Chantiers
           </Text>
-          {!isLoading && (
-            <Text className="text-sm text-muted mt-0.5">
-              {chantiers.length} actif{chantiers.length !== 1 ? "s" : ""}
-            </Text>
-          )}
+          <Text className="text-sm text-muted mt-0.5">
+            {chantiers.length} actif{chantiers.length !== 1 ? "s" : ""}
+          </Text>
         </View>
         <View className="flex-row gap-2">
           <TouchableOpacity
@@ -112,23 +127,7 @@ export default function DashboardScreen() {
         </View>
       </View>
 
-      {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#B85C2A" size="large" />
-        </View>
-      ) : isError ? (
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-base text-muted text-center">
-            Impossible de charger les chantiers.{"\n"}Vérifiez votre connexion.
-          </Text>
-          <TouchableOpacity
-            className="mt-4 bg-primary rounded-xl px-5 py-3"
-            onPress={() => void refetch()}
-          >
-            <Text className="text-primary-foreground font-medium">Réessayer</Text>
-          </TouchableOpacity>
-        </View>
-      ) : chantiers.length === 0 ? (
+      {chantiers.length === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
           <Text
             className="text-xl text-text mb-2"
@@ -153,8 +152,8 @@ export default function DashboardScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
           refreshControl={
             <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={() => void refetch()}
+              refreshing={isSyncing}
+              onRefresh={handleRefresh}
               tintColor="#B85C2A"
             />
           }

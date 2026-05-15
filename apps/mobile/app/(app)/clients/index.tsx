@@ -3,15 +3,17 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Plus, User, Mail, Phone } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { listClients } from "@/lib/api";
 import type { Client } from "@/lib/api";
+import { getAllClients } from "@/db/queries";
+import { refreshClients } from "@/lib/sync";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 function ClientCard({ item, onPress }: { item: Client; onPress: () => void }) {
   return (
@@ -57,11 +59,25 @@ function ClientCard({ item, onPress }: { item: Client; onPress: () => void }) {
 
 export default function ClientsListScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const isConnected = useNetworkStatus();
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  const { data: clients = [], isLoading, isError, refetch, isRefetching } = useQuery({
+  const { data: clients = [] } = useQuery({
     queryKey: ["clients"],
-    queryFn: listClients,
+    queryFn: () => {
+      const local = getAllClients();
+      if (isConnected) void refreshClients(queryClient);
+      return local;
+    },
+    staleTime: Infinity,
   });
+
+  function handleRefresh() {
+    if (!isConnected || isSyncing) return;
+    setIsSyncing(true);
+    void refreshClients(queryClient).finally(() => setIsSyncing(false));
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -73,11 +89,9 @@ export default function ClientsListScreen() {
           >
             Clients
           </Text>
-          {!isLoading && (
-            <Text className="text-sm text-muted mt-0.5">
-              {clients.length} client{clients.length !== 1 ? "s" : ""}
-            </Text>
-          )}
+          <Text className="text-sm text-muted mt-0.5">
+            {clients.length} client{clients.length !== 1 ? "s" : ""}
+          </Text>
         </View>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -87,23 +101,7 @@ export default function ClientsListScreen() {
         </TouchableOpacity>
       </View>
 
-      {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#B85C2A" size="large" />
-        </View>
-      ) : isError ? (
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-base text-muted text-center">
-            Impossible de charger les clients.{"\n"}Vérifiez votre connexion.
-          </Text>
-          <TouchableOpacity
-            className="mt-4 bg-primary rounded-xl px-5 py-3"
-            onPress={() => void refetch()}
-          >
-            <Text className="text-primary-foreground font-medium">Réessayer</Text>
-          </TouchableOpacity>
-        </View>
-      ) : clients.length === 0 ? (
+      {clients.length === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
           <Text
             className="text-xl text-text mb-2"
@@ -128,8 +126,8 @@ export default function ClientsListScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
           refreshControl={
             <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={() => void refetch()}
+              refreshing={isSyncing}
+              onRefresh={handleRefresh}
               tintColor="#B85C2A"
             />
           }
