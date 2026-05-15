@@ -80,11 +80,13 @@ SQLite via expo-sqlite + Drizzle ORM, schéma local miroir des entités serveur 
 
 **Patterns actés** :
 - queryFn hybride : SQLite synchrone + refresh API en background (ADR 0012)
-- `useOfflineMutation` : optimistic local + outbox push + processOutbox fire-and-forget
-- Sync worker : déclencheur global sur reconnect réseau + AppState foreground (pas de polling périodique)
-- Backoff exponentiel dans `processOutbox` (retryCount + lastAttemptAt, MAX_RETRY=20)
+- `useOfflineMutation` : optimistic local + outbox push + processOutbox fire-and-forget. Le mobile génère un UUID v4 → l'API l'accepte tel quel via le champ `uuid` (idempotence 409 si collision)
+- Sync worker : event natif `expo-network` + `AppState=active` + polling 5 s en fallback (l'event natif est peu fiable sur iOS lors d'un toggle mode avion). `processOutbox` puis `refreshAll` séquentiels pour éviter la race « refreshAll écrase le cache avant que processOutbox finisse »
+- Backoff exponentiel dans `processOutbox` capé à 30 s (MAX_RETRY=10). 409 → `synced`, autres 4xx → `abandoned`, 5xx/network → retry
 
-**Critère de sortie atteint** : verticales Chantiers + Clients fonctionnent en offline complet, sync au retour réseau, indicateur visuel en temps réel.
+**Critère de sortie atteint** : verticales Chantiers + Clients fonctionnent en offline complet, sync au retour réseau (≤ 5 s sans reload), indicateur visuel en temps réel.
+
+**Phase 3 corrective (16 mai 2026, PRs #32 → #34)** : implémentation effective de la décision ADR 0012 (API accepte UUIDs client) qui avait été oubliée. Suppression de 70 lignes de dette mobile (`rewriteLocalId`, payload rewriting, setQueryData défensif). Worker résilient avec polling 5 s + logs structurés `[network]/[sync]/[outbox]`.
 
 ---
 
