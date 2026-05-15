@@ -24,7 +24,8 @@ function rewriteLocalId(entityType: OutboxEntityType, oldId: string, newId: stri
   db.delete(table).where(eq(table.id, oldId)).run();
 }
 
-const MAX_RETRY = 20;
+const MAX_RETRY = 10;
+const MAX_BACKOFF_MS = 30_000;
 const MAX_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type OutboxEntry = {
@@ -76,7 +77,7 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
         continue;
       }
 
-      const delay = Math.min(Math.pow(2, fresh.retryCount) * 1000, MAX_RETENTION_MS);
+      const delay = Math.min(Math.pow(2, fresh.retryCount) * 1000, MAX_BACKOFF_MS);
       const lastAttempt = fresh.lastAttemptAt ?? 0;
       if (Date.now() - lastAttempt < delay && fresh.retryCount > 0) continue;
 
