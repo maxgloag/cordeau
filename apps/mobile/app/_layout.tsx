@@ -1,5 +1,6 @@
 import "../global.css";
 import { useEffect } from "react";
+import { runMigrations } from "@/db/migrate";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts, BricolageGrotesque_500Medium, BricolageGrotesque_700Bold } from "@expo-google-fonts/bricolage-grotesque";
@@ -29,6 +30,8 @@ function AuthGuard() {
 
   return null;
 }
+
+runMigrations();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
