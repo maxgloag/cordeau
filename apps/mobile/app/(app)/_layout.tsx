@@ -20,6 +20,18 @@ export default function AppLayout() {
         name="chantiers/[id]"
         options={{ headerShown: true, title: "Chantier" }}
       />
+      <Stack.Screen
+        name="clients/index"
+        options={{ headerShown: true, title: "Clients" }}
+      />
+      <Stack.Screen
+        name="clients/new"
+        options={{ headerShown: true, title: "Nouveau client", presentation: "modal" }}
+      />
+      <Stack.Screen
+        name="clients/[id]"
+        options={{ headerShown: true, title: "Client" }}
+      />
     </Stack>
   );
 }
