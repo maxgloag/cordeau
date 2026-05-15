@@ -15,11 +15,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil, Trash2, User, Mail, Phone } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { listClients, modifierClient, supprimerClient } from "@/lib/api";
-import type { Client, ApiError } from "@/lib/api";
+import type { Client } from "@/lib/api";
 import { clientSchema, type ClientFormValues } from "@/lib/client";
 import { ClientForm } from "@/components/ClientForm";
 import { SubmitButton } from "@/components/SubmitButton";
+import { getAllClients, upsertClients, deleteClientLocal } from "@/db/queries";
+import { useOfflineMutation } from "@/hooks/useOfflineMutation";
 
 function toFormValues(c: Client): ClientFormValues {
   return {
@@ -39,14 +40,13 @@ export default function ClientDetailScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [isPending, setIsPending] = useState(false);
 
-  const { data: clients = [], isLoading } = useQuery({
+  const { data: client } = useQuery({
     queryKey: ["clients"],
-    queryFn: listClients,
+    queryFn: getAllClients,
+    staleTime: Infinity,
+    select: (items) => items.find((c) => c.id === id),
   });
-
-  const client = clients.find((c) => c.id === id);
 
   const { control, handleSubmit, reset, formState: { errors } } = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
@@ -60,26 +60,45 @@ export default function ClientDetailScreen() {
     if (client) reset(toFormValues(client));
   }, [client, reset]);
 
-  async function onSubmitEdit(values: ClientFormValues) {
-    if (!id) return;
-    setIsPending(true);
-    try {
-      await modifierClient(id, {
+  const { mutate: submitUpdate } = useOfflineMutation<Omit<Client, "id">>({
+    entityType: "client",
+    operation: "update",
+    buildLocal: (entityId, payload) => {
+      const updated: Client = { id: entityId, ...payload };
+      upsertClients([updated]);
+      queryClient.setQueryData(["clients"], (old: Client[] | undefined) =>
+        (old ?? []).map((c) => (c.id === entityId ? updated : c)),
+      );
+    },
+  });
+
+  const { mutate: submitDelete } = useOfflineMutation<Record<string, never>>({
+    entityType: "client",
+    operation: "delete",
+    buildLocal: (entityId) => {
+      deleteClientLocal(entityId);
+      queryClient.setQueryData(["clients"], (old: Client[] | undefined) =>
+        (old ?? []).filter((c) => c.id !== entityId),
+      );
+    },
+  });
+
+  function onSubmitEdit(values: ClientFormValues) {
+    if (!id || !client) return;
+    submitUpdate(
+      {
         nom: values.nom,
         email: values.email || null,
         telephone: values.telephone || null,
         adresseRue: values.adresseRue,
         adresseCodePostal: values.adresseCodePostal,
         adresseVille: values.adresseVille,
+        adressePays: values.adressePays,
         notes: values.notes || null,
-      });
-      void queryClient.invalidateQueries({ queryKey: ["clients"] });
-      setIsEditing(false);
-    } catch (err) {
-      Alert.alert("Erreur", (err as ApiError).message ?? "Modification échouée");
-    } finally {
-      setIsPending(false);
-    }
+      },
+      id,
+    );
+    setIsEditing(false);
   }
 
   function confirmSupprimer() {
@@ -91,24 +110,16 @@ export default function ClientDetailScreen() {
         {
           text: "Supprimer",
           style: "destructive",
-          onPress: () => void doSupprimer(),
+          onPress: () => {
+            if (id) submitDelete({}, id);
+            router.back();
+          },
         },
       ],
     );
   }
 
-  async function doSupprimer() {
-    if (!id) return;
-    try {
-      await supprimerClient(id);
-      void queryClient.invalidateQueries({ queryKey: ["clients"] });
-      router.back();
-    } catch (err) {
-      Alert.alert("Erreur", (err as ApiError).message ?? "Suppression échouée");
-    }
-  }
-
-  if (isLoading || !client) {
+  if (!client) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
         <ActivityIndicator color="#B85C2A" size="large" />
@@ -173,13 +184,12 @@ export default function ClientDetailScreen() {
                 <TouchableOpacity
                   className="flex-1 border border-border rounded-xl py-4 items-center"
                   onPress={() => setIsEditing(false)}
-                  disabled={isPending}
                 >
                   <Text className="text-base text-muted font-medium">Annuler</Text>
                 </TouchableOpacity>
                 <SubmitButton
                   label="Enregistrer"
-                  isPending={isPending}
+                  isPending={false}
                   onPress={() => void handleSubmit(onSubmitEdit)()}
                 />
               </View>

@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "./index";
 import { chantiers, clients } from "./schema";
 import type { Chantier, Client } from "@/lib/api";
@@ -68,6 +68,10 @@ export function getAllClients(): Client[] {
     adressePays: r.adressePays,
     notes: r.notes,
   }));
+}
+
+export function deleteClientLocal(id: string) {
+  db.delete(clients).where(eq(clients.id, id)).run();
 }
 
 export function upsertClients(items: Client[]) {
