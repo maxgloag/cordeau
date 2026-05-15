@@ -31,11 +31,12 @@ final readonly class Chantier
         ?Surface $surface = null,
         ?\DateTimeImmutable $maintenant = null,
         ?ClientRef $client = null,
+        ?Uuid $id = null,
     ): self {
         $maintenant ??= new \DateTimeImmutable();
 
         return new self(
-            id: Uuid::v7(),
+            id: $id ?? Uuid::v7(),
             proprietaireId: $proprietaireId,
             adresse: $adresse,
             surface: $surface,

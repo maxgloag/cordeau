@@ -27,6 +27,8 @@ final class CreerChantierPayload
         public readonly ?float $surfaceM2 = null,
         #[Assert\Uuid]
         public readonly ?string $clientId = null,
+        #[Assert\Uuid]
+        public readonly ?string $uuid = null,
     ) {
     }
 
