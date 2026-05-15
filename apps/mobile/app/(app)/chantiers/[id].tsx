@@ -15,11 +15,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MapPin, Pencil, Archive, Maximize2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { fetchChantier, modifierChantier, archiverChantier, listClients } from "@/lib/api";
-import type { Chantier, ApiError } from "@/lib/api";
+import type { Chantier } from "@/lib/api";
 import { STATUT_LABELS, STATUT_COLORS, chantierSchema, type ChantierFormValues } from "@/lib/chantier";
 import { ChantierForm } from "@/components/ChantierForm";
 import { SubmitButton } from "@/components/SubmitButton";
+import { getAllChantiers, getAllClients, upsertChantiers } from "@/db/queries";
+import { useOfflineMutation } from "@/hooks/useOfflineMutation";
 
 function toFormValues(c: Chantier): ChantierFormValues {
   return {
@@ -36,14 +37,19 @@ export default function ChantierDetailScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [isPending, setIsPending] = useState(false);
 
-  const { data: chantier, isLoading } = useQuery({
-    queryKey: ["chantiers", id],
-    queryFn: () => fetchChantier(id),
+  const { data: chantier } = useQuery({
+    queryKey: ["chantiers"],
+    queryFn: getAllChantiers,
+    staleTime: Infinity,
+    select: (items) => items.find((c) => c.id === id),
   });
 
-  const { data: clients = [] } = useQuery({ queryKey: ["clients"], queryFn: listClients });
+  const { data: clients = [] } = useQuery({
+    queryKey: ["clients"],
+    queryFn: getAllClients,
+    staleTime: Infinity,
+  });
 
   const { control, handleSubmit, reset, formState: { errors } } = useForm<ChantierFormValues>({
     resolver: zodResolver(chantierSchema),
@@ -54,29 +60,45 @@ export default function ChantierDetailScreen() {
     if (chantier) reset(toFormValues(chantier));
   }, [chantier, reset]);
 
-  function openEdit() {
-    if (chantier) reset(toFormValues(chantier));
-    setIsEditing(true);
-  }
+  const { mutate: submitUpdate } = useOfflineMutation<Omit<Chantier, "id">>({
+    entityType: "chantier",
+    operation: "update",
+    buildLocal: (entityId, payload) => {
+      const updated: Chantier = { id: entityId, ...payload };
+      upsertChantiers([updated]);
+      queryClient.setQueryData(["chantiers"], (old: Chantier[] | undefined) =>
+        (old ?? []).map((c) => (c.id === entityId ? updated : c)),
+      );
+    },
+  });
 
-  async function onSubmitEdit(values: ChantierFormValues) {
-    if (!id) return;
-    setIsPending(true);
-    try {
-      await modifierChantier(id, {
+  const { mutate: submitArchive } = useOfflineMutation<Record<string, never>>({
+    entityType: "chantier",
+    operation: "delete",
+    buildLocal: (entityId) => {
+      queryClient.setQueryData(["chantiers"], (old: Chantier[] | undefined) =>
+        (old ?? []).filter((c) => c.id !== entityId),
+      );
+    },
+  });
+
+  function onSubmitEdit(values: ChantierFormValues) {
+    if (!id || !chantier) return;
+    const clientNom = clients.find((c) => c.id === values.clientId)?.nom ?? null;
+    submitUpdate(
+      {
         adresseRue: values.adresseRue,
         adresseCodePostal: values.adresseCodePostal,
         adresseVille: values.adresseVille,
+        adressePays: chantier.adressePays,
         surfaceM2: values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
+        statut: chantier.statut,
         clientId: values.clientId || null,
-      });
-      void queryClient.invalidateQueries({ queryKey: ["chantiers"] });
-      setIsEditing(false);
-    } catch (err) {
-      Alert.alert("Erreur", (err as ApiError).message ?? "Modification échouée");
-    } finally {
-      setIsPending(false);
-    }
+        clientNom,
+      },
+      id,
+    );
+    setIsEditing(false);
   }
 
   function confirmArchive() {
@@ -88,24 +110,16 @@ export default function ChantierDetailScreen() {
         {
           text: "Archiver",
           style: "destructive",
-          onPress: () => void doArchive(),
+          onPress: () => {
+            if (id) submitArchive({}, id);
+            router.back();
+          },
         },
       ],
     );
   }
 
-  async function doArchive() {
-    if (!id) return;
-    try {
-      await archiverChantier(id);
-      void queryClient.invalidateQueries({ queryKey: ["chantiers"] });
-      router.back();
-    } catch (err) {
-      Alert.alert("Erreur", (err as ApiError).message ?? "Archivage échoué");
-    }
-  }
-
-  if (isLoading || !chantier) {
+  if (!chantier) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
         <ActivityIndicator color="#B85C2A" size="large" />
@@ -174,13 +188,12 @@ export default function ChantierDetailScreen() {
                 <TouchableOpacity
                   className="flex-1 border border-border rounded-xl py-4 items-center"
                   onPress={() => setIsEditing(false)}
-                  disabled={isPending}
                 >
                   <Text className="text-base text-muted font-medium">Annuler</Text>
                 </TouchableOpacity>
                 <SubmitButton
                   label="Enregistrer"
-                  isPending={isPending}
+                  isPending={false}
                   onPress={() => void handleSubmit(onSubmitEdit)()}
                 />
               </View>
@@ -191,7 +204,7 @@ export default function ChantierDetailScreen() {
             <View className="gap-3">
               <TouchableOpacity
                 className="flex-row items-center gap-3 bg-surface border border-border rounded-xl px-5 py-4"
-                onPress={openEdit}
+                onPress={() => { if (chantier) reset(toFormValues(chantier)); setIsEditing(true); }}
               >
                 <Pencil size={18} color="#B85C2A" />
                 <Text className="text-base text-text font-medium">Modifier le chantier</Text>
