@@ -1,6 +1,6 @@
 import { eq, and, lt } from "drizzle-orm";
 import { db } from "./index";
-import { outbox } from "./schema";
+import { outbox, chantiers, clients } from "./schema";
 import type { OutboxEntityType, OutboxOperation, OutboxStatus } from "./schema";
 import {
   creerChantier, modifierChantier, archiverChantier,
@@ -9,6 +9,20 @@ import {
 import type { QueryClient } from "@tanstack/react-query";
 import { upsertChantiers, upsertClients } from "./queries";
 import { randomUUID } from "expo-crypto";
+
+function rewriteLocalId(entityType: OutboxEntityType, oldId: string, newId: string) {
+  if (oldId === newId) return;
+  db.update(outbox)
+    .set({ entityId: newId })
+    .where(and(
+      eq(outbox.entityId, oldId),
+      eq(outbox.entityType, entityType),
+      eq(outbox.status, "pending" as OutboxStatus),
+    ))
+    .run();
+  const table = entityType === "chantier" ? chantiers : clients;
+  db.delete(table).where(eq(table.id, oldId)).run();
+}
 
 const MAX_RETRY = 20;
 const MAX_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -54,27 +68,30 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
       .all();
 
     for (const entry of entries) {
-      if (entry.retryCount >= MAX_RETRY) {
-        db.update(outbox).set({ status: "abandoned" as OutboxStatus }).where(eq(outbox.id, entry.id)).run();
+      const fresh = db.select().from(outbox).where(eq(outbox.id, entry.id)).get();
+      if (!fresh || fresh.status !== "pending") continue;
+
+      if (fresh.retryCount >= MAX_RETRY) {
+        db.update(outbox).set({ status: "abandoned" as OutboxStatus }).where(eq(outbox.id, fresh.id)).run();
         continue;
       }
 
-      const delay = Math.min(Math.pow(2, entry.retryCount) * 1000, MAX_RETENTION_MS);
-      const lastAttempt = entry.lastAttemptAt ?? 0;
-      if (Date.now() - lastAttempt < delay && entry.retryCount > 0) continue;
+      const delay = Math.min(Math.pow(2, fresh.retryCount) * 1000, MAX_RETENTION_MS);
+      const lastAttempt = fresh.lastAttemptAt ?? 0;
+      if (Date.now() - lastAttempt < delay && fresh.retryCount > 0) continue;
 
-      db.update(outbox).set({ status: "syncing" as OutboxStatus, lastAttemptAt: Date.now() }).where(eq(outbox.id, entry.id)).run();
+      db.update(outbox).set({ status: "syncing" as OutboxStatus, lastAttemptAt: Date.now() }).where(eq(outbox.id, fresh.id)).run();
 
       try {
-        const payload = JSON.parse(entry.payload) as Record<string, unknown>;
-        await pushEntry(entry.entityType, entry.entityId, entry.operation, payload, queryClient);
-        db.update(outbox).set({ status: "synced" as OutboxStatus }).where(eq(outbox.id, entry.id)).run();
+        const payload = JSON.parse(fresh.payload) as Record<string, unknown>;
+        await pushEntry(fresh.entityType, fresh.entityId, fresh.operation, payload, queryClient);
+        db.update(outbox).set({ status: "synced" as OutboxStatus }).where(eq(outbox.id, fresh.id)).run();
       } catch {
         db.update(outbox).set({
           status: "pending" as OutboxStatus,
-          retryCount: entry.retryCount + 1,
+          retryCount: fresh.retryCount + 1,
           lastAttemptAt: Date.now(),
-        }).where(eq(outbox.id, entry.id)).run();
+        }).where(eq(outbox.id, fresh.id)).run();
       }
     }
 
@@ -94,6 +111,7 @@ async function pushEntry(
   if (entityType === "chantier") {
     if (operation === "create") {
       const created = await creerChantier(payload as Parameters<typeof creerChantier>[0]);
+      rewriteLocalId("chantier", entityId, created.id);
       upsertChantiers([created]);
       queryClient.setQueryData(["chantiers"], (old: unknown[]) =>
         (old ?? []).map((c) => ((c as { id: string }).id === entityId ? created : c)),
@@ -113,6 +131,7 @@ async function pushEntry(
   } else if (entityType === "client") {
     if (operation === "create") {
       const created = await creerClient(payload as Parameters<typeof creerClient>[0]);
+      rewriteLocalId("client", entityId, created.id);
       upsertClients([created]);
       queryClient.setQueryData(["clients"], (old: unknown[]) =>
         (old ?? []).map((c) => ((c as { id: string }).id === entityId ? created : c)),
