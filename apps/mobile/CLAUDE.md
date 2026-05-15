@@ -4,11 +4,20 @@
 
 Node 24 · Expo SDK 54 · React Native 0.81 · TypeScript strict · Jest 29 + jest-expo · @testing-library/react-native
 
+**Ajouté en Phase 1** : expo-router, expo-secure-store, NativeWind, TanStack Query, react-hook-form + zod
+**Ajouté en Phase 3** : expo-sqlite + Drizzle ORM, expo-network, expo-crypto, outbox pattern
+
 **À ajouter progressivement** :
-- Phase 1 : expo-router (navigation multi-écrans), expo-secure-store (tokens)
-- Phase 3 : expo-sqlite + Drizzle ORM (offline-first)
 - Phase 4 : expo-auth-session (OAuth)
 - Phase 7 : module natif ARKit/ARCore custom
+
+## Offline-first (Phase 3)
+
+- **Source de vérité locale** : SQLite via Drizzle (`db/schema.ts`, `db/queries.ts`)
+- **Pattern d'écriture** : `useOfflineMutation` — optimistic update SQLite + queryClient cache, push outbox, `processOutbox` fire-and-forget
+- **Pattern de lecture** : queryFn hybride — lit SQLite synchrone, déclenche refresh API en background via `setQueryData` (jamais `invalidateQueries` dans un queryFn)
+- **Sync worker** : `useSyncWorker` monté dans `_layout.tsx`, déclenche sur reconnect + AppState foreground (pas de polling)
+- **Détails** : cf [ADR 0012](../../docs/adr/0012-offline-first-query-pattern.md)
 
 ## Commandes
 

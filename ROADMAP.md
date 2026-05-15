@@ -6,7 +6,7 @@
 
 ## Statut actuel
 
-**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** à démarrer.
+**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** ✅ terminée (mai 2026, issues #22 → #26, PRs #27 → #31). **Phase 4 — OAuth + Apple Sign-In** à démarrer.
 
 ## Rétroplanning indicatif
 
@@ -74,11 +74,17 @@ CRUD Clients (entité + relation `Chantier → Client`), CRUD sur les 3 platefor
 
 ---
 
-## Phase 3 — Offline-first mobile (~2 semaines)
+## Phase 3 — Offline-first mobile (~2 semaines) ✅
 
-SQLite via expo-sqlite + Drizzle ORM, schéma local miroir des entités serveur, file d'attente des mutations (outbox), sync bidirectionnelle, gestion conflits "last write wins" avec timestamps serveur, UI optimiste, indicateur de statut de sync.
+SQLite via expo-sqlite + Drizzle ORM, schéma local miroir des entités serveur (chantiers, clients, outbox), file d'attente des mutations (outbox), sync via worker (`useSyncWorker` sur AppState + reconnect), UI optimiste via `useOfflineMutation`, indicateur `SyncStatusBar`.
 
-**Critère de sortie** : mode avion → créer 5 chantiers + 3 clients → connexion → tout remonte sans doublon ni perte.
+**Patterns actés** :
+- queryFn hybride : SQLite synchrone + refresh API en background (ADR 0012)
+- `useOfflineMutation` : optimistic local + outbox push + processOutbox fire-and-forget
+- Sync worker : déclencheur global sur reconnect réseau + AppState foreground (pas de polling périodique)
+- Backoff exponentiel dans `processOutbox` (retryCount + lastAttemptAt, MAX_RETRY=20)
+
+**Critère de sortie atteint** : verticales Chantiers + Clients fonctionnent en offline complet, sync au retour réseau, indicateur visuel en temps réel.
 
 ---
 
