@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Doctrine\Auth\Repository;
 
+use App\Auth\Port\UserStore;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -11,7 +12,7 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<User>
  */
-final class DoctrineUserRepository extends ServiceEntityRepository
+final class DoctrineUserRepository extends ServiceEntityRepository implements UserStore
 {
     public function __construct(ManagerRegistry $registry)
     {
