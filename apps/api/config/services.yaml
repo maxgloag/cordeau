@@ -13,6 +13,8 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            string $webAppUrl: '%env(WEB_APP_URL)%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -21,6 +23,15 @@ services:
 
     App\Domain\Chantier\Repository\ChantierRepository:
         class: App\Infrastructure\Persistence\Doctrine\Chantier\Repository\DoctrineChantierRepository
+
+    App\Auth\Port\OAuthAccountStore:
+        alias: App\Auth\Repository\OAuthAccountRepository
+
+    App\Auth\Port\UserStore:
+        alias: App\Infrastructure\Persistence\Doctrine\Auth\Repository\DoctrineUserRepository
+
+    App\Auth\Port\GoogleUserResolver:
+        alias: App\Auth\Infrastructure\KnpGoogleUserResolver
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
