@@ -33,5 +33,12 @@ services:
     App\Auth\Port\GoogleUserResolver:
         alias: App\Auth\Infrastructure\KnpGoogleUserResolver
 
+    App\Auth\Port\GoogleIdTokenVerifier:
+        alias: App\Auth\Infrastructure\GoogleTokeninfoVerifier
+
+    App\Auth\Infrastructure\GoogleTokeninfoVerifier:
+        arguments:
+            $allowedAudiencesCsv: '%env(GOOGLE_OAUTH_AUDIENCES)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
