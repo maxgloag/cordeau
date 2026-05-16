@@ -113,6 +113,13 @@ export async function logout(): Promise<void> {
   await apiFetch<void>("/auth/logout", { method: "POST" });
 }
 
+export async function exchangeGoogleIdToken(idToken: string): Promise<AuthResponse> {
+  return apiFetch<AuthResponse>("/auth/oauth/google/exchange", {
+    method: "POST",
+    body: JSON.stringify({ idToken }),
+  });
+}
+
 export async function fetchChantiers(): Promise<Chantier[]> {
   return apiFetch<Chantier[]>("/api/chantiers");
 }

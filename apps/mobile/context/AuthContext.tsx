@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { getToken, setTokens, clearTokens } from "@/lib/auth";
-import { login as apiLogin, register as apiRegister, logout as apiLogout, setSessionExpiredCallback } from "@/lib/api";
+import { login as apiLogin, register as apiRegister, logout as apiLogout, exchangeGoogleIdToken, setSessionExpiredCallback } from "@/lib/api";
 import type { AuthResponse } from "@/lib/api";
 
 type AuthState = {
@@ -14,6 +14,7 @@ type AuthState = {
   isLoading: boolean;
   login: (email: string, motDePasse: string) => Promise<void>;
   register: (email: string, motDePasse: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -48,6 +49,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await handleAuthResponse(await apiRegister(email, motDePasse));
   }
 
+  async function loginWithGoogle(idToken: string) {
+    await handleAuthResponse(await exchangeGoogleIdToken(idToken));
+  }
+
   async function logout() {
     try {
       await apiLogout();
@@ -59,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ token, isLoading, login, register, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

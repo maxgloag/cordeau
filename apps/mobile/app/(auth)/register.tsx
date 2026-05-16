@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/lib/api";
+import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 const schema = z
   .object({
@@ -88,6 +89,9 @@ export default function RegisterScreen() {
                 <Text className="text-sm text-destructive">{errorMessage}</Text>
               </View>
             )}
+
+            <GoogleSignInButton label="Créer mon compte avec Google" onError={setErrorMessage} />
+            <AuthDivider />
 
             <View>
               {(
