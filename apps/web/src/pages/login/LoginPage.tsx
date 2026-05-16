@@ -14,11 +14,20 @@ const schema = z.object({
   motDePasse: z.string().min(1, "Mot de passe requis"),
 });
 
+function readOAuthError(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("oauth_error");
+  if (code === "provider") return "La connexion Google a échoué. Réessayez ou utilisez votre email.";
+  if (code === "no_email") return "Google n'a pas pu nous transmettre votre email.";
+  return undefined;
+}
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isPending, setIsPending] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(readOAuthError);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(schema),

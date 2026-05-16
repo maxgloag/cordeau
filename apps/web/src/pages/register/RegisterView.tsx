@@ -3,6 +3,7 @@ import { HardHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 export type RegisterFormValues = {
   email: string;
@@ -80,6 +81,9 @@ export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHre
               {errorMessage}
             </div>
           )}
+
+          <GoogleSignInButton label="Créer mon compte avec Google" />
+          <AuthDivider />
 
           <div className="space-y-4">
             <div className="space-y-1.5">
