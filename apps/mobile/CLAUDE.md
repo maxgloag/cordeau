@@ -7,8 +7,10 @@ Node 24 · Expo SDK 54 · React Native 0.81 · TypeScript strict · Jest 29 + je
 **Ajouté en Phase 1** : expo-router, expo-secure-store, NativeWind, TanStack Query, react-hook-form + zod
 **Ajouté en Phase 3** : expo-sqlite + Drizzle ORM, expo-network, expo-crypto, outbox pattern
 
+**Ajouté en Phase 4** : expo-auth-session + expo-web-browser, Google Sign-In
+
 **À ajouter progressivement** :
-- Phase 4 : expo-auth-session (OAuth)
+- Phase 5 : expo-image-picker, expo-camera, upload R2
 - Phase 7 : module natif ARKit/ARCore custom
 
 ## Offline-first (Phase 3)

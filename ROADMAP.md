@@ -6,7 +6,7 @@
 
 ## Statut actuel
 
-**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** ✅ terminée (mai 2026, issues #22 → #26, PRs #27 → #31). **Phase 4 — OAuth + Apple Sign-In** à démarrer.
+**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** ✅ terminée (mai 2026, issues #22 → #26, PRs #27 → #31). **Phase 4 — OAuth Google** ✅ terminée (16 mai 2026, issues #35 → #37, PRs #38 → #42, ADR 0013). Apple Sign-In différé. **Phase 5 — Photos + R2** à démarrer.
 
 ## Rétroplanning indicatif
 
@@ -90,11 +90,19 @@ SQLite via expo-sqlite + Drizzle ORM, schéma local miroir des entités serveur 
 
 ---
 
-## Phase 4 — OAuth + Apple Sign-In (~1 semaine)
+## Phase 4 — OAuth Google (~1 jour) ✅
 
-KnpUOAuth2ClientBundle (Google + Apple), table `oauth_account`, flow web (redirect) + flow mobile (expo-auth-session + PKCE).
+KnpUOAuth2ClientBundle + league/oauth2-google. Table `oauth_account` séparée (multi-providers ready). Flow web (redirect Symfony) + flow mobile (expo-auth-session + PKCE → endpoint `/auth/oauth/google/exchange` qui vérifie le `id_token` via `tokeninfo` Google et applique l'auto-link). Idempotence par 409 sur collision UUID.
 
-**Critère de sortie** : nouveau compte créable en 3 clics via Google ou Apple, depuis web et mobile.
+**Patterns actés (ADR 0013)** :
+- Auto-link silencieux par email si `email_verified=true` (Google a déjà validé l'email)
+- Table `oauth_account` extensible (provider varchar) — Apple, GitHub, etc. ajoutables sans migration
+- Ports `OAuthAccountStore`, `UserStore`, `GoogleUserResolver`, `GoogleIdTokenVerifier` pour testabilité (les repos Doctrine sont `final`)
+- Bouton "Continuer avec Google" web + mobile (logo officiel multicolor SVG)
+
+**Critère de sortie atteint** : compte créable en 3 clics via Google depuis web (testé end-to-end). Code mobile livré et bundle Metro vert ; test E2E iPhone différé jusqu'au compte Apple Developer (Expo Go ne supporte pas le bundle ID custom requis par Google iOS).
+
+**Apple Sign-In différé** : sera ajouté quand le compte Apple Developer sera pris (~Phase 5+). Aucun rework nécessaire vu l'archi multi-providers.
 
 ---
 
