@@ -3,6 +3,7 @@ import { HardHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 export type LoginFormValues = {
   email: string;
@@ -82,6 +83,9 @@ export function LoginView({ form, onSubmit, isPending, errorMessage, registerHre
               {errorMessage}
             </div>
           )}
+
+          <GoogleSignInButton />
+          <AuthDivider />
 
           <div className="space-y-4">
             <div className="space-y-1.5">
