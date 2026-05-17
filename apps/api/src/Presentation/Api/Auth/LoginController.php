@@ -9,7 +9,6 @@ use App\Entity\User;
 use App\Infrastructure\Persistence\Doctrine\Auth\Repository\DoctrineAuthTokenRepository;
 use App\Infrastructure\Persistence\Doctrine\Auth\Repository\DoctrineUserRepository;
 use App\Security\TokenGenerator;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +24,6 @@ final class LoginController
         private readonly DoctrineAuthTokenRepository $authTokenRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly TokenGenerator $tokenGenerator,
-        private readonly Security $security,
     ) {
     }
 
@@ -46,15 +44,7 @@ final class LoginController
             return new JsonResponse(['message' => 'Identifiants incorrects.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $estMobile = $request->headers->get('X-Client-Type') === 'mobile';
-
-        if ($estMobile) {
-            return $this->creerReponseToken($user, $request->headers->get('X-Device-Info'));
-        }
-
-        $this->security->login($user, firewallName: 'main');
-
-        return new JsonResponse(['id' => $user->id->toRfc4122(), 'email' => $user->email]);
+        return $this->creerReponseToken($user, $request->headers->get('X-Device-Info'));
     }
 
     private function creerReponseToken(User $user, ?string $deviceInfo): JsonResponse
@@ -76,6 +66,8 @@ final class LoginController
         $this->authTokenRepository->save($authToken);
 
         return new JsonResponse([
+            'id' => $user->id->toRfc4122(),
+            'email' => $user->email,
             'token' => $access['token'],
             'refreshToken' => $refresh['refreshToken'],
             'expiresAt' => $access['expiresAt']->format(\DateTimeInterface::ATOM),

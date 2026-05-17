@@ -15,7 +15,7 @@ security:
 
         main:
             lazy: true
-            stateless: false
+            stateless: true
             provider: app_user_provider
             custom_authenticators:
                 - App\Security\TokenAuthenticator

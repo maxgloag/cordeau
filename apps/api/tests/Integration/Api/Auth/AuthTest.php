@@ -96,15 +96,15 @@ final class AuthTest extends WebTestCase
     }
 
     #[Test]
-    public function login_mobile_retourne_un_token(): void
+    public function login_retourne_un_token_et_les_infos_user(): void
     {
         $client = static::createClient();
-        UserFactory::createOne(['email' => 'mobile@test.fr', 'motDePasseHash' => password_hash('Password1', PASSWORD_BCRYPT, ['cost' => 4])]);
+        UserFactory::createOne(['email' => 'artisan@test.fr', 'motDePasseHash' => password_hash('Password1', PASSWORD_BCRYPT, ['cost' => 4])]);
         $client->request(
             'POST',
             '/auth/login',
-            server: ['CONTENT_TYPE' => 'application/json', 'HTTP_X_CLIENT_TYPE' => 'mobile'],
-            content: json_encode(['email' => 'mobile@test.fr', 'motDePasse' => 'Password1']) ?: '',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['email' => 'artisan@test.fr', 'motDePasse' => 'Password1']) ?: '',
         );
 
         self::assertResponseStatusCodeSame(200);
@@ -112,16 +112,27 @@ final class AuthTest extends WebTestCase
         self::assertArrayHasKey('token', $data);
         self::assertArrayHasKey('refreshToken', $data);
         self::assertArrayHasKey('expiresAt', $data);
+        self::assertArrayHasKey('id', $data);
+        self::assertSame('artisan@test.fr', $data['email']);
     }
 
     #[Test]
     public function me_retourne_le_user_authentifie(): void
     {
         $client = static::createClient();
-        $user = UserFactory::createOne(['email' => 'artisan@test.fr']);
-        $client->loginUser($user->_real());
+        UserFactory::createOne(['email' => 'artisan@test.fr', 'motDePasseHash' => password_hash('Password1', PASSWORD_BCRYPT, ['cost' => 4])]);
 
-        $client->request('GET', '/auth/me');
+        $client->request(
+            'POST',
+            '/auth/login',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['email' => 'artisan@test.fr', 'motDePasse' => 'Password1']) ?: '',
+        );
+        $loginData = self::decodeJson((string) $client->getResponse()->getContent());
+        $token = $loginData['token'];
+        \assert(\is_string($token));
+
+        $client->request('GET', '/auth/me', server: ['HTTP_AUTHORIZATION' => 'Bearer ' . $token]);
 
         self::assertResponseStatusCodeSame(200);
         $data = self::decodeJson((string) $client->getResponse()->getContent());
@@ -137,16 +148,16 @@ final class AuthTest extends WebTestCase
     }
 
     #[Test]
-    public function token_mobile_permet_acces_api_chantiers(): void
+    public function token_permet_acces_api_chantiers(): void
     {
         $client = static::createClient();
-        UserFactory::createOne(['email' => 'mobile@test.fr', 'motDePasseHash' => password_hash('Password1', PASSWORD_BCRYPT, ['cost' => 4])]);
+        UserFactory::createOne(['email' => 'artisan@test.fr', 'motDePasseHash' => password_hash('Password1', PASSWORD_BCRYPT, ['cost' => 4])]);
 
         $client->request(
             'POST',
             '/auth/login',
-            server: ['CONTENT_TYPE' => 'application/json', 'HTTP_X_CLIENT_TYPE' => 'mobile'],
-            content: json_encode(['email' => 'mobile@test.fr', 'motDePasse' => 'Password1']) ?: '',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['email' => 'artisan@test.fr', 'motDePasse' => 'Password1']) ?: '',
         );
 
         $loginData = self::decodeJson((string) $client->getResponse()->getContent());

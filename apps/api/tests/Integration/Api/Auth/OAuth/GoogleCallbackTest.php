@@ -43,7 +43,7 @@ final class GoogleCallbackTest extends WebTestCase
         $httpClient->request('GET', '/auth/oauth/google/callback?code=fake&state=fake');
 
         self::assertResponseRedirects();
-        self::assertStringEndsWith('/', $httpClient->getResponse()->headers->get('Location') ?? '');
+        self::assertStringContainsString('/?login_code=', $httpClient->getResponse()->headers->get('Location') ?? '');
 
         $userRepo = $container->get(DoctrineUserRepository::class);
         \assert($userRepo instanceof DoctrineUserRepository);

@@ -2,27 +2,49 @@
  * @vitest-environment node
  * Tests unitaires des fonctions API — pas de DOM, pas de composant React.
  */
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+const localStorageMock = (() => {
+  const store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { Object.keys(store).forEach(k => delete store[k]); },
+  };
+})();
+
+beforeEach(() => {
+  vi.stubGlobal("localStorage", localStorageMock);
+  localStorageMock.clear();
+});
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
 describe("login", () => {
-  it("retourne l'utilisateur connecté", async () => {
+  it("retourne l'utilisateur connecté et stocke le token", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => ({ id: "abc", email: "artisan@test.fr" }),
+        json: async () => ({
+          id: "abc",
+          email: "artisan@test.fr",
+          token: "selector.verifier",
+          refreshToken: "refreshtoken",
+          expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
+        }),
       }),
     );
 
-    const { login } = await import("../lib/api");
+    const { login, getToken } = await import("../lib/api");
     const result = await login("artisan@test.fr", "Password1");
 
     expect(result.email).toBe("artisan@test.fr");
+    expect(getToken()).toBe("selector.verifier");
   });
 
   it("lève une ApiError en cas de 401", async () => {

@@ -2,16 +2,20 @@ import type { components } from "@cordeau/shared";
 
 export const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:8000";
 
-export type Chantier = components["schemas"]["Chantier"] & {
-  id: string;
-  adresseRue: string;
-  adresseCodePostal: string;
-  adresseVille: string;
-  adressePays: string;
-  statut: string;
-  clientId?: string | null;
-  clientNom?: string | null;
-};
+const TOKEN_KEY = "cordeau_token";
+const REFRESH_TOKEN_KEY = "cordeau_refresh_token";
+
+export function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+export function setTokens(token: string, refreshToken: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+}
+export function clearTokens(): void {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
 
 export type UserMe = {
   id: string;
@@ -23,24 +27,84 @@ export type ApiError = {
   message: string;
 };
 
+type AuthResponse = {
+  id: string;
+  email: string;
+  token: string;
+  refreshToken: string;
+  expiresAt: string;
+};
+
+type RefreshResponse = {
+  token: string;
+  refreshToken: string;
+  expiresAt: string;
+};
+
+async function tryRefresh(): Promise<boolean> {
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+  if (!refreshToken) return false;
+
+  try {
+    const res = await fetch(`${API_URL}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) {
+      clearTokens();
+      return false;
+    }
+    const data = (await res.json()) as RefreshResponse;
+    setTokens(data.token, data.refreshToken);
+    return true;
+  } catch {
+    clearTokens();
+    return false;
+  }
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const defaultHeaders: Record<string, string> = { Accept: "application/json" };
   if (init?.body !== undefined) defaultHeaders["Content-Type"] = "application/json";
 
+  const token = getToken();
+  if (token) defaultHeaders["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
-    credentials: "include",
     headers: { ...defaultHeaders, ...(init?.headers ?? {}) },
   });
+
+  if (res.status === 401) {
+    const refreshed = await tryRefresh();
+    if (refreshed) {
+      const retryHeaders = { ...defaultHeaders, Authorization: `Bearer ${getToken() ?? ""}` };
+      const retry = await fetch(`${API_URL}${path}`, {
+        ...init,
+        headers: { ...retryHeaders, ...(init?.headers ?? {}) },
+      });
+      if (!retry.ok) {
+        const error: ApiError = { status: retry.status, message: retry.statusText };
+        try {
+          const body = (await retry.json()) as { detail?: string; message?: string };
+          error.message = body.detail ?? body.message ?? retry.statusText;
+        } catch { /* ignore */ }
+        throw error;
+      }
+      if (retry.status === 204) return undefined as T;
+      return retry.json() as Promise<T>;
+    }
+    const error: ApiError = { status: 401, message: "Non authentifié" };
+    throw error;
+  }
 
   if (!res.ok) {
     const error: ApiError = { status: res.status, message: res.statusText };
     try {
-      const body = (await res.json()) as { detail?: string };
-      if (body.detail) error.message = body.detail;
-    } catch {
-      // ignore json parse error
-    }
+      const body = (await res.json()) as { detail?: string; message?: string };
+      error.message = body.detail ?? body.message ?? res.statusText;
+    } catch { /* ignore */ }
     throw error;
   }
 
@@ -53,31 +117,53 @@ export async function fetchMe(): Promise<UserMe> {
   return apiFetch<UserMe>("/auth/me");
 }
 
-export async function login(
-  email: string,
-  motDePasse: string,
-): Promise<UserMe> {
-  return apiFetch<UserMe>("/auth/login", {
+export async function exchangeOAuthCode(code: string): Promise<UserMe> {
+  const data = await apiFetch<AuthResponse>("/auth/oauth/code/exchange", {
     method: "POST",
-    body: JSON.stringify({ email, motDePasse }),
+    body: JSON.stringify({ code }),
   });
+  setTokens(data.token, data.refreshToken);
+  return { id: data.id, email: data.email };
 }
 
-export async function register(
-  email: string,
-  motDePasse: string,
-): Promise<UserMe> {
-  return apiFetch<UserMe>("/auth/register", {
+export async function login(email: string, motDePasse: string): Promise<UserMe> {
+  const data = await apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, motDePasse }),
   });
+  setTokens(data.token, data.refreshToken);
+  return { id: data.id, email: data.email };
+}
+
+export async function register(email: string, motDePasse: string): Promise<UserMe> {
+  const data = await apiFetch<AuthResponse>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email, motDePasse }),
+  });
+  setTokens(data.token, data.refreshToken);
+  return { id: data.id, email: data.email };
 }
 
 export async function logout(): Promise<void> {
-  await apiFetch<void>("/auth/logout", { method: "POST" });
+  try {
+    await apiFetch<void>("/auth/logout", { method: "POST" });
+  } finally {
+    clearTokens();
+  }
 }
 
 // Chantiers
+export type Chantier = components["schemas"]["Chantier"] & {
+  id: string;
+  adresseRue: string;
+  adresseCodePostal: string;
+  adresseVille: string;
+  adressePays: string;
+  statut: string;
+  clientId?: string | null;
+  clientNom?: string | null;
+};
+
 export async function fetchChantiers(): Promise<Chantier[]> {
   return apiFetch<Chantier[]>("/api/chantiers");
 }
@@ -91,9 +177,7 @@ export type CreerChantierPayload = {
   clientId?: string | null;
 };
 
-export async function creerChantier(
-  payload: CreerChantierPayload,
-): Promise<Chantier> {
+export async function creerChantier(payload: CreerChantierPayload): Promise<Chantier> {
   return apiFetch<Chantier>("/api/chantiers", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -102,10 +186,7 @@ export async function creerChantier(
 
 export type ModifierChantierPayload = Partial<CreerChantierPayload>;
 
-export async function modifierChantier(
-  id: string,
-  payload: ModifierChantierPayload,
-): Promise<Chantier> {
+export async function modifierChantier(id: string, payload: ModifierChantierPayload): Promise<Chantier> {
   return apiFetch<Chantier>(`/api/chantiers/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/merge-patch+json" },

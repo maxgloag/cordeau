@@ -74,13 +74,7 @@ final class RegisterController
         $user->motDePasseHash = $this->passwordHasher->hashPassword($user, $motDePasse);
         $this->userRepository->save($user);
 
-        $estMobile = $request->headers->get('X-Client-Type') === 'mobile';
-
-        if ($estMobile) {
-            return $this->creerReponseToken($user, $request->headers->get('X-Device-Info'));
-        }
-
-        return new JsonResponse(['id' => $user->id->toRfc4122(), 'email' => $user->email], Response::HTTP_CREATED);
+        return $this->creerReponseToken($user, $request->headers->get('X-Device-Info'));
     }
 
     private function creerReponseToken(User $user, ?string $deviceInfo): JsonResponse
@@ -102,6 +96,8 @@ final class RegisterController
         $this->authTokenRepository->save($authToken);
 
         return new JsonResponse([
+            'id' => $user->id->toRfc4122(),
+            'email' => $user->email,
             'token' => $access['token'],
             'refreshToken' => $refresh['refreshToken'],
             'expiresAt' => $access['expiresAt']->format(\DateTimeInterface::ATOM),
