@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\Auth\OAuth;
 
-use App\Entity\User;
 use App\Infrastructure\Persistence\Doctrine\Auth\Repository\DoctrineOAuthLoginCodeRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,7 +37,6 @@ final class OAuthCodeExchangeController
         $this->loginCodeRepository->save($loginCode);
 
         $user = $loginCode->authToken->utilisateur;
-        \assert($user instanceof User);
 
         return new JsonResponse([
             'id' => $user->id->toRfc4122(),
