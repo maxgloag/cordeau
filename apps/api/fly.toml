@@ -8,6 +8,9 @@ primary_region = "cdg"  # Paris — latence < 30ms depuis France
 [build]
   dockerfile = "Dockerfile"
 
+[deploy]
+  release_command = "php bin/console doctrine:migrations:migrate --no-interaction"
+
 [env]
   APP_ENV = "prod"
   # Les secrets (APP_SECRET, DATABASE_URL) sont injectés via `fly secrets set`,
