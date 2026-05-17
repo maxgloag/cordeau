@@ -20,7 +20,7 @@ class OAuthLoginCode
     #[ORM\Column(length: 64, unique: true)]
     public readonly string $code;
 
-    #[ORM\ManyToOne(targetEntity: AuthToken::class)]
+    #[ORM\ManyToOne(targetEntity: AuthToken::class, fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     public readonly AuthToken $authToken;
 
