@@ -33,6 +33,9 @@ security:
 
 when@test:
     security:
+        firewalls:
+            main:
+                stateless: false
         password_hashers:
             App\Entity\User:
                 algorithm: auto
