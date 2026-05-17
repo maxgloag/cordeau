@@ -15,6 +15,7 @@
         "league/oauth2-google": "^5.0",
         "nelmio/cors-bundle": "^2.6",
         "predis/predis": "^3.4",
+        "symfony/asset": "7.4.*",
         "symfony/cache": "7.4.*",
         "symfony/console": "7.4.*",
         "symfony/dotenv": "7.4.*",
@@ -85,6 +86,7 @@
         "phpunit/phpunit": "^12",
         "symfony/browser-kit": "7.4.*",
         "symfony/css-selector": "7.4.*",
+        "symfony/twig-bundle": "7.4.*",
         "zenstruck/foundry": "^2"
     }
 }

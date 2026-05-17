@@ -1,6 +1,10 @@
 api_platform:
     title: Cordeau API
     version: 1.0.0
+    enable_swagger_ui: true
+    docs_formats:
+        jsonopenapi: ['application/vnd.openapi+json']
+        html: ['text/html']
     defaults:
         stateless: false
         cache_headers:
@@ -12,3 +16,9 @@ api_platform:
         json: ['application/merge-patch+json']
     exception_to_status:
         App\Domain\Chantier\Exception\ChantierIntrouvableException: 404
+
+when@prod:
+    api_platform:
+        enable_swagger_ui: false
+        docs_formats:
+            jsonopenapi: ['application/vnd.openapi+json']
