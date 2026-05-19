@@ -67,6 +67,9 @@ Thumbs.db
 apps/web/.vitest-attachments/
 apps/web/src/test/__screenshots__/
 
+# Serena — diagnostics ponctuels (notes de travail, supprimées une fois l'insight migré vers ADR/runbook)
+.serena/memories/diagnostic/
+
 # Misc
 *.tsbuildinfo
 
