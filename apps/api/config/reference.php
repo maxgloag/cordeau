@@ -1630,7 +1630,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     security?: SecurityConfig,
  *     nelmio_cors?: NelmioCorsConfig,
  *     knpu_oauth2_client?: KnpuOauth2ClientConfig,
- *     twig?: TwigConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1656,7 +1655,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         security?: SecurityConfig,
  *         nelmio_cors?: NelmioCorsConfig,
  *         knpu_oauth2_client?: KnpuOauth2ClientConfig,
- *         twig?: TwigConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1670,7 +1668,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         nelmio_cors?: NelmioCorsConfig,
  *         zenstruck_foundry?: ZenstruckFoundryConfig,
  *         knpu_oauth2_client?: KnpuOauth2ClientConfig,
- *         twig?: TwigConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,
