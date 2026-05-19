@@ -58,10 +58,65 @@ body:
       required: false
 
   - type: textarea
-    id: notes_tech
+    id: dev_notes
     attributes:
-      label: Notes techniques
-      description: Décisions structurantes ? ADR à rédiger ?
-      placeholder: "Voir ADR 0002 pour l'archi hexagonale…"
+      label: Dev Notes
+      description: Contexte technique self-contained pour implémenter sans relire Notion et 5 ADRs. Patterns archi, fichiers à toucher, standards de test.
+      placeholder: |
+        **Patterns archi à respecter** :
+        - Bounded context : <ex. chantier> — mode rigoureux (cf ADR 0002, ADR 0010)
+        - VO partagés : <ex. Adresse depuis Shared/ValueObject>
+
+        **Fichiers à créer / modifier** :
+        - apps/api/src/Domain/Chantier/...
+        - apps/web/src/features/chantiers/...
+
+        **Tests prévus** :
+        - Domain : unitaires sans DB
+        - Use cases : intégration avec DB (Foundry + WebTestCase)
+        - API : intégration HTTP
+    validations:
+      required: false
+
+  - type: textarea
+    id: securite_rgpd
+    attributes:
+      label: Impact sécurité / RGPD
+      description: Cocher ce qui s'applique. Si au moins une case est cochée → /security-review obligatoire avant merge. Si "données personnelles" → ADR 0015 (RGPD) à consulter quand il existera.
+      placeholder: |
+        - [ ] Manipule des données personnelles (nom, email, téléphone, adresse, photo identifiable, géoloc, IP)
+        - [ ] Touche à l'authentification, aux sessions, ou aux tokens
+        - [ ] Touche à des permissions / RBAC / ownership
+        - [ ] Manipule des secrets (clés API, credentials, JWT keys)
+        - [ ] Upload / stockage / téléchargement de fichiers
+        - [ ] Manipule des données financières (devis, facture, paiement, TVA)
+        - [ ] Ajoute une dépendance externe (lib, MCP, API tierce, sous-traitant RGPD)
+        - [ ] Aucune des cases ci-dessus
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Références
+      description: Citations précises avec source path. Évite de remettre tout le contexte en mémoire à chaque session.
+      placeholder: |
+        - [Source: docs/adr/0002-architecture-hexagonale.md#Decision]
+        - [Source: docs/adr/0011-clientref-value-object-denormalise.md]
+        - [Source: apps/api/src/Domain/Chantier/Entity/Chantier.php:24-58]
+        - [Source: docs/THESAURUS.md#Chantier]
+    validations:
+      required: false
+
+  - type: textarea
+    id: learnings
+    attributes:
+      label: Learnings (à remplir en fin de story)
+      description: Ce que cette story a appris pour la suivante. Patterns émergents, pièges évités, points à refactor. Lu en début de la story suivante du même bounded context.
+      placeholder: |
+        - Pattern qui a marché : ...
+        - Piège évité : ...
+        - À refactor avant la prochaine story : ...
+        - Nouveau ADR à écrire ? : ...
     validations:
       required: false

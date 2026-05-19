@@ -65,12 +65,30 @@ Toute décision structurante (choix de lib, pattern d'archi, migration) → un A
 
 **Avant** d'introduire une décision non triviale, écrire l'ADR. Pas après.
 
+Section **Implications sécurité** optionnelle, **obligatoire** si la décision touche : auth/sessions/tokens, permissions/RBAC, secrets, données personnelles, stockage de fichiers, données financières, ajout d'une dépendance externe. Couvrir au minimum : surface d'attaque ajoutée, secrets manipulés, données personnelles touchées (et leur base légale RGPD), points de fuite potentiels.
+
 ### Tests
 
 - Domain riche → tests unitaires sans DB
 - Use cases → tests d'intégration avec DB
 - API → tests d'intégration avec une vraie réponse HTTP
 - Pas de feature shippée sans test sur le domaine au minimum
+
+### Bug-fix : protocole double-fix
+
+Tout bug qui sort du dev local (caught en CI, en démo, ou plus tard en prod) = **deux bugs en un** : le défaut code, et le défaut du système de test qui l'a laissé passer. Un fix sans audit du système de test est incomplet.
+
+À chaque PR `fix:` qui répare un bug hors dev local, la description doit contenir une section **Audit système de test** répondant à :
+
+1. **Quel layer aurait dû attraper ce bug ?** (unit / intégration / e2e / type-check / lint / contract / property)
+2. **Pourquoi ce layer ne l'a pas attrapé ?** (test absent, assertion incomplète, mock divergent, scénario hors paramétrage, exclusion de couverture mal calibrée)
+3. **Quelle modification concrète de ce layer ferme la fente ?** (test ajouté, assertion renforcée, mock retiré, contrat ajouté, couverture étendue). Cette modif fait partie du même PR.
+
+Si la réponse à (3) est "rien, on ne pouvait pas l'attraper" — le diagnostic est presque toujours faux. Creuser plus.
+
+### Naming métier
+
+[docs/THESAURUS.md](docs/THESAURUS.md) liste les termes canoniques du domaine (`Chantier`, `Client`, `ClientRef`, `Adresse`, etc.) avec définition / N'EST PAS / synonymes à éviter. Consulter **avant** de nommer une classe, un champ, une route, une table. Ajouter une entrée avant d'introduire un terme métier nouveau dans le code. À auditer en fin de phase.
 
 ### Architecture hexagonale pragmatique
 
@@ -121,11 +139,22 @@ Si un signal de vélocité ou d'archi se dégrade (cf critère de sortie de chaq
 Skills à invoquer automatiquement selon le contexte (sans qu'on ait à le demander) :
 
 - **Avant chaque `gh pr create`** → lancer `/simplify` sur les changements de la branche, puis intégrer les corrections suggérées avant d'ouvrir la PR
-- **Avant de merger une PR liée à l'auth, à la facturation ou au stockage de fichiers** (`ctx:auth`, `ctx:facture`, `ctx:photo`, ou modifs touchant aux secrets/permissions) → lancer `/security-review` et résoudre les findings critiques avant merge
+- **Avant de merger une PR qui coche au moins une case "Impact sécurité / RGPD"** du template story (auth/sessions, permissions/RBAC, secrets, données personnelles, stockage de fichiers, données financières, dépendance externe) → lancer `/security-review` et résoudre les findings critiques avant merge. Inclut explicitement les PR qui touchent des données personnelles (clients, adresses, téléphones, photos identifiables) au titre RGPD, pas seulement auth/facture/photo
 - **Avant chaque merge** → lancer `/review` pour un second avis sur la PR
 - **Pour toute question DB / Neon / queries / connexion / migration prod** → utiliser le skill `neon-postgres` au lieu de répondre depuis la mémoire
 - **Phase 1.4 et 1.5 (UI web et mobile)** → utiliser le skill `frontend-design` quand on génère des écrans nouveaux pour éviter le rendu "AI générique"
 - **Phase 6 (Devis) et au-delà, queries SQL complexes** → consulter `supabase-postgres-best-practices` (best practices Postgres génériques)
+
+### Skills superpowers (harness Claude Code)
+
+Les skills `superpowers:*` sont chargés au démarrage de session via le harness, donc disponibles sans installation côté projet. Ceux explicitement attendus dans le workflow Cordeau :
+
+- **Avant toute nouvelle feature ou composant** (spec floue, design ouvert, choix d'archi à explorer) → `superpowers:brainstorming` avant de planifier ou coder. Sauf si la spec Notion est déjà validée et fermée
+- **Avant d'implémenter une sous-étape de la roadmap** (étape 3 du [protocole de démarrage de phase](#protocole-de-démarrage-de-phase) couvre déjà le plan) → `superpowers:writing-plans` si le plan dépasse 3 étapes non triviales
+- **Avant d'écrire l'implémentation d'une story** → `superpowers:test-driven-development` (red → green → refactor, cohérent avec la règle "Pas de feature shippée sans test sur le domaine")
+- **Sur tout bug, test qui échoue, ou comportement inattendu** → `superpowers:systematic-debugging` avant de proposer un fix. Si le bug sort du dev local, enchaîner avec l'audit système de test (cf [Bug-fix : protocole double-fix](#bug-fix--protocole-double-fix))
+- **Avant de dire "c'est fait" / d'ouvrir une PR** → `superpowers:verification-before-completion` (lancer les commandes de vérification — tsc, tests, lint — et confirmer le output, pas se contenter d'asserter)
+- **À réception d'une code review** (PR commentée par /review, /ultrareview, ou humain) → `superpowers:receiving-code-review` avant d'implémenter les suggestions (vérifier la rigueur technique avant l'agrément performatif)
 
 Si une de ces règles s'applique mais que tu juges qu'elle ne sert à rien dans le cas précis, l'expliquer plutôt que de l'appliquer aveuglément.
 
