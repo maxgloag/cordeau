@@ -167,3 +167,6 @@ Si une de ces règles s'applique mais que tu juges qu'elle ne sert à rien dans 
 - Quand l'utilisateur référence une page Notion, utiliser le serveur MCP Notion (workspace Cordeau uniquement)
 - Conventions FR : tout est en français (UI, doc, identifiants métier comme `Chantier`, `Devis`, `Client`)
 - **Pas de hacks** : si quelque chose ne fonctionne pas, consulter Context7 MCP avant de coder un workaround. Cf [feedback memory](~/.claude/projects/-Users-MaximeG-Developer-cordeau/memory/feedback_no_hacks.md).
+- **Ambiguïté en cours d'implémentation** : présenter les interprétations possibles plutôt que d'en choisir une silencieusement. `AskUserQuestion` couvre les décisions structurantes (étape 4 du protocole de phase) ; cette règle couvre les micro-choix d'implémentation
+- **Surgical changes** : chaque ligne modifiée doit tracer à la demande ou au scope de la story en cours. Dead code ou style adjacent hors scope : mentionner, ne pas toucher. N'invalide pas la règle de refactor en cours de phase (étape 8) : refactor à l'intérieur du bounded context travaillé, pas drive-by sur du code adjacent
+- **Pas de PR drive-by** : si une amélioration adjacente vaut le coup, ouvrir une issue séparée plutôt que de l'embarquer dans la PR en cours
