@@ -5,7 +5,8 @@
 ## Règles
 
 - **Un seul terme par concept.** Si tu hésites entre deux mots, regarde ici. Si le concept n'y est pas, ajoute-le **avant** de coder.
-- **Tout en français.** Identifiants métier (classes, champs Doctrine, routes API non-REST) en français. L'anglais est réservé aux primitives techniques (`Repository`, `Provider`, `Processor`, `Payload`).
+- **Partage FR / EN par couche** ([ADR 0014](adr/0014-naming-conventions-fr-en.md)). Vocabulaire métier en français (`Chantier`, `Devis`, `lierClient`, `StatutChantier`, routes `/api/chantiers`, tables `chantier`). Primitives de framework en anglais (`Repository`, `Provider`, `Processor`, `Payload`, `Factory`, `execute()`). Heuristique : si le terme est dans ce THESAURUS, il est en FR dans le code.
+- **Pas d'accents dans les identifiers** ([ADR 0014](adr/0014-naming-conventions-fr-en.md)). Le code écrit `Metre`, `cloturer`, `etat`, `recu` même si le terme métier ici est listé avec ses accents. La translittération est mécanique : `é/è/ê/ë → e`, `à/â/ä → a`, `î/ï → i`, `ô/ö → o`, `ù/û/ü → u`, `ç → c`, `œ → oe`. Les accents restent obligatoires dans l'UI, les libellés, les commentaires, les données stockées.
 - **Cohérence cross-plateforme.** Le même terme doit apparaître identique côté API (Symfony), web (React) et mobile (Expo). Pas de `Job` côté mobile pour ce qui s'appelle `Chantier` côté API.
 - **Promouvoir un VO vers `Shared/ValueObject/`** dès qu'il est utilisé par ≥ 2 bounded contexts (cf [ADR 0010](adr/0010-crud-leger-pattern-reference.md)).
 
