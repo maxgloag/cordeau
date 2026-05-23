@@ -49,3 +49,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0011](0011-clientref-value-object-denormalise.md) | ClientRef : value object dénormalisé sur Chantier | Accepted |
 | [0012](0012-offline-first-query-pattern.md) | Pattern offline-first : queryFn hybride SQLite/API + useOfflineMutation | Accepted |
 | [0013](0013-oauth-google-auto-link.md) | OAuth Google : table `oauth_account` séparée + auto-link par email vérifié | Accepted |
+| [0014](0014-naming-conventions-fr-en.md) | Conventions de nommage FR / EN dans le code | Accepted |
