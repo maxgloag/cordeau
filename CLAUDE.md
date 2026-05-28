@@ -6,7 +6,7 @@
 
 Cordeau est un SaaS mobile-first de gestion d'activité pour artisans du bâtiment indépendants (auto-entrepreneurs, TPE 1-5 personnes). Trois plateformes : **API** Symfony, **web** back-office React, **mobile** Expo. Différenciateurs V1 : modèle Chantier/Lots/Tâches/Mesures pensé pour l'artisan, capture terrain sans friction, offline-first, double interface mobile + web. Mesure AR repoussée V2 (cf [ADR 0016](docs/adr/0016-positionnement-v1-outil-de-suivi.md)).
 
-La pensée stratégique et business vit sur Notion (vision, persona, roadmap business, finances, specs collaboratives). Le repo est la **source de vérité technique** : code, conventions (`CLAUDE.md`), ADRs, roadmap technique, runbooks.
+La pensée stratégique et business vit sur Notion (vision, persona, roadmap business, finances, specs collaboratives). Le repo est la **source de vérité technique** : code, conventions (`CLAUDE.md`), ADRs, roadmap technique, runbooks. Vue d'ensemble de l'architecture (diagrammes C4 vivants) : [docs/architecture.md](docs/architecture.md) ([ADR 0018](docs/adr/0018-documentation-architecture-as-code.md)).
 
 ## Workflow Notion ↔ repo
 
