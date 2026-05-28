@@ -4,7 +4,7 @@
 
 ## Le projet
 
-Cordeau est un SaaS mobile-first de gestion d'activité pour artisans du bâtiment indépendants (auto-entrepreneurs, TPE 1-5 personnes). Trois plateformes : **API** Symfony, **web** back-office React, **mobile** Expo. Différenciateurs : mesure AR, offline-first, double interface mobile + web.
+Cordeau est un SaaS mobile-first de gestion d'activité pour artisans du bâtiment indépendants (auto-entrepreneurs, TPE 1-5 personnes). Trois plateformes : **API** Symfony, **web** back-office React, **mobile** Expo. Différenciateurs V1 : modèle Chantier/Lots/Tâches/Mesures pensé pour l'artisan, capture terrain sans friction, offline-first, double interface mobile + web. Mesure AR repoussée V2 (cf [ADR 0016](docs/adr/0016-positionnement-v1-outil-de-suivi.md)).
 
 La pensée stratégique et business vit sur Notion (vision, persona, roadmap business, finances, specs collaboratives). Le repo est la **source de vérité technique** : code, conventions (`CLAUDE.md`), ADRs, roadmap technique, runbooks.
 
@@ -47,7 +47,7 @@ pnpm format                 # Prettier en place
 
 ### Commits — Conventional Commits
 
-Format : `type(scope): subject`. Types autorisés : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `ci`, `build`. Scope = nom d'app (`api`, `web`, `mobile`, `infra`, `ci`) ou bounded context (`chantier`, `client`, `auth`, `photo`, `devis`, `metre-ar`).
+Format : `type(scope): subject`. Types autorisés : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `ci`, `build`. Scope = nom d'app (`api`, `web`, `mobile`, `infra`, `ci`) ou bounded context (`chantier`, `client`, `auth`, `photo`, `lot`, `mesure`, `materiau`, `devis`, `facture`).
 
 Exemples : `feat(chantier): add archivage use case`, `fix(api): handle null adresse on creation`, `chore(ci): cache composer downloads`.
 
@@ -92,17 +92,18 @@ Si la réponse à (3) est "rien, on ne pouvait pas l'attraper" — le diagnostic
 
 ### Architecture hexagonale pragmatique
 
-Voir [docs/adr/0002-architecture-hexagonale.md](docs/adr/0002-architecture-hexagonale.md). En résumé : **rigoureuse** sur les bounded contexts complexes (mesure AR, métré, devis, TVA), **légère** sur les CRUD simples (clients, adresses, tags). Les dépendances pointent toujours vers l'intérieur — le domaine ne connaît ni Doctrine ni Symfony.
+Voir [docs/adr/0002-architecture-hexagonale.md](docs/adr/0002-architecture-hexagonale.md). En résumé : **rigoureuse** sur les bounded contexts complexes (Lot/Mesure/Devis/TVA, AR V2), **légère** sur les CRUD simples (clients, adresses, tags). Les dépendances pointent toujours vers l'intérieur — le domaine ne connaît ni Doctrine ni Symfony.
 
 ## Discipline produit
 
 - **Verticales end-to-end**, pas horizontales : un bounded context complet sur les 3 plateformes avant de répliquer
 - **Phase 1 = moment de validation** : si quelque chose semble bancal, refactor MAINTENANT avant Phase 2
+- **Valider en saisie manuelle avant d'introduire la magie** : pas de feature « intelligente » (LLM, structuration vocale, géofencing, détection risques, automation) tant que le concept manuel n'a pas validé son utilité auprès des testeurs (cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)). Le wedge V1 est la combinaison modèle Chantier/Lots/Tâches/Mesures + UX mobile sans friction + offline-first, pas la magie en aval
 - **Démo perso hebdo** (vendredi) : lancer l'app comme un user
 
 ## Roadmap
 
-Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 0 (fondations).
+Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 5 (Photos + R2) à démarrer, pivot vers Phase 6 Lots/Tâches ensuite. V1 ciblée septembre 2026 (bêta payante).
 
 ## Surveillance CI automatique
 
@@ -175,3 +176,4 @@ Si une de ces règles s'applique mais que tu juges qu'elle ne sert à rien dans 
 - **Surgical changes** : chaque ligne modifiée doit tracer à la demande ou au scope de la story en cours. Dead code ou style adjacent hors scope : mentionner, ne pas toucher. N'invalide pas la règle de refactor en cours de phase (étape 8) : refactor à l'intérieur du bounded context travaillé, pas drive-by sur du code adjacent
 - **Pas de PR drive-by** : si une amélioration adjacente vaut le coup, ouvrir une issue séparée plutôt que de l'embarquer dans la PR en cours
 - **Dispatch parallèle vs séquentiel** : explorations indépendantes sans état partagé → `superpowers:dispatching-parallel-agents`. Étapes dépendantes (chaque action utilise l'output de la précédente) → séquentiel, pas de dispatch
+- **Trajectoire V1 manuelle → V1.2+ magie** : avant toute proposition de feature « IA / vocale / structuration automatique / chrono auto / détection risques », vérifier la trajectoire dans [ROADMAP.md](ROADMAP.md). V1 est manuelle, V1.1 fluidifie l'UX, V1.2 ajoute la magie LLM **conditionnée au critère de validation bêta** ([ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)). Ne pas court-circuiter — c'est un garde-fou explicite

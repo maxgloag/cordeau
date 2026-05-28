@@ -6,18 +6,18 @@
 
 ## Statut actuel
 
-**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** ✅ terminée (mai 2026, issues #22 → #26, PRs #27 → #31). **Phase 4 — OAuth Google** ✅ terminée (16 mai 2026, issues #35 → #37, PRs #38 → #42, ADR 0013). Apple Sign-In différé. **Phase 5 — Photos + R2** à démarrer.
+**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** ✅ terminée (mai 2026, issues #22 → #26, PRs #27 → #31). **Phase 4 — OAuth Google** ✅ terminée (16 mai 2026, issues #35 → #37, PRs #38 → #42, ADR 0013). Apple Sign-In différé. **Phase 5 — Photos + R2** à démarrer. **Repositionnement V1 acté mai 2026** ([ADR 0015](docs/adr/0015-modele-chantier-lots-taches-mesures.md), [ADR 0016](docs/adr/0016-positionnement-v1-outil-de-suivi.md), [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)) : wedge V1 = capture terrain manuelle ; AR et PDP différés V2 ; IA différée V1.2+ sur critère de validation bêta.
 
 ## Rétroplanning indicatif
 
 | Période | Phases | Cible |
 |---|---|---|
-| Mai 2026 | Phase 0 + début Phase 1 | Fondations + premiers chantiers |
-| Juin 2026 | Phase 1 + Phase 2 | Verticales Chantiers + Clients |
-| Juillet 2026 | Phase 3 + Phase 4 | Offline-first + OAuth |
-| Août 2026 | Phase 5 + Phase 6 | Photos R2 + Devis |
-| Septembre 2026 | Phase 7 | AR de mesure V1 |
-| Octobre 2026 | Lancement bêta payante | 5 artisans bêta-testeurs |
+| Mai 2026 | Phases 0 → 4 ✅ | Fondations + Chantiers + Clients + Offline + OAuth |
+| Mai-juin 2026 | Phase 5 | Photos + R2 |
+| Juin-juillet 2026 | Phases 6 + 7 | Verticale Lots/Tâches + Capture terrain & Métré manuel |
+| Juillet-août 2026 | Phase 8 | Devis + Facture brouillon (édition manuelle) |
+| Septembre 2026 | Phase 9 | Bêta payante V1 — validation critère manuel |
+| Q4 2026 → 2027 | Phases 10+ | V1.1 (UX fluidifiée) / V1.2 (magie LLM si critère levé) / V1.3 / V2 |
 
 ---
 
@@ -114,37 +114,81 @@ Bucket Cloudflare R2, endpoints Symfony pour pre-signed URLs, upload direct depu
 
 ---
 
-## Phase 6 — Devis (~2-3 semaines)
+## Phase 6 — Verticale Lots / Tâches (~2-3 semaines)
 
-**Premier vrai morceau métier**. Étudier Tolteck/Obat avant de coder, parler à de vrais artisans pour figer le design.
+**Premier vrai morceau métier post-Phase 5**. Le Lot devient l'unité centrale du chantier (cf [ADR 0015](docs/adr/0015-modele-chantier-lots-taches-mesures.md)). Mode création express : un chantier sans lot reste valide.
 
-Entité `Devis` avec lignes/TVA/totaux, use cases (créer/éditer/dupliquer/envoyer), génération PDF (worker Messenger), numérotation légale (séquence ininterrompue), états (brouillon/envoyé/accepté/refusé/expiré), UI web pour édition + UI mobile en lecture/partage.
+### Sous-étapes
 
-**Critère de sortie** : un artisan génère un devis conforme légalement, l'envoie par email, le client peut l'ouvrir.
+- **6.1 Domaine + persistance** (4-5 j) : entités `Lot`, `Tache`, VO `ModeFacturation` (enum `TEMPS` / `SURFACE` / `FORFAIT`), `Estimation`, `Reel`, `Imprevu` (VO horodaté). Ports `LotRepository`, `TacheRepository`. Adapters Doctrine, migration additive (pas de modif `chantier`), tests domaine purs.
+- **6.2 Use cases + API** (3-4 j) : `Creer/Lister/Modifier/SupprimerLot`, `Creer/Cocher/SupprimerTache`. Routes `/chantiers/{id}/lots`, `/lots/{id}/taches`. OpenAPI → types TS.
+- **6.3 Mobile** (3-4 j) : écran chantier enrichi avec section Lots, bouton « + lot » + UI mode express (chantier sans lot fonctionne par défaut). Édition tâches inline. Outbox pour les nouvelles entités.
+- **6.4 Web** (2-3 j) : vue détaillée chantier avec arborescence lots/tâches, édition rapide.
 
----
-
-## Phase 7 — AR de mesure V1 (~3-4 semaines)
-
-**Le "wow" feature**. Volontairement en phase 7 — tant que le reste n'est pas solide, l'AR ne sauve rien.
-
-Expo Module custom pour ARKit (iOS prio 1, LiDAR), flow tap-to-measure, calcul de polygone, sauvegarde du métré lié au chantier, export du résultat. ARCore Android en V2.
-
-**Critère de sortie** : surface au sol mesurée à ±3 cm sur iPhone Pro, valeur enregistrée dans le chantier.
+**Critère de sortie** : un artisan crée un chantier mode express depuis mobile, ajoute un lot mode `SURFACE` avec estimation, ajoute 3 tâches, coche les tâches, le tout synchronisé sur web.
 
 ---
 
-## Phase 8 — Facturation + conformité (~2-3 semaines, optionnel)
+## Phase 7 — Capture terrain + Métré manuel (~2-3 semaines)
 
-Si on décide de rester un "logiciel de facturation" légal : entité `Facture`, transformation devis → facture, conformité loi anti-fraude TVA, intégration Chorus Pro / PDP, audit avec un expert (~2-4k€).
+**La phase qui valide le wedge V1**. Si la capture manuelle est friction-prone ici, le concept échouera la bêta — c'est le test ultime de [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md).
 
-**Alternative** : se positionner "outil de suivi" et intégrer plus tard un vrai logiciel de facturation via API.
+### Sous-étapes
+
+- **7.1 Domaine** (3 j) : entités `Materiau` (avec `EtatMateriau` enum `PREVU` / `UTILISE`), `Mesure` (avec `TypeMesure` enum + `Source` enum), `Pointage`. VO `Surface` / `Longueur` / `Volume` promus dans `Shared/ValueObject/`. Méthode pure `Mesure::calculer()` depuis dimensions sources. Tests domaine.
+- **7.2 Use cases + API** (3 j) : `Creer/Marquer/SupprimerMateriau`, `Creer/CorrigerMesure`, `DemarrerChrono`/`ArreterChrono` (gestion Pointage). Photos contextualisées (champ optionnel `lotId`/`tacheId` sur `Photo`).
+- **7.3 Mobile** (5-6 j) — **focus UX critique** : écran Lot avec sections Tâches / Matériaux / Mesures / Chrono ; formulaires en 1-2 taps ; calcul auto Mesure depuis dimensions ; bouton start/stop chrono persistant ; photo en un geste rattachée au lot ou à une mesure ; rappels locaux fin de journée si chrono ouvert > 12h ; rappel de pointage configurable.
+- **7.4 Web** (2 j) : vue métré par lot (récap des mesures avec total), liste matériaux avec bascule prévu/utilisé en un clic, vue chrono cumulé.
+
+**Critère de sortie** : un artisan, sur un chantier réel, capture en une journée 5+ entrées matériaux, 3+ mesures, 4+ pointages chrono et 10+ photos, sans aide. Vélocité ressentie : « plus rapide qu'un carnet ».
 
 ---
 
-## Phase 9 — Go-to-market (en parallèle dès Phase 5)
+## Phase 8 — Devis + Facture brouillon (~3-4 semaines)
 
-Landing page Next.js séparée, formulaire d'attente, 5 artisans bêta recrutés réseau/terrain, onboarding manuel un par un en visio, itération rapide sur feedbacks, pricing à poser, mentions légales / CGU / CGV / DPA chez avocat (~1.5-2.5k€).
+**Les sorties qui consomment les données captées en Phase 7**. Pas de conformité PDP en V1 ([ADR 0016](docs/adr/0016-positionnement-v1-outil-de-suivi.md)). Mobile-first sur la création basique (« devis sur place »), web pour la finalisation pointue (logo, mentions complexes).
+
+### Sous-étapes
+
+- **8.1 Profil pro / Onboarding** (3-4 j) : entité `ProfilPro` (raison sociale, SIRET, adresse, mentions assurance/RGE, taux horaire par défaut, logo upload), écrans onboarding mobile/web post-inscription, validation côté serveur (export PDF bloqué si profil incomplet).
+- **8.2 Domaine + persistance Devis** (3-4 j) : entité `Devis` avec `LigneDevis`, `TauxTVA`, `MontantHT`/`MontantTTC`, `EtatDevis` (`brouillon | envoye | accepte | refuse | expire | annule`), entité `Avenant`. Numérotation séquentielle attribuée à la finalisation (`DEV-{yyyy}-{seq}`). Génération brouillon depuis Lots du chantier (lignes auto pour modes `SURFACE`/`FORFAIT`, lignes vides pré-remplies pour `TEMPS`).
+- **8.3 Domaine + persistance Facture** (2-3 j) : entité `Facture`, `LigneFacture`, `EtatFacture` (`brouillon | emise | annulee`), génération brouillon depuis Devis accepté + `Materiau.UTILISE` + `Pointage`. Séquence `FAC-{yyyy}-{seq}`.
+- **8.4 Génération PDF** (2-3 j) : worker Symfony Messenger, template avec mentions légales depuis ProfilPro, watermark « Document de travail » visible (V1, retiré V2). Upload vers R2 avec URLs pré-signées TTL court.
+- **8.5 Mobile** (4-5 j) : UI complète création/édition Devis et Facture (édition lignes, taux TVA, totaux auto, ajout avenant, partage PDF). Pas une UI de lecture — vraie édition.
+- **8.6 Web** (3-4 j) : édition pointue (logo upload, mentions personnalisées, conditions paiement), envoi par email avec lien magique.
+
+**Critère de sortie** : un artisan, depuis mobile chez un client, génère un devis depuis les lots du chantier, l'édite, finalise en PDF avec numéro séquentiel et mentions légales, et l'envoie par email — le tout sans toucher au web.
+
+---
+
+## Phase 9 — Bêta payante V1 (en parallèle dès Phase 6)
+
+**Validation du critère** acté en [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md). Cette phase démarre en parallèle de Phase 6 (recrutement testeurs, landing, juridique) et culmine en septembre 2026 par l'onboarding effectif.
+
+### Sous-étapes
+
+- **9.1 Landing + waitlist** (2-3 j) : page Next.js séparée, formulaire d'attente, positionnement « carnet de chantier » (pas « secrétaire vocal », pas d'IA mentionnée — cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)).
+- **9.2 Juridique** (~1-2 sem) : CGU / CGV / DPA chez avocat (~1.5-2.5 k€), clauses spécifiques non-conformité PDP, mention assurance pro.
+- **9.3 Pricing acté** : freemium (tier gratuit limité 1-2 chantiers actifs, photos limitées, pas de logo personnalisé) + abonnement 20-30 €/mois HT (acté avant ouverture bêta payante — vision Notion avril).
+- **9.4 Recrutement** (~2-4 sem en // des phases précédentes) : 5 artisans bêta dont **au moins 2 hors réseau bigouden direct** (mitigation faux positif politesse, cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)). Réseau bigouden + Toulouse + appel ouvert via réseau pro.
+- **9.5 Onboarding manuel** (1 par 1 en visio) puis 3-4 semaines d'usage réel.
+- **9.6 Évaluation critère** : interviews verbatim + observation terrain. Conditions cumulatives :
+  - **3/5** déclarent gagner du temps **en saisie manuelle**
+  - **2/5** acceptent abonnement payant symbolique (10-15 €/mois minimum)
+  - Pas de feedback récurrent « la magie LLM aurait sauvé ce truc »
+
+**Critère de sortie** : si critère levé → V1.2 priorisée (magie LLM). Sinon → rétro avant V1.1, le socle est revu.
+
+---
+
+## Phases 10+ — Trajectoire post-V1 (esquissée)
+
+À détailler en fin de Phase 9 selon le retour bêta.
+
+- **V1.1 — UX fluidifiée** (~2-3 sem) : templates de tâches récurrentes, raccourcis (réutiliser dernier matériau), Whisper local pour transcription brute offline (sans LLM structurant, cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)), rappels locaux enrichis. Pas de magie LLM.
+- **V1.2 — Magie LLM** (~4-6 sem, conditionnée au critère 9.6) : nouvel ADR sur stack LLM (Whisper API vs local, Claude vs OpenAI, schémas structurés). Structuration vocale, récap auto journée, descriptifs générés. Chrono auto géofencé. Premier coût variable LLM 5-10 €/mois/utilisateur (intégré au pricing).
+- **V1.3 — Intelligence personnelle** (~3-4 sem) : planning kanban, vue calendrier, stats personnelles, détection chantiers à risque (depuis historique), stock van + liste de courses.
+- **V2** : AR comme `Source: AR` sur entité `Mesure` existante (pas de refacto), client dans l'expérience (signature, portail), partenariat / intégration PDP (Pennylane, Sellsy, ou Chorus Pro direct), catalogue produits visualisable AR (partenariats fabricants).
 
 ---
 

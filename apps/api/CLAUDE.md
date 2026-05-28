@@ -50,10 +50,10 @@ src/
 ## Rigueur vs légèreté
 
 **Full hexagonal** (domain riche, value objects, ports, tests unitaires sans DB) :
-- Mesure AR · calcul de métré · génération de devis · règles de facturation/TVA
+- `Lot` (modes de facturation, estimation/réel) · `Mesure` (calcul assisté manuel V1, AR V2) · génération `Devis` / `Facture` brouillon · règles TVA (Phase 8) · transitions de statut (cf [ADR 0015](../../docs/adr/0015-modele-chantier-lots-taches-mesures.md))
 
-**Légèreté (controller → service → Doctrine directement)** :
-- CRUD simples : clients, adresses, tags, photos (sans logique métier)
+**Légèreté (controller → service → Doctrine directement, cf [ADR 0010](../../docs/adr/0010-crud-leger-pattern-reference.md))** :
+- CRUD simples : clients, adresses, tags, photos, `Tache`, `Materiau`, `Pointage` (sans logique métier dense)
 
 ## Conventions PHP
 
@@ -62,7 +62,7 @@ src/
 - `final` par défaut sur les classes concrètes
 - PHPStan niveau 9 doit passer sans `@phpstan-ignore`
 - Pas de `public` properties — passer par le constructeur ou des méthodes nommées
-- Identifiants métier en français, primitives de framework en anglais — partage par couche fixé par l'[ADR 0014](../../docs/adr/0014-naming-conventions-fr-en.md). Exemples : `Chantier`, `Client`, `Devis`, `Facture`, `Metrage`, `lierClient()`, `StatutChantier::EN_PREPARATION` ; mais `ChantierRepository`, `CreerChantierProcessor`, `execute()`
+- Identifiants métier en français, primitives de framework en anglais — partage par couche fixé par l'[ADR 0014](../../docs/adr/0014-naming-conventions-fr-en.md). Exemples : `Chantier`, `Client`, `Lot`, `Tache`, `Mesure`, `Materiau`, `Pointage`, `Devis`, `Facture`, `Avenant`, `lierClient()`, `StatutChantier::EN_PREPARATION`, `ModeFacturation::SURFACE`, `EtatMateriau::UTILISE` ; mais `ChantierRepository`, `CreerChantierProcessor`, `execute()`
 - Pas d'accents dans les identifiers (classes, méthodes, champs, énums, fichiers, routes, tables, colonnes). `Metre`, pas `Mètre`. `cloturer`, pas `clôturer`. Détail des règles dans l'[ADR 0014](../../docs/adr/0014-naming-conventions-fr-en.md)
 
 ## Tests

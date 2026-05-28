@@ -50,3 +50,6 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0012](0012-offline-first-query-pattern.md) | Pattern offline-first : queryFn hybride SQLite/API + useOfflineMutation | Accepted |
 | [0013](0013-oauth-google-auto-link.md) | OAuth Google : table `oauth_account` séparée + auto-link par email vérifié | Accepted |
 | [0014](0014-naming-conventions-fr-en.md) | Conventions de nommage FR / EN dans le code | Accepted |
+| [0015](0015-modele-chantier-lots-taches-mesures.md) | Modèle Chantier → Lots → Tâches → Mesures / Matériaux | Accepted |
+| [0016](0016-positionnement-v1-outil-de-suivi.md) | Positionnement V1 « outil de suivi », AR et PDP différés V2 | Accepted |
+| [0017](0017-differer-ia-validation-manuelle.md) | Différer l'IA : validation manuelle V1, magie V1.2+ | Accepted |
