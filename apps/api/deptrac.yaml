@@ -1,0 +1,67 @@
+# Deptrac — enforcement de l'architecture hexagonale (cf ADR 0002 + ADR 0018).
+#
+# Périmètre : le coeur hexagonal rigoureux uniquement (Domain / Application / Shared).
+# Les bounded contexts "CRUD léger" (Auth, Client) mélangent volontairement Doctrine
+# dans leurs entités (ADR 0010) → hors périmètre, non listés comme couches internes.
+#
+# Invariant garanti : Domain et Application ne dépendent QUE d'eux-mêmes + Shared.
+# Toute fuite vers Doctrine, API Platform ou le framework Symfony = violation en CI.
+# symfony/uid et symfony/clock sont tolérés (utilitaires de value objects, pas de
+# couplage framework) → exclus de la couche SymfonyFramework.
+#
+# Lancer : ./vendor/bin/deptrac analyse
+
+deptrac:
+  paths:
+    - src
+
+  layers:
+    # --- Coeur hexagonal (couches internes, dépendances pointant vers l'intérieur) ---
+    - name: Domain
+      collectors:
+        - type: directory
+          value: src/Domain/.*
+    - name: Application
+      collectors:
+        - type: directory
+          value: src/Application/.*
+    - name: Shared
+      collectors:
+        - type: directory
+          value: src/Shared/.*
+
+    # --- Couches "cibles" : frameworks interdits dans le coeur hexagonal ---
+    - name: Doctrine
+      collectors:
+        - type: classNameRegex
+          value: '#^Doctrine\\#'
+    - name: ApiPlatform
+      collectors:
+        - type: classNameRegex
+          value: '#^ApiPlatform\\#'
+    - name: SymfonyFramework
+      collectors:
+        - type: bool
+          must:
+            - type: classNameRegex
+              value: '#^Symfony\\#'
+          must_not:
+            # Utilitaires de value objects, autorisés dans le domaine
+            - type: classNameRegex
+              value: '#^Symfony\\Component\\Uid\\#'
+            - type: classNameRegex
+              value: '#^Symfony\\Component\\Clock\\#'
+
+  ruleset:
+    Domain:
+      - Shared
+    Application:
+      - Domain
+      - Shared
+    Shared: ~
+
+    # Couches cibles : aucune dépendance sortante analysée (code vendor hors `paths`).
+    # Listées avec un ruleset vide pour documenter qu'elles n'ont pas de droit sortant.
+    Doctrine: ~
+    ApiPlatform: ~
+    SymfonyFramework: ~

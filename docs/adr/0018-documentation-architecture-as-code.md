@@ -28,12 +28,11 @@ Contraintes : tout ce qui est « source de vérité technique » doit être **da
 
 EventStorming et context maps en FigJam sont autorisés pour la phase de réflexion (notamment avant un bounded context complexe : Lots/Mesures/Devis), mais leur sortie durable doit être transcrite en ADR + diagramme Mermaid. Le board FigJam est jetable.
 
-**3. Enforcement architectural — adopté en principe, activé progressivement.**
+**3. Enforcement architectural — Deptrac activé dès maintenant côté API.**
 
-- **Deptrac** (PHP) pour vérifier la règle hexagonale côté API (`Domain/` → pas de dépendance Doctrine/Symfony, use cases → ports uniquement). Cible : intégration CI **au début de la Phase 6** (Lots/Tâches), quand un 2ᵉ contexte hexagonal complexe arrive et rend la règle non triviale à tenir à la main.
-- **dependency-cruiser** (TS) pour web/mobile : pas d'activation planifiée tant que la taille des apps (~37 fichiers chacune) ne le justifie pas. À reconsidérer si une frontière de couche (ex. `pages/` n'importe pas directement `lib/api`) devient à protéger.
-
-Ces deux activations feront chacune l'objet d'un ADR de suivi au moment de l'intégration CI (config = surface de maintenance).
+- **Deptrac** (PHP, `deptrac/deptrac` en `require-dev`) est **actif en CI** (job `ci / api`, après PHPStan, formatter `github-actions`). Config dans [`apps/api/deptrac.yaml`](../../apps/api/deptrac.yaml). Choix d'activer **tôt** plutôt qu'en Phase 6 : poser le filet pendant que le coeur hexagonal est propre (0 violation au départ) encode la règle quand elle est simple, au lieu de la rétro-appliquer sur un code potentiellement déjà dévié.
+- **Périmètre volontairement restreint** au coeur hexagonal rigoureux : couches `Domain`, `Application`, `Shared`. Elles ne peuvent dépendre que d'elles-mêmes (vers l'intérieur). Toute fuite vers Doctrine, API Platform ou le framework Symfony = violation bloquante. `symfony/uid` et `symfony/clock` sont tolérés (utilitaires de value objects, pas de couplage framework). Les bounded contexts **CRUD léger** (Auth, Client) qui mélangent Doctrine dans leurs entités ([ADR 0010](0010-crud-leger-pattern-reference.md)) sont **hors périmètre** — c'est cohérent avec « rigueur sur le complexe, légèreté sur le simple » ([ADR 0002](0002-architecture-hexagonale.md)). Les futurs contextes complexes (Lot, Mesure, Devis) tomberont automatiquement sous `src/Domain/` et `src/Application/`, donc couverts sans config supplémentaire.
+- **dependency-cruiser** (TS) pour web/mobile : pas d'activation planifiée tant que la taille des apps (~37 fichiers chacune) ne le justifie pas. À reconsidérer si une frontière de couche (ex. `pages/` n'importe pas directement `lib/api`) devient à protéger. Fera l'objet d'un ADR de suivi le moment venu.
 
 ## Consequences
 
@@ -49,5 +48,5 @@ Ces deux activations feront chacune l'objet d'un ADR de suivi au moment de l'int
 - FigJam hors git = perte des sessions de découverte si non transcrites. Assumé : c'est le rôle de la transcription en ADR.
 
 **Signaux pour reconsidérer** :
-- Si `architecture.md` est régulièrement obsolète en revue → automatiser (génération partielle depuis le code) ou réduire son périmètre.
-- Si une violation hexagonale passe en revue humaine → accélérer l'activation de Deptrac.
+- Si `architecture.md` est régulièrement obsolète en revue → automatiser (génération partielle depuis le code, ex. `deptrac analyse --formatter=mermaidjs`) ou réduire son périmètre.
+- Si une violation hexagonale apparaît dans un CRUD léger hors périmètre Deptrac et qu'elle pose problème → étendre le périmètre Deptrac à ce contexte (le promouvoir en couche interne).

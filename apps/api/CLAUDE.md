@@ -15,6 +15,7 @@ php bin/console debug:router       # routes enregistrées
 php bin/phpunit                    # tous les tests
 php bin/phpunit tests/Integration/ # tests d'intégration seuls
 ./vendor/bin/phpstan analyse       # analyse statique
+./vendor/bin/deptrac analyse       # enforcement archi hexagonale (cf ADR 0018)
 php bin/console doctrine:migrations:diff    # générer une migration
 php bin/console doctrine:migrations:migrate # appliquer
 php bin/console doctrine:database:create --env=test  # créer la DB de test
@@ -45,7 +46,7 @@ src/
         └── {BoundedContext}/  # controllers + DTOs + StateProviders/Processors
 ```
 
-**Règle absolue** : les dépendances pointent vers l'intérieur. `Domain/` ne connaît ni Doctrine, ni Symfony, ni rien d'externe.
+**Règle absolue** : les dépendances pointent vers l'intérieur. `Domain/` ne connaît ni Doctrine, ni Symfony, ni rien d'externe. **Vérifiée mécaniquement par Deptrac** (`deptrac.yaml`) en CI : toute fuite de Doctrine / API Platform / framework Symfony dans `Domain/`, `Application/` ou `Shared/` casse le build (cf [ADR 0018](../../docs/adr/0018-documentation-architecture-as-code.md)). `symfony/uid` et `symfony/clock` sont tolérés (utilitaires de value objects). Les CRUD légers (Auth, Client) sont hors périmètre Deptrac, par design.
 
 ## Rigueur vs légèreté
 

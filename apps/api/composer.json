@@ -68,7 +68,8 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "deptrac": "deptrac analyse --no-progress"
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -80,6 +81,7 @@
         }
     },
     "require-dev": {
+        "deptrac/deptrac": "^4.6",
         "phpstan/phpstan": "^2",
         "phpstan/phpstan-doctrine": "^2.0",
         "phpstan/phpstan-symfony": "^2.0",

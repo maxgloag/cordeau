@@ -68,6 +68,10 @@ jobs:
           DATABASE_URL: postgresql://cordeau:cordeau@localhost:5432/cordeau?serverVersion=18&charset=utf8
           APP_SECRET: ci_secret_for_tests
 
+      - name: Run Deptrac (architecture hexagonale)
+        run: ./vendor/bin/deptrac analyse --no-progress --formatter=github-actions
+        working-directory: apps/api
+
       - name: Run PHPUnit
         run: php bin/phpunit
         working-directory: apps/api

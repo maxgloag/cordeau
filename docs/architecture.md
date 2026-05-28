@@ -152,7 +152,7 @@ flowchart TB
     class pg store
 ```
 
-> **Règle de dépendance** : les flèches pointent vers l'intérieur. `Domain/` n'importe ni Doctrine ni Symfony. C'est précisément cette règle qu'un outil d'enforcement (Deptrac) pourra vérifier en CI — cf [ADR 0018](adr/0018-documentation-architecture-as-code.md).
+> **Règle de dépendance** : les flèches pointent vers l'intérieur. `Domain/` n'importe ni Doctrine ni Symfony. Cette règle est **vérifiée mécaniquement par Deptrac** en CI ([`apps/api/deptrac.yaml`](../apps/api/deptrac.yaml)) : toute fuite framework dans `Domain/`/`Application/`/`Shared/` casse le build — cf [ADR 0018](adr/0018-documentation-architecture-as-code.md). Les CRUD légers (Auth, Client) sont hors périmètre par design.
 
 ---
 
