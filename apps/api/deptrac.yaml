@@ -39,6 +39,13 @@ deptrac:
       collectors:
         - type: classNameRegex
           value: '#^ApiPlatform\\#'
+    # Utilitaires Symfony autorisés dans le domaine (valeur standard, pas de couplage framework).
+    # Ajouter ici tout nouveau composant Symfony utilisé comme utilitaire dans Domain/Application.
+    - name: SymfonyUtilities
+      collectors:
+        - type: classNameRegex
+          value: '#^Symfony\\Component\\(Uid|Clock)\\#'
+    # Catch-all Symfony — tout ce qui n'est pas dans SymfonyUtilities est interdit dans le domaine.
     - name: SymfonyFramework
       collectors:
         - type: bool
@@ -46,18 +53,17 @@ deptrac:
             - type: classNameRegex
               value: '#^Symfony\\#'
           must_not:
-            # Utilitaires de value objects, autorisés dans le domaine
             - type: classNameRegex
-              value: '#^Symfony\\Component\\Uid\\#'
-            - type: classNameRegex
-              value: '#^Symfony\\Component\\Clock\\#'
+              value: '#^Symfony\\Component\\(Uid|Clock)\\#'
 
   ruleset:
     Domain:
       - Shared
+      - SymfonyUtilities
     Application:
       - Domain
       - Shared
+      - SymfonyUtilities
     Shared: ~
 
     # Couches cibles : aucune dépendance sortante analysée (code vendor hors `paths`).
@@ -65,3 +71,4 @@ deptrac:
     Doctrine: ~
     ApiPlatform: ~
     SymfonyFramework: ~
+    SymfonyUtilities: ~

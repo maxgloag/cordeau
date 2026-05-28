@@ -68,8 +68,7 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ],
-        "deptrac": "deptrac analyse --no-progress"
+        ]
     },
     "conflict": {
         "symfony/symfony": "*"

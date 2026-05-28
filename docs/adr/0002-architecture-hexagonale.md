@@ -57,13 +57,7 @@ src/Presentation/Api/{Context}/
 - Deux "modes" d'architecture à maintenir → risque d'incohérence si mal documenté
 - Discipline requise pour ne pas glisser vers le "tout complexe" ou le "tout léger"
 
-**Signaux de bascule** (léger → hexagonal) :
-- Une transition d'état métier apparaît sur une entité légère (ex. `archiver`, `valider`, `cloturer`)
-- Une règle de calcul ou un invariant non trivial émerge
-- Deux processors partagent une logique métier (DRY brisé sur la logique, pas sur l'I/O)
-- Le besoin de tester la logique sans DB devient pressant
-
-La bascule est un **refactor planifié, pas une dette** : l'entité n'était pas mal architecturée, les conditions ont changé. Détail du protocole de bascule dans [ADR 0010](0010-crud-leger-pattern-reference.md).
+**Signal de bascule** (léger → hexagonal) : dès qu'une entité légère acquiert des invariants, des transitions d'état ou une logique de calcul. C'est un **refactor planifié, pas une dette** — les conditions ont changé. Protocole détaillé dans [ADR 0010](0010-crud-leger-pattern-reference.md).
 
 **Signaux d'alarme** :
 - Si le domaine importe Doctrine ou Symfony → bug architectural, corriger immédiatement (cf Deptrac)

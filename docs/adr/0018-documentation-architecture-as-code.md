@@ -44,7 +44,7 @@ EventStorming et context maps en FigJam sont autorisés pour la phase de réflex
 
 **Trade-offs** :
 - Un document vivant **peut diverger** du code s'il n'est pas tenu. Mitigation : mise à jour en fin de phase intégrée au protocole (`CLAUDE.md` § Fin de phase), datée en en-tête.
-- Mermaid `flowchart` stylé C4 est une approximation du C4 « pur » (pas de tooling C4 dédié type Structurizr). Choix assumé pour le ROII : zéro dépendance, rendu natif. Migration vers Structurizr DSL possible plus tard si le besoin de navigation interactive multi-niveaux apparaît.
+- Mermaid `flowchart` est une approximation du C4 pur — cf. décision §1 pour le raisonnement. Migration Structurizr DSL possible si navigation multi-niveaux interactive devient nécessaire.
 - FigJam hors git = perte des sessions de découverte si non transcrites. Assumé : c'est le rôle de la transcription en ADR.
 
 **Signaux pour reconsidérer** :

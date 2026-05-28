@@ -199,8 +199,6 @@ Prochaines verticales (cf [ROADMAP.md](../ROADMAP.md)) : Phase 5 Photos/R2, Phas
 
 ---
 
-## Comment mettre à jour ce document
+---
 
-1. Les diagrammes sont du Mermaid inline — éditer le bloc, prévisualiser dans l'aperçu Markdown de GitHub.
-2. À chaque **fin de phase** : ajouter les nouveaux conteneurs/contextes, déplacer les éléments « (Phase N) » de prévision vers réel, dater l'en-tête.
-3. Décision structurante derrière un changement de diagramme → un ADR **avant** la mise à jour ici. Ce document reflète, il ne décide pas.
+> **Mise à jour** : en fin de phase (protocole dans `CLAUDE.md`). Toute décision structurante derrière un changement de diagramme → ADR **avant** la mise à jour ici.

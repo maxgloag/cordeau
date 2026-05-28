@@ -14,6 +14,9 @@ jobs:
   api:
     name: ci / api
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
 
     services:
       postgres:
@@ -57,25 +60,19 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
-        working-directory: apps/api
 
       - name: Run PHPStan
         run: ./vendor/bin/phpstan analyse --no-progress --error-format=github
-        working-directory: apps/api
         env:
           APP_ENV: dev
-          # DB nommée "cordeau" → Doctrine ajoute _test en mode test → "cordeau_test" (créée par le service)
-          DATABASE_URL: postgresql://cordeau:cordeau@localhost:5432/cordeau?serverVersion=18&charset=utf8
-          APP_SECRET: ci_secret_for_tests
 
       - name: Run Deptrac (architecture hexagonale)
         run: ./vendor/bin/deptrac analyse --no-progress --formatter=github-actions
-        working-directory: apps/api
 
       - name: Run PHPUnit
         run: php bin/phpunit
-        working-directory: apps/api
         env:
+          # DB nommée "cordeau" → Doctrine ajoute _test en mode test → "cordeau_test" (créée par le service)
           DATABASE_URL: postgresql://cordeau:cordeau@localhost:5432/cordeau?serverVersion=18&charset=utf8
           APP_SECRET: ci_secret_for_tests
 
