@@ -92,44 +92,17 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Chromium (full)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        timeout-minutes: 15
-        run: |
-          set -e
-          for attempt in 1 2 3; do
-            echo "::group::Attempt $attempt"
-            if timeout 240 pnpm --filter @cordeau/web exec playwright install --with-deps chromium; then
-              echo "::endgroup::"
-              exit 0
-            fi
-            echo "::endgroup::"
-            echo "::warning::Attempt $attempt timed out or failed, retrying in 30s..."
-            sleep 30
-          done
-          echo "::error::Playwright install failed after 3 attempts (cdn.playwright.dev hang ?)"
-          exit 1
-
-      - name: Install Playwright system deps (cached binary)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        timeout-minutes: 5
-        run: pnpm --filter @cordeau/web exec playwright install-deps chromium
 
       - name: Lint
         run: pnpm --filter @cordeau/web lint
 
-      - name: Test
-        run: pnpm --filter @cordeau/web test
+      # Vitest project "browser" (.test.tsx) skip en CI : download Chrome
+      # depuis cdn.playwright.dev hang sur runners GHA Ubuntu 24.04 (cf issue
+      # #48). Les tests browser continuent de tourner en local via `pnpm test`.
+      - name: Test (unit project only)
+        run: pnpm --filter @cordeau/web test --project unit
 
       - name: Build
         run: pnpm --filter @cordeau/web build
