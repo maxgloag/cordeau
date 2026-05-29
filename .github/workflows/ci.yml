@@ -104,10 +104,25 @@ jobs:
 
       - name: Install Playwright Chromium (full)
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm --filter @cordeau/web exec playwright install --with-deps chromium
+        timeout-minutes: 15
+        run: |
+          set -e
+          for attempt in 1 2 3; do
+            echo "::group::Attempt $attempt"
+            if timeout 240 pnpm --filter @cordeau/web exec playwright install --with-deps chromium; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "::warning::Attempt $attempt timed out or failed, retrying in 30s..."
+            sleep 30
+          done
+          echo "::error::Playwright install failed after 3 attempts (cdn.playwright.dev hang ?)"
+          exit 1
 
       - name: Install Playwright system deps (cached binary)
         if: steps.playwright-cache.outputs.cache-hit == 'true'
+        timeout-minutes: 5
         run: pnpm --filter @cordeau/web exec playwright install-deps chromium
 
       - name: Lint
