@@ -15,6 +15,7 @@ php bin/console debug:router       # routes enregistrées
 php bin/phpunit                    # tous les tests
 php bin/phpunit tests/Integration/ # tests d'intégration seuls
 ./vendor/bin/phpstan analyse       # analyse statique
+./vendor/bin/deptrac analyse       # enforcement archi hexagonale (cf ADR 0018)
 php bin/console doctrine:migrations:diff    # générer une migration
 php bin/console doctrine:migrations:migrate # appliquer
 php bin/console doctrine:database:create --env=test  # créer la DB de test
@@ -45,15 +46,19 @@ src/
         └── {BoundedContext}/  # controllers + DTOs + StateProviders/Processors
 ```
 
-**Règle absolue** : les dépendances pointent vers l'intérieur. `Domain/` ne connaît ni Doctrine, ni Symfony, ni rien d'externe.
+**Règle absolue** : les dépendances pointent vers l'intérieur. `Domain/` ne connaît ni Doctrine, ni Symfony, ni rien d'externe. **Vérifiée mécaniquement par Deptrac** (`deptrac.yaml`) en CI : toute fuite de Doctrine / API Platform / framework Symfony dans `Domain/`, `Application/` ou `Shared/` casse le build (cf [ADR 0018](../../docs/adr/0018-documentation-architecture-as-code.md)). `symfony/uid` et `symfony/clock` sont tolérés (utilitaires de value objects). Les CRUD légers (Auth, Client) sont hors périmètre Deptrac, par design.
 
 ## Rigueur vs légèreté
 
-**Full hexagonal** (domain riche, value objects, ports, tests unitaires sans DB) :
-- `Lot` (modes de facturation, estimation/réel) · `Mesure` (calcul assisté manuel V1, AR V2) · génération `Devis` / `Facture` brouillon · règles TVA (Phase 8) · transitions de statut (cf [ADR 0015](../../docs/adr/0015-modele-chantier-lots-taches-mesures.md))
+Le critère n'est pas la taille ou la période de développement — c'est la **nature de la logique métier**.
 
-**Légèreté (controller → service → Doctrine directement, cf [ADR 0010](../../docs/adr/0010-crud-leger-pattern-reference.md))** :
-- CRUD simples : clients, adresses, tags, photos, `Tache`, `Materiau`, `Pointage` (sans logique métier dense)
+**Full hexagonal** : quand le contexte a des invariants à protéger, des transitions d'état, ou des règles de calcul. Le domaine doit pouvoir être testé sans DB.
+- `Chantier` · `Lot` (modes de facturation, estimation/réel) · `Mesure` (calcul assisté manuel V1, AR V2) · génération `Devis` / `Facture` · règles TVA (Phase 8) · transitions de statut (cf [ADR 0015](../../docs/adr/0015-modele-chantier-lots-taches-mesures.md))
+
+**Légèreté** (controller → Doctrine directement, cf [ADR 0010](../../docs/adr/0010-crud-leger-pattern-reference.md)) : quand le contexte est un *conteneur de données référencé* — zéro transition d'état, zéro règle de calcul, validation triviale. Il n'y a pas de domaine à isoler du framework.
+- `Client` · adresses · tags · `Photo` · `Materiau` · `Pointage`
+
+Si une entité légère acquiert des règles métier → bascule planifiée vers l'hexagonal (protocole dans ADR 0010). Ce n'est pas une dette, les conditions ont changé.
 
 ## Conventions PHP
 

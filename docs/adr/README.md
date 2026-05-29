@@ -53,3 +53,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0015](0015-modele-chantier-lots-taches-mesures.md) | Modèle Chantier → Lots → Tâches → Mesures / Matériaux | Accepted |
 | [0016](0016-positionnement-v1-outil-de-suivi.md) | Positionnement V1 « outil de suivi », AR et PDP différés V2 | Accepted |
 | [0017](0017-differer-ia-validation-manuelle.md) | Différer l'IA : validation manuelle V1, magie V1.2+ | Accepted |
+| [0018](0018-documentation-architecture-as-code.md) | Documentation d'architecture as-code (C4 + Mermaid) et enforcement | Accepted |
