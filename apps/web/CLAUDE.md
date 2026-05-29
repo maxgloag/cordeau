@@ -90,6 +90,10 @@ Voir [docs/adr/0006-vitest-browser-mode.md](../../docs/adr/0006-vitest-browser-m
 
 ## Variables d'environnement
 
-- `VITE_API_URL` : URL de l'API (défaut `http://localhost:8000`)
-- En prod : variable injectée par Cloudflare Pages (sans `VITE_` prefix dans les secrets CF)
+- `.env` : valeurs par défaut committées
+- `.env.local` : valeurs dev locales — gitignored (VITE_API_URL, VITE_SENTRY_DSN)
+- `.env.test.local` : valeurs pour les tests — gitignored
+- En prod, les variables sont injectées par Cloudflare Pages (sans `VITE_` prefix dans les secrets CF)
 - Accès dans le code : `import.meta.env['VITE_API_URL']` (pas de déstructuring)
+
+**Setup initial** : consulter [docs/ENV-SETUP.md](../../docs/ENV-SETUP.md).

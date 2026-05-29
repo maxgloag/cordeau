@@ -89,4 +89,6 @@ Si une entité légère acquiert des règles métier → bascule planifiée vers
 - `.env` : valeurs par défaut committées (sans secrets)
 - `.env.local` : valeurs dev locales non committées (credentials DB, etc.)
 - `.env.test.local` : credentials pour la DB de test
-- En prod, les variables sont injectées par Coolify (pas de `.env.prod`)
+- En prod, les variables sont injectées par Fly.io via `fly secrets set` (pas de `.env.prod`). Procédure de rotation détaillée dans [docs/runbooks/rotation-secrets.md](../../docs/runbooks/rotation-secrets.md)
+
+**Setup initial** : consulter [docs/ENV-SETUP.md](../../docs/ENV-SETUP.md) pour la checklist complète et les sources des secrets.

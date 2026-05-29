@@ -54,6 +54,17 @@ eas build --profile production --platform all    # build prod
 - Variable dans `.env` : `EXPO_PUBLIC_API_URL=http://localhost:8000`
 - Accès dans le code : `process.env['EXPO_PUBLIC_API_URL']` (pas de destructuring)
 
+## Variables d'environnement
+
+- `.env` : valeurs par défaut committées
+- `.env.local` : valeurs dev locales — gitignored (API_URL, Google client IDs, Sentry DSN)
+- `.env.test.local` : valeurs pour les tests — gitignored
+- En prod, les variables sont injectées via EAS Secrets ou `eas.json` (profils non-sensibles)
+- Toutes les variables doivent être préfixées `EXPO_PUBLIC_` pour être accessibles côté client
+- Accès dans le code : `process.env['EXPO_PUBLIC_VAR']` (pas de destructuring)
+
+**Setup initial** : consulter [docs/ENV-SETUP.md](../../docs/ENV-SETUP.md).
+
 ## Conventions
 
 - TypeScript strict (`tsconfig.json` généré par Expo, vérifier que `strict: true`)
