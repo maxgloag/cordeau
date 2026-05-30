@@ -1,3 +1,4 @@
+# Infra dev : Postgres + Redis (PHP géré par Symfony CLI — voir docs/ENV-SETUP.md).
 services:
   postgres:
     image: postgres:18-alpine

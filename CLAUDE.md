@@ -31,9 +31,11 @@ Détails et justifications dans [docs/adr/](docs/adr/).
 
 ```bash
 # Dev local (lance les 3 apps en parallèle via Turborepo)
-docker compose up -d        # Postgres + Redis
+docker compose up -d        # Postgres + Redis (infra uniquement — PHP géré par Symfony CLI)
 pnpm install                # à la racine (workspaces pnpm)
 pnpm dev                    # turbo run dev
+
+# API Symfony : toujours `symfony console`, jamais `php bin/console` (voir docs/ENV-SETUP.md)
 
 # Tests / lint / build
 pnpm test

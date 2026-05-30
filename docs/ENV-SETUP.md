@@ -39,6 +39,13 @@ apps/mobile/
 
 ### Prérequis
 
+**Outils requis :**
+- [OrbStack](https://orbstack.dev) (ou Docker Desktop) — pour Postgres + Redis
+- [Symfony CLI](https://symfony.com/download) — gère automatiquement la version PHP via `apps/api/.php-version`
+- [pnpm](https://pnpm.io) — gestionnaire de packages JS
+
+**Architecture dev locale :** Docker fournit uniquement l'infra (Postgres, Redis). Le serveur PHP tourne via Symfony CLI, qui lit `apps/api/.php-version` (`8.5`) et sélectionne automatiquement la bonne version — même si PHP 8.2 est la version globale de la machine. Toujours utiliser `symfony console` (pas `php bin/console`) depuis `apps/api/`.
+
 ```bash
 docker compose up -d   # Lance Postgres + Redis
 pnpm install           # Dépendances (à la racine du monorepo)
@@ -139,8 +146,8 @@ docker compose up -d
 **"Database does not exist" en test**
 ```bash
 cd apps/api
-php bin/console doctrine:database:create --env=test
-php bin/console doctrine:migrations:migrate --env=test --no-interaction
+symfony console doctrine:database:create --env=test
+symfony console doctrine:migrations:migrate --env=test --no-interaction
 ```
 
 **Mobile ne se connecte pas à l'API sur device physique**
