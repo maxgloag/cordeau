@@ -1,0 +1,4 @@
+# Fichiers générés — ne pas formater
+packages/shared/src/api.generated.ts
+packages/shared/openapi.json
+pnpm-lock.yaml

@@ -28,9 +28,19 @@ export default function NewChantierScreen() {
     staleTime: Infinity,
   });
 
-  const { control, handleSubmit, formState: { errors } } = useForm<ChantierFormValues>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ChantierFormValues>({
     resolver: zodResolver(chantierSchema),
-    defaultValues: { adresseRue: "", adresseCodePostal: "", adresseVille: "", surfaceM2: "", clientId: "" },
+    defaultValues: {
+      adresseRue: "",
+      adresseCodePostal: "",
+      adresseVille: "",
+      surfaceM2: "",
+      clientId: "",
+    },
   });
 
   const { mutate } = useOfflineMutation<Omit<Chantier, "id">>({
@@ -39,14 +49,16 @@ export default function NewChantierScreen() {
     buildLocal: (entityId, payload) => {
       const localChantier: Chantier = { id: entityId, ...payload };
       upsertChantiers([localChantier]);
-      queryClient.setQueryData(["chantiers"], (old: Chantier[] | undefined) =>
-        [...(old ?? []), localChantier],
-      );
+      queryClient.setQueryData(["chantiers"], (old: Chantier[] | undefined) => [
+        ...(old ?? []),
+        localChantier,
+      ]);
     },
   });
 
   function onSubmit(values: ChantierFormValues) {
-    const clientNom = clients.find((c) => c.id === values.clientId)?.nom ?? null;
+    const clientNom =
+      clients.find((c) => c.id === values.clientId)?.nom ?? null;
     mutate({
       adresseRue: values.adresseRue,
       adresseCodePostal: values.adresseCodePostal,
@@ -66,7 +78,10 @@ export default function NewChantierScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, padding: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text
             className="text-2xl text-text mb-6"
             style={{ fontFamily: "BricolageGrotesque_700Bold" }}

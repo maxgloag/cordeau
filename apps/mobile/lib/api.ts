@@ -45,7 +45,7 @@ async function apiFetch<T>(
     "X-Client-Type": "mobile",
     ...(hasBody ? { "Content-Type": "application/json" } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(init?.headers as Record<string, string> | undefined ?? {}),
+    ...((init?.headers as Record<string, string> | undefined) ?? {}),
   };
 
   const res = await fetch(`${API_URL}${path}`, { ...init, headers });
@@ -80,7 +80,10 @@ async function tryRefresh(): Promise<boolean> {
   try {
     const res = await fetch(`${API_URL}/auth/refresh`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Client-Type": "mobile" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Client-Type": "mobile",
+      },
       body: JSON.stringify({ refreshToken }),
     });
     if (!res.ok) return false;
@@ -95,14 +98,20 @@ async function tryRefresh(): Promise<boolean> {
   }
 }
 
-export async function login(email: string, motDePasse: string): Promise<AuthResponse> {
+export async function login(
+  email: string,
+  motDePasse: string,
+): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, motDePasse }),
   });
 }
 
-export async function register(email: string, motDePasse: string): Promise<AuthResponse> {
+export async function register(
+  email: string,
+  motDePasse: string,
+): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify({ email, motDePasse }),
@@ -113,7 +122,9 @@ export async function logout(): Promise<void> {
   await apiFetch<void>("/auth/logout", { method: "POST" });
 }
 
-export async function exchangeGoogleIdToken(idToken: string): Promise<AuthResponse> {
+export async function exchangeGoogleIdToken(
+  idToken: string,
+): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/auth/oauth/google/exchange", {
     method: "POST",
     body: JSON.stringify({ idToken }),
@@ -138,7 +149,9 @@ export type CreerChantierPayload = {
   uuid?: string | null;
 };
 
-export async function creerChantier(payload: CreerChantierPayload): Promise<Chantier> {
+export async function creerChantier(
+  payload: CreerChantierPayload,
+): Promise<Chantier> {
   return apiFetch<Chantier>("/api/chantiers", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -185,7 +198,9 @@ export type CreerClientPayload = {
   uuid?: string | null;
 };
 
-export async function creerClient(payload: CreerClientPayload): Promise<Client> {
+export async function creerClient(
+  payload: CreerClientPayload,
+): Promise<Client> {
   return apiFetch<Client>("/api/clients", {
     method: "POST",
     body: JSON.stringify(payload),

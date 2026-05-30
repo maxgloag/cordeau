@@ -22,7 +22,14 @@ type Props = {
   clients?: Client[];
 };
 
-export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLabel, clients = [] }: Props) {
+export function ChantierFormView({
+  form,
+  onSubmit,
+  isPending,
+  onCancel,
+  submitLabel,
+  clients = [],
+}: Props) {
   const {
     register,
     handleSubmit,
@@ -30,9 +37,19 @@ export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLa
   } = form;
 
   return (
-    <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-4">
+    <form
+      onSubmit={(e) => void handleSubmit(onSubmit)(e)}
+      className="space-y-4"
+    >
       <div className="space-y-1.5">
-        <Label htmlFor="adresseRue" style={{ fontSize: "0.8rem", fontWeight: 500, color: "var(--color-text)" }}>
+        <Label
+          htmlFor="adresseRue"
+          style={{
+            fontSize: "0.8rem",
+            fontWeight: 500,
+            color: "var(--color-text)",
+          }}
+        >
           Adresse
         </Label>
         <Input
@@ -42,13 +59,22 @@ export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLa
           aria-invalid={errors.adresseRue !== undefined}
         />
         {errors.adresseRue && (
-          <p className="text-xs" style={{ color: "var(--color-destructive)" }}>{errors.adresseRue.message}</p>
+          <p className="text-xs" style={{ color: "var(--color-destructive)" }}>
+            {errors.adresseRue.message}
+          </p>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="adresseCodePostal" style={{ fontSize: "0.8rem", fontWeight: 500, color: "var(--color-text)" }}>
+          <Label
+            htmlFor="adresseCodePostal"
+            style={{
+              fontSize: "0.8rem",
+              fontWeight: 500,
+              color: "var(--color-text)",
+            }}
+          >
             Code postal
           </Label>
           <Input
@@ -59,12 +85,24 @@ export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLa
             aria-invalid={errors.adresseCodePostal !== undefined}
           />
           {errors.adresseCodePostal && (
-            <p className="text-xs" style={{ color: "var(--color-destructive)" }}>{errors.adresseCodePostal.message}</p>
+            <p
+              className="text-xs"
+              style={{ color: "var(--color-destructive)" }}
+            >
+              {errors.adresseCodePostal.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="adresseVille" style={{ fontSize: "0.8rem", fontWeight: 500, color: "var(--color-text)" }}>
+          <Label
+            htmlFor="adresseVille"
+            style={{
+              fontSize: "0.8rem",
+              fontWeight: 500,
+              color: "var(--color-text)",
+            }}
+          >
             Ville
           </Label>
           <Input
@@ -74,14 +112,27 @@ export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLa
             aria-invalid={errors.adresseVille !== undefined}
           />
           {errors.adresseVille && (
-            <p className="text-xs" style={{ color: "var(--color-destructive)" }}>{errors.adresseVille.message}</p>
+            <p
+              className="text-xs"
+              style={{ color: "var(--color-destructive)" }}
+            >
+              {errors.adresseVille.message}
+            </p>
           )}
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="surfaceM2" style={{ fontSize: "0.8rem", fontWeight: 500, color: "var(--color-text)" }}>
-          Surface (m²) <span style={{ color: "var(--color-muted)" }}>— optionnel</span>
+        <Label
+          htmlFor="surfaceM2"
+          style={{
+            fontSize: "0.8rem",
+            fontWeight: 500,
+            color: "var(--color-text)",
+          }}
+        >
+          Surface (m²){" "}
+          <span style={{ color: "var(--color-muted)" }}>— optionnel</span>
         </Label>
         <Input
           id="surfaceM2"
@@ -93,37 +144,61 @@ export function ChantierFormView({ form, onSubmit, isPending, onCancel, submitLa
           aria-invalid={errors.surfaceM2 !== undefined}
         />
         {errors.surfaceM2 && (
-          <p className="text-xs" style={{ color: "var(--color-destructive)" }}>{errors.surfaceM2.message}</p>
+          <p className="text-xs" style={{ color: "var(--color-destructive)" }}>
+            {errors.surfaceM2.message}
+          </p>
         )}
       </div>
 
       {clients.length > 0 && (
         <div className="space-y-1.5">
-          <Label htmlFor="clientId" style={{ fontSize: "0.8rem", fontWeight: 500, color: "var(--color-text)" }}>
-            Client <span style={{ color: "var(--color-muted)" }}>— optionnel</span>
+          <Label
+            htmlFor="clientId"
+            style={{
+              fontSize: "0.8rem",
+              fontWeight: 500,
+              color: "var(--color-text)",
+            }}
+          >
+            Client{" "}
+            <span style={{ color: "var(--color-muted)" }}>— optionnel</span>
           </Label>
           <select
             id="clientId"
             className="flex h-9 w-full rounded-md border px-3 py-1 text-sm"
-            style={{ borderColor: "var(--color-border)", background: "var(--color-surface)", color: "var(--color-text)" }}
+            style={{
+              borderColor: "var(--color-border)",
+              background: "var(--color-surface)",
+              color: "var(--color-text)",
+            }}
             {...register("clientId")}
           >
             <option value="">Aucun client</option>
             {clients.map((c) => (
-              <option key={c.id} value={c.id}>{c.nom}</option>
+              <option key={c.id} value={c.id}>
+                {c.nom}
+              </option>
             ))}
           </select>
         </div>
       )}
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isPending}
+        >
           Annuler
         </Button>
         <Button
           type="submit"
           disabled={isPending}
-          style={{ background: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+          style={{
+            background: "var(--color-primary)",
+            color: "var(--color-primary-foreground)",
+          }}
         >
           {isPending ? "Enregistrement…" : submitLabel}
         </Button>

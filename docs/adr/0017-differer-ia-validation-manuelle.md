@@ -27,10 +27,10 @@ Le brainstorm vision produit (mai 2026) proposait une **V0.1 « Le secrétaire v
 
 Trois alternatives ont été évaluées :
 
-| Option | Verdict |
-|---|---|
-| **IA dès V1** comme proposé dans le brainstorm original | Coût économique non amorti, wedge réel obscurci, risque de déception fort. Rejeté |
-| **IA optionnelle dès V1** (toggle) | Complexifie le code (deux chemins UX), double les tests, n'élimine pas le coût économique. Rejeté |
+| Option                                                              | Verdict                                                                                                      |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **IA dès V1** comme proposé dans le brainstorm original             | Coût économique non amorti, wedge réel obscurci, risque de déception fort. Rejeté                            |
+| **IA optionnelle dès V1** (toggle)                                  | Complexifie le code (deux chemins UX), double les tests, n'élimine pas le coût économique. Rejeté            |
 | **Pas de LLM en V1, ré-évaluation post-bêta** sur critère explicite | Simplifie V1, force la validation du concept manuel, garde la magie en option claire pour V1.2+. **Retenue** |
 
 ## Decision
@@ -51,7 +51,7 @@ V1 (Phases 5-9 de la ROADMAP révisée) ne consomme aucune API LLM. Cela exclut 
 Le différenciant V1 est la **combinaison** :
 
 1. Modèle Chantier → Lots → Tâches → Mesures/Matériaux/Pointages (cf [ADR 0015](0015-modele-chantier-lots-taches-mesures.md)) — alignement métier
-2. UX mobile *vraiment* optimisée saisie rapide : gros boutons, actions en 1-2 taps, formulaires courts, photo en un geste, catégories larges pour matériaux, imprévu en note rapide
+2. UX mobile _vraiment_ optimisée saisie rapide : gros boutons, actions en 1-2 taps, formulaires courts, photo en un geste, catégories larges pour matériaux, imprévu en note rapide
 3. Offline-first solide (déjà acquis Phase 3)
 4. Chrono manuel start/stop sans friction sur le lot
 5. Métré manuel assisté (calcul auto depuis dimensions, cf [ADR 0015](0015-modele-chantier-lots-taches-mesures.md))
@@ -99,7 +99,7 @@ Conditions pour Whisper local V1.1 :
 ### Coûts assumés
 
 - **Risque marketing à contre-courant** : en 2026 le marché SaaS communique massivement sur l'IA. Ne pas en parler peut sembler « en retard ». Mitigation : le pitch terrain (gain de temps observé en saisie manuelle) suffit auprès d'artisans pragmatiques (cible Cordeau). Le marketing « IA invisible » émerge plus tard quand la magie est livrée.
-- **Effort UX renforcé** : sans magie pour masquer une UX médiocre, chaque écran doit être *vraiment* fluide. Phase 7 (Capture terrain + Métré manuel) est le test ultime. Si l'UX manuelle est trop friction-prone, le concept échouera la bêta — risque assumé, c'est l'objectif du critère de validation.
+- **Effort UX renforcé** : sans magie pour masquer une UX médiocre, chaque écran doit être _vraiment_ fluide. Phase 7 (Capture terrain + Métré manuel) est le test ultime. Si l'UX manuelle est trop friction-prone, le concept échouera la bêta — risque assumé, c'est l'objectif du critère de validation.
 - **Frustration potentielle des testeurs** qui s'attendraient à de la magie. Mitigation : onboarding bêta explicite (« V1 manuel, magie en cours de validation post-bêta »).
 
 ### Risques résiduels

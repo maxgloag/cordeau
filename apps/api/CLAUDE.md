@@ -53,9 +53,11 @@ src/
 Le critère n'est pas la taille ou la période de développement — c'est la **nature de la logique métier**.
 
 **Full hexagonal** : quand le contexte a des invariants à protéger, des transitions d'état, ou des règles de calcul. Le domaine doit pouvoir être testé sans DB.
+
 - `Chantier` · `Lot` (modes de facturation, estimation/réel) · `Mesure` (calcul assisté manuel V1, AR V2) · génération `Devis` / `Facture` · règles TVA (Phase 8) · transitions de statut (cf [ADR 0015](../../docs/adr/0015-modele-chantier-lots-taches-mesures.md))
 
-**Légèreté** (controller → Doctrine directement, cf [ADR 0010](../../docs/adr/0010-crud-leger-pattern-reference.md)) : quand le contexte est un *conteneur de données référencé* — zéro transition d'état, zéro règle de calcul, validation triviale. Il n'y a pas de domaine à isoler du framework.
+**Légèreté** (controller → Doctrine directement, cf [ADR 0010](../../docs/adr/0010-crud-leger-pattern-reference.md)) : quand le contexte est un _conteneur de données référencé_ — zéro transition d'état, zéro règle de calcul, validation triviale. Il n'y a pas de domaine à isoler du framework.
+
 - `Client` · adresses · tags · `Photo` · `Materiau` · `Pointage`
 
 Si une entité légère acquiert des règles métier → bascule planifiée vers l'hexagonal (protocole dans ADR 0010). Ce n'est pas une dette, les conditions ont changé.

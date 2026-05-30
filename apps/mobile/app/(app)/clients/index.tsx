@@ -42,7 +42,9 @@ function ClientCard({ item, onPress }: { item: Client; onPress: () => void }) {
             {item.email && (
               <View className="flex-row items-center gap-1">
                 <Mail size={11} color="#9B8F85" />
-                <Text className="text-xs text-muted" numberOfLines={1}>{item.email}</Text>
+                <Text className="text-xs text-muted" numberOfLines={1}>
+                  {item.email}
+                </Text>
               </View>
             )}
             {item.telephone && (

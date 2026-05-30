@@ -23,10 +23,11 @@ const chantierSchema = z.object({
     .regex(/^\d{5}$/, "Format invalide (5 chiffres)"),
   adresseVille: z.string().min(1, "Ville requise"),
   adressePays: z.string().min(1),
-  surfaceM2: z.string().refine(
-    (v) => v === "" || (!isNaN(parseFloat(v)) && parseFloat(v) > 0),
-    { message: "Surface invalide" },
-  ),
+  surfaceM2: z
+    .string()
+    .refine((v) => v === "" || (!isNaN(parseFloat(v)) && parseFloat(v) > 0), {
+      message: "Surface invalide",
+    }),
   clientId: z.string(),
 });
 
@@ -44,10 +45,17 @@ function makeDefaultValues(c?: Chantier): ChantierFormValues {
 export default function DashboardPage() {
   const queryClient = useQueryClient();
 
-  const { data: clients = [] } = useQuery({ queryKey: ["clients"], queryFn: listClients });
+  const { data: clients = [] } = useQuery({
+    queryKey: ["clients"],
+    queryFn: listClients,
+  });
 
   // Chantiers
-  const { data: chantiers = [], isLoading, isError } = useQuery({
+  const {
+    data: chantiers = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["chantiers"],
     queryFn: fetchChantiers,
   });
@@ -66,7 +74,8 @@ export default function DashboardPage() {
         adresseCodePostal: values.adresseCodePostal,
         adresseVille: values.adresseVille,
         adressePays: values.adressePays,
-        surfaceM2: values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
+        surfaceM2:
+          values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
         clientId: values.clientId || null,
       }),
     onSuccess: () => {
@@ -98,7 +107,8 @@ export default function DashboardPage() {
         adresseCodePostal: values.adresseCodePostal,
         adresseVille: values.adresseVille,
         adressePays: values.adressePays,
-        surfaceM2: values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
+        surfaceM2:
+          values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
         clientId: values.clientId || null,
       });
     },
@@ -130,7 +140,10 @@ export default function DashboardPage() {
       isLoading={isLoading}
       isError={isError}
       showCreate={showCreate}
-      onOpenCreate={() => { setShowCreate(true); createForm.reset(makeDefaultValues()); }}
+      onOpenCreate={() => {
+        setShowCreate(true);
+        createForm.reset(makeDefaultValues());
+      }}
       onCloseCreate={() => setShowCreate(false)}
       createForm={createForm}
       onSubmitCreate={(v) => createMutation.mutateAsync(v)}
@@ -143,7 +156,9 @@ export default function DashboardPage() {
       isEditing={editMutation.isPending}
       archivingId={archivingId}
       onRequestArchive={(id) => setArchivingId(id)}
-      onConfirmArchive={async () => { if (archivingId) await archiveMutation.mutateAsync(archivingId); }}
+      onConfirmArchive={async () => {
+        if (archivingId) await archiveMutation.mutateAsync(archivingId);
+      }}
       onCancelArchive={() => setArchivingId(null)}
       isArchiving={archiveMutation.isPending}
     />

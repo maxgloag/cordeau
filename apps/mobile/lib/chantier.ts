@@ -16,12 +16,16 @@ export const STATUT_COLORS: Record<string, string> = {
 
 export const chantierSchema = z.object({
   adresseRue: z.string().min(1, "Adresse requise"),
-  adresseCodePostal: z.string().min(1, "Code postal requis").regex(/^\d{5}$/, "5 chiffres"),
+  adresseCodePostal: z
+    .string()
+    .min(1, "Code postal requis")
+    .regex(/^\d{5}$/, "5 chiffres"),
   adresseVille: z.string().min(1, "Ville requise"),
-  surfaceM2: z.string().refine(
-    (v) => v === "" || (!isNaN(parseFloat(v)) && parseFloat(v) > 0),
-    { message: "Surface invalide" },
-  ),
+  surfaceM2: z
+    .string()
+    .refine((v) => v === "" || (!isNaN(parseFloat(v)) && parseFloat(v) > 0), {
+      message: "Surface invalide",
+    }),
   clientId: z.string(),
 });
 

@@ -10,6 +10,7 @@ Node 24 · Expo SDK 54 · React Native 0.81 · TypeScript strict · Jest 29 + je
 **Ajouté en Phase 4** : expo-auth-session + expo-web-browser, Google Sign-In
 
 **À ajouter progressivement** :
+
 - Phase 5 : expo-image-picker, expo-camera, upload R2
 - Phase 7 : module natif ARKit/ARCore custom
 
@@ -82,10 +83,12 @@ eas build --profile production --platform all    # build prod
 ## NativeWind (Tailwind pour React Native)
 
 À ajouter Phase 1 pour le styling cohérent avec le web. Setup :
+
 ```bash
 pnpm add nativewind tailwindcss
 pnpm add -D babel-plugin-nativewind
 ```
+
 Puis configurer `babel.config.js` et `metro.config.js`.
 
 ## EAS (Expo Application Services)

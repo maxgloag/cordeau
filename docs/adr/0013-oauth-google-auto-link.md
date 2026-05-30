@@ -41,6 +41,7 @@ CREATE TABLE oauth_account (
 ```
 
 Justifications :
+
 - **N providers par user** : un user peut lier Google ET Apple. Une table séparée évite des dizaines de colonnes nulles sur `utilisateur`.
 - **Évolutif** : ajouter Microsoft / GitHub / Facebook n'impacte pas le schéma `utilisateur`.
 - **Audit-friendly** : on garde la date de liaison, on peut tracer.
@@ -66,17 +67,20 @@ L'alternative "refus explicite avec UI" a été rejetée pour la friction qu'ell
 ## Consequences
 
 **Bénéfices** :
+
 - Friction d'inscription divisée par ~5 (1 clic + consent au lieu de email + password + validation)
 - Schéma extensible (Apple, autres providers) sans migration ultérieure
 - Réutilise toute l'infra existante (`User`, `AuthToken`, `TokenAuthenticator`) : seule la création d'`User` change (pas de password)
 - Pattern idiomatique Symfony, peu de code custom à maintenir
 
 **Trade-offs** :
+
 - Dépendance externe (Google APIs) : si Google est down, register/login via Google ne marche pas. Le fallback email/password reste disponible.
 - Comptes "sans mot de passe" (`motDePasseHash=''`) : un user créé via Google ne peut pas se login en email/password tant qu'il n'a pas explicitement défini un password. Endpoint `set-password` à ajouter en V2 si besoin.
 - Config externe (Google Cloud Console, redirect URIs prod) à gérer en dehors du repo. Documenté dans le runbook.
 
 **Décisions différées** :
+
 - **Apple Sign-In** : ajouté quand le compte Apple Developer sera pris (automne 2026). L'architecture `oauth_account` accepte déjà `provider='apple'` sans modif. Un nouveau Processor + endpoint suffira.
 - **Unlink** : pas d'endpoint pour délier Google en V1. Si demandé, ajouter `DELETE /auth/oauth/{provider}`.
 - **Microsoft / GitHub / Facebook** : aucun signal d'usage de la cible artisans. Différé sine die.

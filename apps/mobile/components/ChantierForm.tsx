@@ -10,10 +10,30 @@ type Props = {
 };
 
 const TEXT_FIELDS = [
-  { name: "adresseRue" as const, label: "Adresse", placeholder: "12 rue de la Paix", keyboard: "default" as const },
-  { name: "adresseCodePostal" as const, label: "Code postal", placeholder: "75002", keyboard: "numeric" as const },
-  { name: "adresseVille" as const, label: "Ville", placeholder: "Paris", keyboard: "default" as const },
-  { name: "surfaceM2" as const, label: "Surface (m²) — optionnel", placeholder: "ex. 85", keyboard: "decimal-pad" as const },
+  {
+    name: "adresseRue" as const,
+    label: "Adresse",
+    placeholder: "12 rue de la Paix",
+    keyboard: "default" as const,
+  },
+  {
+    name: "adresseCodePostal" as const,
+    label: "Code postal",
+    placeholder: "75002",
+    keyboard: "numeric" as const,
+  },
+  {
+    name: "adresseVille" as const,
+    label: "Ville",
+    placeholder: "Paris",
+    keyboard: "default" as const,
+  },
+  {
+    name: "surfaceM2" as const,
+    label: "Surface (m²) — optionnel",
+    placeholder: "ex. 85",
+    keyboard: "decimal-pad" as const,
+  },
 ];
 
 export function ChantierForm({ control, errors, clients = [] }: Props) {
@@ -41,7 +61,9 @@ export function ChantierForm({ control, errors, clients = [] }: Props) {
             )}
           />
           {errors[name] && (
-            <Text className="text-xs text-destructive mt-1">{errors[name]?.message}</Text>
+            <Text className="text-xs text-destructive mt-1">
+              {errors[name]?.message}
+            </Text>
           )}
         </View>
       ))}
@@ -49,7 +71,10 @@ export function ChantierForm({ control, errors, clients = [] }: Props) {
       {clients.length > 0 && (
         <View className="mb-4">
           <Text className="text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">
-            Client <Text className="normal-case tracking-normal font-normal">— optionnel</Text>
+            Client{" "}
+            <Text className="normal-case tracking-normal font-normal">
+              — optionnel
+            </Text>
           </Text>
           <Controller
             control={control}
@@ -65,8 +90,11 @@ export function ChantierForm({ control, errors, clients = [] }: Props) {
                     accessibilityState={{ checked: value === c.id }}
                     className={`px-4 py-3 ${i < clients.length ? "border-b border-border" : ""}`}
                   >
-                    <Text className={`text-base ${value === c.id ? "text-primary font-semibold" : "text-text"}`}>
-                      {c.id === value ? "✓ " : "  "}{c.nom}
+                    <Text
+                      className={`text-base ${value === c.id ? "text-primary font-semibold" : "text-text"}`}
+                    >
+                      {c.id === value ? "✓ " : "  "}
+                      {c.nom}
                     </Text>
                   </Pressable>
                 ))}

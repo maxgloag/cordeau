@@ -33,14 +33,25 @@ async function queryFnHybride<T>(
   if (isConnected) {
     // fire-and-forget : fetch en background, invalide la query
     apiRead()
-      .then((items) => { upsertLocal(items); void queryClient.invalidateQueries({ queryKey }); })
-      .catch(() => { /* silencieux si réseau instable */ });
+      .then((items) => {
+        upsertLocal(items);
+        void queryClient.invalidateQueries({ queryKey });
+      })
+      .catch(() => {
+        /* silencieux si réseau instable */
+      });
   }
-  return local.length > 0 ? local : apiRead().then((items) => { upsertLocal(items); return items; });
+  return local.length > 0
+    ? local
+    : apiRead().then((items) => {
+        upsertLocal(items);
+        return items;
+      });
 }
 ```
 
 Comportement :
+
 - **SQLite non vide** : retourne le cache local immédiatement, refresh API en arrière-plan
 - **SQLite vide + online** : fetch API, upsert SQLite, retourne le résultat (hydratation initiale)
 - **SQLite vide + offline** : retourne `[]` avec `isError = false` (UI affiche "aucun chantier" plutôt qu'erreur)
@@ -64,6 +75,7 @@ function useOfflineMutation<TPayload>(opts: {
 ```
 
 Comportement :
+
 - L'UI se met à jour **avant** que le réseau soit consulté (optimiste)
 - L'outbox garantit que la mutation sera poussée même si la connexion revient des heures plus tard
 - Pas de `rollback` UI en V1 (last write wins suffit) — si l'API renvoie 422, l'erreur est loggée et l'entrée outbox passée à `error`
@@ -71,6 +83,7 @@ Comportement :
 ### Worker de sync
 
 Monté dans `app/(app)/_layout.tsx` via `useSyncWorker()` :
+
 - `AppState` listener : chaque passage en `active` déclenche `processQueue()` + `refreshAll()`
 - Polling `expo-network` toutes les 30s quand l'app est au premier plan : si `isConnected` passe à `true` → même déclenchement
 - Mutex `isSyncing` (ref) : évite les appels concurrents
@@ -96,6 +109,7 @@ Backoff exponentiel : délai = `min(2^retryCount * 1000, 30_000)` ms (cap à 30 
 Au-delà de `retryCount > 10`, statut = `abandoned`.
 
 **Codes HTTP** :
+
 - 2xx → `synced`
 - **409 Conflict** → `synced` (idempotence : l'entité existe déjà côté serveur avec ce UUID)
 - 4xx (autres) → `abandoned` (payload invalide, retry inutile)
@@ -104,6 +118,7 @@ Au-delà de `retryCount > 10`, statut = `abandoned`.
 ### Worker de sync (suite)
 
 `useSyncWorker` combine trois triggers (cf [hooks/useSyncWorker.ts](../../apps/mobile/hooks/useSyncWorker.ts)) :
+
 1. **Event natif** `Network.addNetworkStateListener` — réactif mais peu fiable sur iOS lors d'un toggle mode-avion
 2. **AppState** → `active` — déclenche au retour en premier plan
 3. **Polling 5 s** en complément — garantit que la sync part au plus tard dans les 5 s suivant une reconnexion, même si l'event natif est avalé
@@ -113,6 +128,7 @@ Chaque trigger appelle `syncIfOnline` qui re-vérifie l'état réseau directemen
 ### Implémentation API — UUIDs client acceptés
 
 Implémenté en CP3.1 (PR #32). Les Payloads `Creer{Chantier,Client}Payload` acceptent un champ optionnel `uuid` :
+
 - Si fourni → utilisé tel quel pour l'entité (Doctrine, table `chantier` / `client`)
 - Si absent → généré côté serveur (`Uuid::v7`, rétrocompat web)
 - Si `uuid` existe déjà → **409 Conflict** (idempotence)
@@ -124,16 +140,19 @@ Conséquence côté mobile : `useOfflineMutation` injecte automatiquement `{ ...
 ## Consequences
 
 **Bénéfices** :
+
 - L'UI est toujours réactive (zéro spinner bloquant sur lecture)
 - Les mutations fonctionnent 100% hors-ligne
 - Pattern identique pour toute entité future (Photo, Devis) → réutilisation directe
 
 **Trade-offs** :
+
 - `staleTime: Infinity` couplé au worker de sync : si le worker est défaillant, les données ne se rafraîchissent plus. Atténué par les triggers multiples (event réseau + AppState + polling 5 s).
 - L'API accepte les UUIDs client (UUID v4/v7) avec idempotence 409 — pattern fragile à respecter pour toute nouvelle entité offline. CRUD léger : check de collision dans le Processor. Full hexagonal : exception domaine `*DejaExistantException` → `ConflictHttpException` dans le Processor.
 - Pas de résolution de conflit UI en V1 : "last write wins" sur timestamp serveur. Acceptable pour usage solo/petite équipe (cible : ≤5 personnes par compte).
 
 **Décision différée** :
+
 - Résolution de conflits multi-utilisateurs → Phase 8+
 - Sync bidirectionnelle "push serveur → mobile" (WebSocket / SSE) → Phase 8+
 - `BackgroundFetch` iOS → si les artisans remontent le problème de données obsolètes après une longue nuit sans ouvrir l'app

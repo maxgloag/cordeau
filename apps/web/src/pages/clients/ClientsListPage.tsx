@@ -16,10 +16,11 @@ import type { ClientFormValues } from "./ClientFormView";
 
 const clientSchema = z.object({
   nom: z.string().min(1, "Nom requis"),
-  email: z.string().refine(
-    (v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
-    { message: "Email invalide" },
-  ),
+  email: z
+    .string()
+    .refine((v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), {
+      message: "Email invalide",
+    }),
   telephone: z.string(),
   adresseRue: z.string().min(1, "Adresse requise"),
   adresseCodePostal: z
@@ -47,7 +48,11 @@ function makeDefaultValues(c?: Client): ClientFormValues {
 export default function ClientsListPage() {
   const queryClient = useQueryClient();
 
-  const { data: clients = [], isLoading, isError } = useQuery({
+  const {
+    data: clients = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["clients"],
     queryFn: listClients,
   });
@@ -130,7 +135,10 @@ export default function ClientsListPage() {
       isLoading={isLoading}
       isError={isError}
       showCreate={showCreate}
-      onOpenCreate={() => { setShowCreate(true); createForm.reset(makeDefaultValues()); }}
+      onOpenCreate={() => {
+        setShowCreate(true);
+        createForm.reset(makeDefaultValues());
+      }}
       onCloseCreate={() => setShowCreate(false)}
       createForm={createForm}
       onSubmitCreate={(v) => createMutation.mutateAsync(v)}
@@ -143,7 +151,9 @@ export default function ClientsListPage() {
       isEditing={editMutation.isPending}
       deletingId={deletingId}
       onRequestDelete={(id) => setDeletingId(id)}
-      onConfirmDelete={async () => { if (deletingId) await deleteMutation.mutateAsync(deletingId); }}
+      onConfirmDelete={async () => {
+        if (deletingId) await deleteMutation.mutateAsync(deletingId);
+      }}
       onCancelDelete={() => setDeletingId(null)}
       isDeleting={deleteMutation.isPending}
     />

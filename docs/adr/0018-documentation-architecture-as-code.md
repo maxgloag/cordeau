@@ -22,7 +22,7 @@ Contraintes : tout ce qui est « source de vérité technique » doit être **da
 
 - Vue d'ensemble vivante dans [`docs/architecture.md`](../architecture.md) : niveaux C4 Context → Container → Component, plus les flux clés (offline-first).
 - Format **Mermaid `flowchart`/`sequenceDiagram`** stylé C4 (classDef), **pas** la syntaxe `C4Context` native de Mermaid — cette dernière est encore expérimentale et son rendu GitHub est instable. Le `flowchart` se rend de façon fiable dans GitHub et Notion.
-- Frontière ADR ↔ `architecture.md` : un **ADR** est une décision datée et immuable (le *pourquoi*) ; `architecture.md` est un document **vivant** qui décrit l'*état courant* (le *quoi*) et se met à jour en fin de phase. `architecture.md` reflète, il ne décide pas.
+- Frontière ADR ↔ `architecture.md` : un **ADR** est une décision datée et immuable (le _pourquoi_) ; `architecture.md` est un document **vivant** qui décrit l'_état courant_ (le _quoi_) et se met à jour en fin de phase. `architecture.md` reflète, il ne décide pas.
 
 **2. FigJam reste un outil de découverte, hors repo.**
 
@@ -37,16 +37,19 @@ EventStorming et context maps en FigJam sont autorisés pour la phase de réflex
 ## Consequences
 
 **Bénéfices** :
+
 - Vue d'ensemble unique, versionnée, diffable en PR — l'archi devient relisible et reviewable.
 - Onboarding (humain ou IA) accéléré : `architecture.md` complète `CLAUDE.md` et les memories Serena.
 - Le passage par Mermaid force à expliciter les frontières et les protocoles.
 - Trajectoire d'enforcement claire : la règle hexagonale (aujourd'hui une discipline) devient vérifiable mécaniquement quand le coût de l'erreur monte.
 
 **Trade-offs** :
+
 - Un document vivant **peut diverger** du code s'il n'est pas tenu. Mitigation : mise à jour en fin de phase intégrée au protocole (`CLAUDE.md` § Fin de phase), datée en en-tête.
 - Mermaid `flowchart` est une approximation du C4 pur — cf. décision §1 pour le raisonnement. Migration Structurizr DSL possible si navigation multi-niveaux interactive devient nécessaire.
 - FigJam hors git = perte des sessions de découverte si non transcrites. Assumé : c'est le rôle de la transcription en ADR.
 
 **Signaux pour reconsidérer** :
+
 - Si `architecture.md` est régulièrement obsolète en revue → automatiser (génération partielle depuis le code, ex. `deptrac analyse --formatter=mermaidjs`) ou réduire son périmètre.
 - Si une violation hexagonale apparaît dans un CRUD léger hors périmètre Deptrac et qu'elle pose problème → étendre le périmètre Deptrac à ce contexte (le promouvoir en couche interne).

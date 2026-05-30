@@ -3,7 +3,10 @@ import { HardHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import {
+  AuthDivider,
+  GoogleSignInButton,
+} from "@/components/auth/GoogleSignInButton";
 
 export type LoginFormValues = {
   email: string;
@@ -18,7 +21,13 @@ type Props = {
   registerHref: string;
 };
 
-export function LoginView({ form, onSubmit, isPending, errorMessage, registerHref }: Props) {
+export function LoginView({
+  form,
+  onSubmit,
+  isPending,
+  errorMessage,
+  registerHref,
+}: Props) {
   const {
     register,
     handleSubmit,
@@ -28,7 +37,10 @@ export function LoginView({ form, onSubmit, isPending, errorMessage, registerHre
   return (
     <div
       className="flex min-h-screen items-center justify-center px-4"
-      style={{ background: "var(--color-background)", fontFamily: "var(--font-body)" }}
+      style={{
+        background: "var(--color-background)",
+        fontFamily: "var(--font-body)",
+      }}
     >
       <div className="w-full max-w-sm">
         {/* En-tête */}
@@ -89,7 +101,14 @@ export function LoginView({ form, onSubmit, isPending, errorMessage, registerHre
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" style={{ color: "var(--color-text)", fontSize: "0.8rem", fontWeight: 500 }}>
+              <Label
+                htmlFor="email"
+                style={{
+                  color: "var(--color-text)",
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                }}
+              >
                 Adresse email
               </Label>
               <Input
@@ -101,14 +120,24 @@ export function LoginView({ form, onSubmit, isPending, errorMessage, registerHre
                 aria-invalid={errors.email !== undefined}
               />
               {errors.email && (
-                <p className="text-xs" style={{ color: "var(--color-destructive)" }}>
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--color-destructive)" }}
+                >
                   {errors.email.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="motDePasse" style={{ color: "var(--color-text)", fontSize: "0.8rem", fontWeight: 500 }}>
+              <Label
+                htmlFor="motDePasse"
+                style={{
+                  color: "var(--color-text)",
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                }}
+              >
                 Mot de passe
               </Label>
               <Input
@@ -120,7 +149,10 @@ export function LoginView({ form, onSubmit, isPending, errorMessage, registerHre
                 aria-invalid={errors.motDePasse !== undefined}
               />
               {errors.motDePasse && (
-                <p className="text-xs" style={{ color: "var(--color-destructive)" }}>
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--color-destructive)" }}
+                >
                   {errors.motDePasse.message}
                 </p>
               )}
@@ -140,7 +172,10 @@ export function LoginView({ form, onSubmit, isPending, errorMessage, registerHre
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm" style={{ color: "var(--color-muted)" }}>
+        <p
+          className="mt-4 text-center text-sm"
+          style={{ color: "var(--color-muted)" }}
+        >
           Pas encore de compte ?{" "}
           <a
             href={registerHref}

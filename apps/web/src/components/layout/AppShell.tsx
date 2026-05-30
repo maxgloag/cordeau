@@ -12,7 +12,11 @@ type Props = {
 export default function AppShell({ children }: Props) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { data: user } = useQuery({ queryKey: ["auth", "me"], queryFn: fetchMe, staleTime: 60_000 });
+  const { data: user } = useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: fetchMe,
+    staleTime: 60_000,
+  });
 
   async function handleLogout() {
     try {
@@ -25,14 +29,33 @@ export default function AppShell({ children }: Props) {
   }
 
   return (
-    <div className="flex h-screen" style={{ background: "var(--color-background)", fontFamily: "var(--font-body)" }}>
+    <div
+      className="flex h-screen"
+      style={{
+        background: "var(--color-background)",
+        fontFamily: "var(--font-body)",
+      }}
+    >
       <aside
         className="flex w-56 flex-col"
-        style={{ background: "var(--color-sidebar)", color: "var(--color-sidebar-foreground)" }}
+        style={{
+          background: "var(--color-sidebar)",
+          color: "var(--color-sidebar-foreground)",
+        }}
       >
-        <div className="flex items-center gap-2 px-5 py-6 border-b" style={{ borderColor: "var(--color-sidebar-border)" }}>
+        <div
+          className="flex items-center gap-2 px-5 py-6 border-b"
+          style={{ borderColor: "var(--color-sidebar-border)" }}
+        >
           <HardHat size={20} style={{ color: "var(--color-primary)" }} />
-          <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.1rem", letterSpacing: "-0.02em" }}>
+          <span
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 700,
+              fontSize: "1.1rem",
+              letterSpacing: "-0.02em",
+            }}
+          >
             Cordeau
           </span>
         </div>
@@ -41,7 +64,13 @@ export default function AppShell({ children }: Props) {
           <Link
             to="/dashboard"
             className="flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors"
-            activeProps={{ style: { background: "var(--color-sidebar-active)", color: "var(--color-sidebar-active-foreground)", fontWeight: 600 } }}
+            activeProps={{
+              style: {
+                background: "var(--color-sidebar-active)",
+                color: "var(--color-sidebar-active-foreground)",
+                fontWeight: 600,
+              },
+            }}
             inactiveProps={{ style: { color: "var(--color-sidebar-muted)" } }}
           >
             <LayoutDashboard size={15} />
@@ -50,7 +79,13 @@ export default function AppShell({ children }: Props) {
           <Link
             to="/clients"
             className="flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors"
-            activeProps={{ style: { background: "var(--color-sidebar-active)", color: "var(--color-sidebar-active-foreground)", fontWeight: 600 } }}
+            activeProps={{
+              style: {
+                background: "var(--color-sidebar-active)",
+                color: "var(--color-sidebar-active-foreground)",
+                fontWeight: 600,
+              },
+            }}
             inactiveProps={{ style: { color: "var(--color-sidebar-muted)" } }}
           >
             <Users size={15} />
@@ -58,8 +93,14 @@ export default function AppShell({ children }: Props) {
           </Link>
         </nav>
 
-        <div className="px-4 py-4 border-t" style={{ borderColor: "var(--color-sidebar-border)" }}>
-          <div className="text-xs mb-3 truncate" style={{ color: "var(--color-sidebar-muted)" }}>
+        <div
+          className="px-4 py-4 border-t"
+          style={{ borderColor: "var(--color-sidebar-border)" }}
+        >
+          <div
+            className="text-xs mb-3 truncate"
+            style={{ color: "var(--color-sidebar-muted)" }}
+          >
             {user?.email ?? "…"}
           </div>
           <button
@@ -72,9 +113,7 @@ export default function AppShell({ children }: Props) {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto p-8">
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto p-8">{children}</main>
     </div>
   );
 }

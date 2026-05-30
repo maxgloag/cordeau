@@ -37,15 +37,15 @@ src/Presentation/Api/Client/
 
 ### Différences vs mode rigoureux (Chantier)
 
-| Élément | Mode rigoureux (Chantier) | Mode léger (Client) |
-|---|---|---|
-| Séparation Domain / Infrastructure | Oui (`Domain/Chantier/Entity/Chantier.php` + `Infrastructure/.../ChantierDoctrineEntity.php`) | **Non** — une seule classe `Client` portant les attributs Doctrine |
-| Port de repository (interface) | Oui (`Domain/Chantier/Repository/ChantierRepository.php`) | **Non** — `ServiceEntityRepository<Client>` direct |
-| Use cases dédiés (`Application/`) | Oui (`Creer`, `Modifier`, `Archiver`, `Lister`, `Obtenir`) | **Non** — le Processor API Platform pilote directement le Repository |
-| DTOs entrée/sortie séparés | Oui | Payload + Resource uniquement (pas de DTO intermédiaire) |
-| Tests unitaires de domaine | Oui (sans DB) | Limités aux VO triviaux ; couverture portée par les tests d'intégration |
-| Tests d'intégration persistance | Oui | Oui |
-| Tests d'intégration API | Oui | Oui |
+| Élément                            | Mode rigoureux (Chantier)                                                                     | Mode léger (Client)                                                     |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Séparation Domain / Infrastructure | Oui (`Domain/Chantier/Entity/Chantier.php` + `Infrastructure/.../ChantierDoctrineEntity.php`) | **Non** — une seule classe `Client` portant les attributs Doctrine      |
+| Port de repository (interface)     | Oui (`Domain/Chantier/Repository/ChantierRepository.php`)                                     | **Non** — `ServiceEntityRepository<Client>` direct                      |
+| Use cases dédiés (`Application/`)  | Oui (`Creer`, `Modifier`, `Archiver`, `Lister`, `Obtenir`)                                    | **Non** — le Processor API Platform pilote directement le Repository    |
+| DTOs entrée/sortie séparés         | Oui                                                                                           | Payload + Resource uniquement (pas de DTO intermédiaire)                |
+| Tests unitaires de domaine         | Oui (sans DB)                                                                                 | Limités aux VO triviaux ; couverture portée par les tests d'intégration |
+| Tests d'intégration persistance    | Oui                                                                                           | Oui                                                                     |
+| Tests d'intégration API            | Oui                                                                                           | Oui                                                                     |
 
 ### Règle de bascule (léger → rigoureux)
 

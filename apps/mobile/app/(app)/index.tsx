@@ -18,7 +18,13 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/chantier";
 import { SyncStatusBar } from "@/components/SyncStatusBar";
 
-function ChantierCard({ item, onPress }: { item: Chantier; onPress: () => void }) {
+function ChantierCard({
+  item,
+  onPress,
+}: {
+  item: Chantier;
+  onPress: () => void;
+}) {
   const color = STATUT_COLORS[item.statut] ?? "#9CA3AF";
 
   return (
@@ -48,7 +54,9 @@ function ChantierCard({ item, onPress }: { item: Chantier; onPress: () => void }
             {item.clientNom ? (
               <View className="flex-row items-center gap-1 mt-1">
                 <User size={11} color="#9B8F85" />
-                <Text className="text-xs text-muted" numberOfLines={1}>{item.clientNom}</Text>
+                <Text className="text-xs text-muted" numberOfLines={1}>
+                  {item.clientNom}
+                </Text>
               </View>
             ) : null}
           </View>
@@ -64,9 +72,7 @@ function ChantierCard({ item, onPress }: { item: Chantier; onPress: () => void }
         </View>
 
         {item.surfaceM2 != null && (
-          <Text className="text-xs text-muted mt-2">
-            {item.surfaceM2} m²
-          </Text>
+          <Text className="text-xs text-muted mt-2">{item.surfaceM2} m²</Text>
         )}
       </View>
     </TouchableOpacity>

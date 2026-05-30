@@ -9,12 +9,21 @@ import { useNetworkStatus } from "./useNetworkStatus";
 
 const POLL_INTERVAL_MS = 5_000;
 
-async function syncIfOnline(queryClient: ReturnType<typeof useQueryClient>, trigger: string) {
+async function syncIfOnline(
+  queryClient: ReturnType<typeof useQueryClient>,
+  trigger: string,
+) {
   const ns = await Network.getNetworkStateAsync().catch(() => null);
-  console.log(`[sync] trigger=${trigger} connected=${ns?.isConnected ?? "unknown"}`);
+  console.log(
+    `[sync] trigger=${trigger} connected=${ns?.isConnected ?? "unknown"}`,
+  );
   if (!ns?.isConnected) return;
-  await processOutbox(queryClient).catch((e) => console.log("[sync] processOutbox error", e));
-  await refreshAll(queryClient).catch((e) => console.log("[sync] refreshAll error", e));
+  await processOutbox(queryClient).catch((e) =>
+    console.log("[sync] processOutbox error", e),
+  );
+  await refreshAll(queryClient).catch((e) =>
+    console.log("[sync] refreshAll error", e),
+  );
 }
 
 export function useSyncWorker() {

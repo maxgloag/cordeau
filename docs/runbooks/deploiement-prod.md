@@ -6,13 +6,13 @@
 
 ## Vue d'ensemble
 
-| Composant | Hébergement | URL cible | Coût |
-|---|---|---|---|
-| API (Symfony) | Fly.io région `cdg` (Paris) | `https://cordeau-api.fly.dev` | 0 € |
-| Postgres | Neon (Frankfurt, EU central) | connexion via `DATABASE_URL` | 0 € |
-| Web (Vite/React) | Cloudflare Pages | `https://cordeau-web.pages.dev` | 0 € |
-| Mobile (Expo) | EAS preview build | APK installable (sideload) | 0 € |
-| Erreurs | Sentry × 3 projets | `*.sentry.io` | 0 € |
+| Composant        | Hébergement                  | URL cible                       | Coût |
+| ---------------- | ---------------------------- | ------------------------------- | ---- |
+| API (Symfony)    | Fly.io région `cdg` (Paris)  | `https://cordeau-api.fly.dev`   | 0 €  |
+| Postgres         | Neon (Frankfurt, EU central) | connexion via `DATABASE_URL`    | 0 €  |
+| Web (Vite/React) | Cloudflare Pages             | `https://cordeau-web.pages.dev` | 0 €  |
+| Mobile (Expo)    | EAS preview build            | APK installable (sideload)      | 0 €  |
+| Erreurs          | Sentry × 3 projets           | `*.sentry.io`                   | 0 €  |
 
 **Le jour où on achète `cordeau-pro.fr`** : on ajoute un certificat custom sur Fly et un domaine custom sur Cloudflare Pages. Pas de changement de code.
 
@@ -133,7 +133,7 @@ Si erreur 502/503 : `fly logs --app cordeau-api` pour voir le démarrage.
 ```yaml
 deploy-api:
   name: deploy / api
-  needs: api  # Attend que les tests API passent
+  needs: api # Attend que les tests API passent
   if: github.ref == 'refs/heads/main'
   runs-on: ubuntu-latest
   steps:
@@ -180,6 +180,7 @@ fly tokens create deploy --app cordeau-api --expiry 8760h  # 1 an
 ### Vérification
 
 Une fois le build terminé (~2 min) :
+
 - Ouvrir `https://cordeau-web.pages.dev`
 - La page doit afficher le statut santé en vert (consommé depuis l'API Fly)
 
@@ -234,6 +235,7 @@ eas build --profile preview --platform android
 ```
 
 Le build prend 10-20 min sur les serveurs EAS (cloud, gratuit, 30 builds/mois). À la fin, EAS donne :
+
 - une URL de download de l'APK
 - un QR code à scanner depuis l'Android pour installer
 
@@ -255,27 +257,30 @@ Le build prend 10-20 min sur les serveurs EAS (cloud, gratuit, 30 builds/mois). 
 
 https://sentry.io → **Projects** → **Create Project** ×3 :
 
-| Projet | Plateforme |
-|---|---|
-| `cordeau-api` | PHP / Symfony |
-| `cordeau-web` | React |
-| `cordeau-mobile` | React Native |
+| Projet           | Plateforme    |
+| ---------------- | ------------- |
+| `cordeau-api`    | PHP / Symfony |
+| `cordeau-web`    | React         |
+| `cordeau-mobile` | React Native  |
 
 Pour chacun, Sentry fournit un **DSN** (`https://<key>@o<org>.ingest.sentry.io/<project>`).
 
 ### Stockage des DSN
 
 **API** (secret Fly) :
+
 ```bash
 fly secrets set SENTRY_DSN="<dsn cordeau-api>" --app cordeau-api
 ```
 
 **Web** (variable Cloudflare Pages, dashboard) :
+
 ```
 VITE_SENTRY_DSN=<dsn cordeau-web>
 ```
 
 **Mobile** (`apps/mobile/eas.json` → `env`) :
+
 ```json
 "EXPO_PUBLIC_SENTRY_DSN": "<dsn cordeau-mobile>"
 ```
@@ -283,6 +288,7 @@ VITE_SENTRY_DSN=<dsn cordeau-web>
 ### Note Phase 0 vs Phase 1
 
 Phase 0 valide juste la **chaîne** : DSN stocké, accessible côté app via env var. L'**intégration code** (lib `@sentry/*` installée + initialisée) est légitimement reportée en Phase 1 — il n'y a rien à instrumenter sur `/health` seul. À Phase 1, ajouter :
+
 - API : `composer require sentry/sentry-symfony`
 - Web : `pnpm --filter @cordeau/web add @sentry/react`
 - Mobile : `pnpm --filter @cordeau/mobile add @sentry/react-native`
@@ -323,6 +329,7 @@ php bin/console doctrine:query:sql "SELECT 1"
 ```
 
 Causes fréquentes :
+
 - `serverVersion=18` manquant → Doctrine plante en bootstrap
 - IP Fly non whitelist sur Neon → vérifier dans dashboard Neon que les "allowed IPs" sont en `0.0.0.0/0` (par défaut, c'est ouvert sur le free tier)
 
@@ -337,6 +344,7 @@ Notre `apps/mobile` est en mode managed (pas de `ios/` ni `android/` versionnés
 ### Cold start Fly trop lent
 
 Si la 1ère requête après inactivité dépasse 5 s, vérifier :
+
 - OPcache activé (oui, dans le Dockerfile)
 - `auto_stop_machines = "stop"` plutôt que `"suspend"` (suspend = ~3s de plus mais conserve la mémoire). On a choisi `stop` pour rester full-free.
 - Si vraiment gênant, mettre `min_machines_running = 1` dans `fly.toml` (sort du free tier mais garde une machine toujours warm)

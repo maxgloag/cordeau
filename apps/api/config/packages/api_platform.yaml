@@ -3,17 +3,17 @@ api_platform:
     version: 1.0.0
     enable_swagger_ui: true
     docs_formats:
-        jsonopenapi: ['application/vnd.openapi+json']
-        html: ['text/html']
+        jsonopenapi: ["application/vnd.openapi+json"]
+        html: ["text/html"]
     defaults:
         stateless: false
         cache_headers:
-            vary: ['Content-Type', 'Authorization', 'Origin']
+            vary: ["Content-Type", "Authorization", "Origin"]
     formats:
-        json: ['application/json']
-        jsonld: ['application/ld+json']
+        json: ["application/json"]
+        jsonld: ["application/ld+json"]
     patch_formats:
-        json: ['application/merge-patch+json']
+        json: ["application/merge-patch+json"]
     exception_to_status:
         App\Domain\Chantier\Exception\ChantierIntrouvableException: 404
 
@@ -21,4 +21,4 @@ when@prod:
     api_platform:
         enable_swagger_ui: false
         docs_formats:
-            jsonopenapi: ['application/vnd.openapi+json']
+            jsonopenapi: ["application/vnd.openapi+json"]

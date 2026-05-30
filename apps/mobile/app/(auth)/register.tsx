@@ -15,7 +15,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/lib/api";
-import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import {
+  AuthDivider,
+  GoogleSignInButton,
+} from "@/components/auth/GoogleSignInButton";
 
 const schema = z
   .object({
@@ -39,7 +42,11 @@ export default function RegisterScreen() {
   const [isPending, setIsPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", motDePasse: "", confirmation: "" },
   });
@@ -51,8 +58,12 @@ export default function RegisterScreen() {
       await register(values.email, values.motDePasse);
     } catch (err) {
       const apiErr = err as ApiError;
-      if (apiErr.status === 409) setErrorMessage("Cette adresse email est déjà utilisée.");
-      else if (apiErr.status === 422) setErrorMessage("Mot de passe invalide (8 car. min., 1 maj., 1 chiffre).");
+      if (apiErr.status === 409)
+        setErrorMessage("Cette adresse email est déjà utilisée.");
+      else if (apiErr.status === 422)
+        setErrorMessage(
+          "Mot de passe invalide (8 car. min., 1 maj., 1 chiffre).",
+        );
       else setErrorMessage("Une erreur est survenue.");
     } finally {
       setIsPending(false);
@@ -64,7 +75,10 @@ export default function RegisterScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-background"
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="flex-1 justify-center px-6 py-12">
           <View className="mb-10">
             <Text
@@ -73,7 +87,9 @@ export default function RegisterScreen() {
             >
               Cordeau
             </Text>
-            <Text className="text-base text-muted">Créez votre espace artisan</Text>
+            <Text className="text-base text-muted">
+              Créez votre espace artisan
+            </Text>
           </View>
 
           <View className="bg-surface rounded-2xl p-6 shadow-sm border border-border">
@@ -90,15 +106,36 @@ export default function RegisterScreen() {
               </View>
             )}
 
-            <GoogleSignInButton label="Créer mon compte avec Google" onError={setErrorMessage} />
+            <GoogleSignInButton
+              label="Créer mon compte avec Google"
+              onError={setErrorMessage}
+            />
             <AuthDivider />
 
             <View>
               {(
                 [
-                  { name: "email" as const, label: "Adresse email", placeholder: "artisan@exemple.fr", keyboardType: "email-address" as const, secure: false },
-                  { name: "motDePasse" as const, label: "Mot de passe", placeholder: "8 car. min., 1 maj., 1 chiffre", keyboardType: "default" as const, secure: true },
-                  { name: "confirmation" as const, label: "Confirmer le mot de passe", placeholder: "••••••••", keyboardType: "default" as const, secure: true },
+                  {
+                    name: "email" as const,
+                    label: "Adresse email",
+                    placeholder: "artisan@exemple.fr",
+                    keyboardType: "email-address" as const,
+                    secure: false,
+                  },
+                  {
+                    name: "motDePasse" as const,
+                    label: "Mot de passe",
+                    placeholder: "8 car. min., 1 maj., 1 chiffre",
+                    keyboardType: "default" as const,
+                    secure: true,
+                  },
+                  {
+                    name: "confirmation" as const,
+                    label: "Confirmer le mot de passe",
+                    placeholder: "••••••••",
+                    keyboardType: "default" as const,
+                    secure: true,
+                  },
                 ] as const
               ).map(({ name, label, placeholder, keyboardType, secure }) => (
                 <View key={name}>
@@ -124,7 +161,9 @@ export default function RegisterScreen() {
                     )}
                   />
                   {errors[name] && (
-                    <Text className="text-xs text-destructive mt-1">{errors[name]?.message}</Text>
+                    <Text className="text-xs text-destructive mt-1">
+                      {errors[name]?.message}
+                    </Text>
                   )}
                 </View>
               ))}

@@ -20,7 +20,11 @@ export function useSyncStatus(): { status: SyncStatus; pendingCount: number } {
     return () => clearInterval(interval);
   }, []);
 
-  const status: SyncStatus = !isConnected ? "offline" : pendingCount > 0 ? "pending" : "synced";
+  const status: SyncStatus = !isConnected
+    ? "offline"
+    : pendingCount > 0
+      ? "pending"
+      : "synced";
 
   return { status, pendingCount };
 }

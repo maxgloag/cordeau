@@ -6,7 +6,13 @@ import {
   type ReactNode,
 } from "react";
 import { getToken, setTokens, clearTokens } from "@/lib/auth";
-import { login as apiLogin, register as apiRegister, logout as apiLogout, exchangeGoogleIdToken, setSessionExpiredCallback } from "@/lib/api";
+import {
+  login as apiLogin,
+  register as apiRegister,
+  logout as apiLogout,
+  exchangeGoogleIdToken,
+  setSessionExpiredCallback,
+} from "@/lib/api";
 import type { AuthResponse } from "@/lib/api";
 
 type AuthState = {
@@ -64,7 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, isLoading, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider
+      value={{ token, isLoading, login, register, loginWithGoogle, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

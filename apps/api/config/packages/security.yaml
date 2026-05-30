@@ -1,6 +1,6 @@
 security:
     password_hashers:
-        App\Entity\User: 'bcrypt'
+        App\Entity\User: "bcrypt"
 
     providers:
         app_user_provider:

@@ -1,6 +1,11 @@
 import { Plus, Pencil, Trash2, User, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,7 +90,10 @@ export function ClientsListView({
         </div>
         <Button
           onClick={onOpenCreate}
-          style={{ background: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+          style={{
+            background: "var(--color-primary)",
+            color: "var(--color-primary-foreground)",
+          }}
         >
           <Plus size={16} className="mr-1.5" />
           Nouveau client
@@ -93,7 +101,10 @@ export function ClientsListView({
       </div>
 
       {isLoading && (
-        <div className="py-20 text-center text-sm" style={{ color: "var(--color-muted)" }}>
+        <div
+          className="py-20 text-center text-sm"
+          style={{ color: "var(--color-muted)" }}
+        >
           Chargement…
         </div>
       )}
@@ -101,7 +112,11 @@ export function ClientsListView({
       {isError && !isLoading && (
         <div
           className="rounded-lg px-4 py-3 text-sm"
-          style={{ background: "oklch(0.96 0.03 27)", color: "var(--color-destructive)", border: "1px solid oklch(0.88 0.06 27)" }}
+          style={{
+            background: "oklch(0.96 0.03 27)",
+            color: "var(--color-destructive)",
+            border: "1px solid oklch(0.88 0.06 27)",
+          }}
         >
           Impossible de charger les clients. Vérifiez votre connexion.
         </div>
@@ -112,7 +127,10 @@ export function ClientsListView({
           className="rounded-lg border py-16 text-center"
           style={{ borderColor: "var(--color-border)", borderStyle: "dashed" }}
         >
-          <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+          <p
+            className="text-sm font-medium"
+            style={{ color: "var(--color-text)" }}
+          >
             Aucun client pour l'instant
           </p>
           <p className="text-sm mt-1" style={{ color: "var(--color-muted)" }}>
@@ -122,7 +140,10 @@ export function ClientsListView({
             onClick={onOpenCreate}
             className="mt-4"
             size="sm"
-            style={{ background: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+            style={{
+              background: "var(--color-primary)",
+              color: "var(--color-primary-foreground)",
+            }}
           >
             <Plus size={14} className="mr-1.5" />
             Nouveau client
@@ -133,21 +154,61 @@ export function ClientsListView({
       {!isLoading && !isError && clients.length > 0 && (
         <div
           className="rounded-lg border overflow-hidden"
-          style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}
+          style={{
+            background: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+          }}
         >
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: `1px solid var(--color-border)`, background: "var(--color-background)" }}>
-                <th className="px-4 py-2.5 text-left font-medium" style={{ color: "var(--color-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <tr
+                style={{
+                  borderBottom: `1px solid var(--color-border)`,
+                  background: "var(--color-background)",
+                }}
+              >
+                <th
+                  className="px-4 py-2.5 text-left font-medium"
+                  style={{
+                    color: "var(--color-muted)",
+                    fontSize: "0.75rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
                   Client
                 </th>
-                <th className="px-4 py-2.5 text-left font-medium" style={{ color: "var(--color-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <th
+                  className="px-4 py-2.5 text-left font-medium"
+                  style={{
+                    color: "var(--color-muted)",
+                    fontSize: "0.75rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
                   Contact
                 </th>
-                <th className="px-4 py-2.5 text-left font-medium" style={{ color: "var(--color-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <th
+                  className="px-4 py-2.5 text-left font-medium"
+                  style={{
+                    color: "var(--color-muted)",
+                    fontSize: "0.75rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
                   Adresse
                 </th>
-                <th className="px-4 py-2.5 text-right font-medium" style={{ color: "var(--color-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <th
+                  className="px-4 py-2.5 text-right font-medium"
+                  style={{
+                    color: "var(--color-muted)",
+                    fontSize: "0.75rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
                   Actions
                 </th>
               </tr>
@@ -156,36 +217,71 @@ export function ClientsListView({
               {clients.map((c, i) => (
                 <tr
                   key={c.id}
-                  style={{ borderBottom: i < clients.length - 1 ? `1px solid var(--color-border)` : undefined }}
+                  style={{
+                    borderBottom:
+                      i < clients.length - 1
+                        ? `1px solid var(--color-border)`
+                        : undefined,
+                  }}
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <User size={13} className="shrink-0" style={{ color: "var(--color-primary)" }} />
-                      <span className="font-medium" style={{ color: "var(--color-text)" }}>{c.nom}</span>
+                      <User
+                        size={13}
+                        className="shrink-0"
+                        style={{ color: "var(--color-primary)" }}
+                      />
+                      <span
+                        className="font-medium"
+                        style={{ color: "var(--color-text)" }}
+                      >
+                        {c.nom}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-0.5">
                       {c.email && (
-                        <span className="flex items-center gap-1 text-xs" style={{ color: "var(--color-muted)" }}>
+                        <span
+                          className="flex items-center gap-1 text-xs"
+                          style={{ color: "var(--color-muted)" }}
+                        >
                           <Mail size={10} />
                           {c.email}
                         </span>
                       )}
                       {c.telephone && (
-                        <span className="flex items-center gap-1 text-xs" style={{ color: "var(--color-muted)" }}>
+                        <span
+                          className="flex items-center gap-1 text-xs"
+                          style={{ color: "var(--color-muted)" }}
+                        >
                           <Phone size={10} />
                           {c.telephone}
                         </span>
                       )}
                       {!c.email && !c.telephone && (
-                        <span style={{ color: "var(--color-muted)", fontSize: "0.75rem" }}>—</span>
+                        <span
+                          style={{
+                            color: "var(--color-muted)",
+                            fontSize: "0.75rem",
+                          }}
+                        >
+                          —
+                        </span>
                       )}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-xs" style={{ color: "var(--color-text)" }}>{c.adresseRue}</p>
-                    <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: "var(--color-text)" }}
+                    >
+                      {c.adresseRue}
+                    </p>
+                    <p
+                      className="text-xs"
+                      style={{ color: "var(--color-muted)" }}
+                    >
                       {c.adresseCodePostal} {c.adresseVille}
                     </p>
                   </td>
@@ -197,7 +293,10 @@ export function ClientsListView({
                         title="Modifier"
                         aria-label="Modifier le client"
                       >
-                        <Pencil size={13} style={{ color: "var(--color-muted)" }} />
+                        <Pencil
+                          size={13}
+                          style={{ color: "var(--color-muted)" }}
+                        />
                       </button>
                       <button
                         onClick={() => onRequestDelete(c.id)}
@@ -205,7 +304,10 @@ export function ClientsListView({
                         title="Supprimer"
                         aria-label="Supprimer le client"
                       >
-                        <Trash2 size={13} style={{ color: "var(--color-destructive)" }} />
+                        <Trash2
+                          size={13}
+                          style={{ color: "var(--color-destructive)" }}
+                        />
                       </button>
                     </div>
                   </td>
@@ -216,10 +318,17 @@ export function ClientsListView({
         </div>
       )}
 
-      <Dialog open={showCreate} onOpenChange={(open) => { if (!open) onCloseCreate(); }}>
+      <Dialog
+        open={showCreate}
+        onOpenChange={(open) => {
+          if (!open) onCloseCreate();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "var(--font-heading)", fontWeight: 600 }}>
+            <DialogTitle
+              style={{ fontFamily: "var(--font-heading)", fontWeight: 600 }}
+            >
               Nouveau client
             </DialogTitle>
           </DialogHeader>
@@ -233,10 +342,17 @@ export function ClientsListView({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={editingClient !== null} onOpenChange={(open) => { if (!open) onCloseEdit(); }}>
+      <Dialog
+        open={editingClient !== null}
+        onOpenChange={(open) => {
+          if (!open) onCloseEdit();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "var(--font-heading)", fontWeight: 600 }}>
+            <DialogTitle
+              style={{ fontFamily: "var(--font-heading)", fontWeight: 600 }}
+            >
               Modifier le client
             </DialogTitle>
           </DialogHeader>
@@ -250,16 +366,24 @@ export function ClientsListView({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={deletingId !== null} onOpenChange={(open) => { if (!open) onCancelDelete(); }}>
+      <AlertDialog
+        open={deletingId !== null}
+        onOpenChange={(open) => {
+          if (!open) onCancelDelete();
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer ce client ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. Le client sera définitivement supprimé et dé-lié de tous ses chantiers.
+              Cette action est irréversible. Le client sera définitivement
+              supprimé et dé-lié de tous ses chantiers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={onCancelDelete}>Annuler</AlertDialogCancel>
+            <AlertDialogCancel onClick={onCancelDelete}>
+              Annuler
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => void onConfirmDelete()}
               disabled={isDeleting}

@@ -188,12 +188,12 @@ sequenceDiagram
 
 ## Maturité par conteneur (Phase 4)
 
-| Conteneur | Statut | Périmètre actuel |
-|---|---|---|
-| **API** | MVP | Auth (email + Google OAuth), Chantier (hexagonal complet), Client (CRUD léger), déployée Fly.io + Neon |
-| **Web** | MVP | Login/register, CRUD chantiers + clients, garde de route, Sentry, Cloudflare Pages |
-| **Mobile** | MVP + offline | Login/register, CRUD chantiers + clients, SQLite + outbox + sync worker, Google Sign-In, EAS |
-| **Shared** | Outillage | Génération OpenAPI → TS opérationnelle |
+| Conteneur  | Statut        | Périmètre actuel                                                                                       |
+| ---------- | ------------- | ------------------------------------------------------------------------------------------------------ |
+| **API**    | MVP           | Auth (email + Google OAuth), Chantier (hexagonal complet), Client (CRUD léger), déployée Fly.io + Neon |
+| **Web**    | MVP           | Login/register, CRUD chantiers + clients, garde de route, Sentry, Cloudflare Pages                     |
+| **Mobile** | MVP + offline | Login/register, CRUD chantiers + clients, SQLite + outbox + sync worker, Google Sign-In, EAS           |
+| **Shared** | Outillage     | Génération OpenAPI → TS opérationnelle                                                                 |
 
 Prochaines verticales (cf [ROADMAP.md](../ROADMAP.md)) : Phase 5 Photos/R2, Phase 6 Lots/Tâches, Phase 8 Devis/Facture.
 

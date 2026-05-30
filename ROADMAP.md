@@ -10,14 +10,14 @@
 
 ## Rétroplanning indicatif
 
-| Période | Phases | Cible |
-|---|---|---|
-| Mai 2026 | Phases 0 → 4 ✅ | Fondations + Chantiers + Clients + Offline + OAuth |
-| Mai-juin 2026 | Phase 5 | Photos + R2 |
-| Juin-juillet 2026 | Phases 6 + 7 | Verticale Lots/Tâches + Capture terrain & Métré manuel |
-| Juillet-août 2026 | Phase 8 | Devis + Facture brouillon (édition manuelle) |
-| Septembre 2026 | Phase 9 | Bêta payante V1 — validation critère manuel |
-| Q4 2026 → 2027 | Phases 10+ | V1.1 (UX fluidifiée) / V1.2 (magie LLM si critère levé) / V1.3 / V2 |
+| Période           | Phases          | Cible                                                               |
+| ----------------- | --------------- | ------------------------------------------------------------------- |
+| Mai 2026          | Phases 0 → 4 ✅ | Fondations + Chantiers + Clients + Offline + OAuth                  |
+| Mai-juin 2026     | Phase 5         | Photos + R2                                                         |
+| Juin-juillet 2026 | Phases 6 + 7    | Verticale Lots/Tâches + Capture terrain & Métré manuel              |
+| Juillet-août 2026 | Phase 8         | Devis + Facture brouillon (édition manuelle)                        |
+| Septembre 2026    | Phase 9         | Bêta payante V1 — validation critère manuel                         |
+| Q4 2026 → 2027    | Phases 10+      | V1.1 (UX fluidifiée) / V1.2 (magie LLM si critère levé) / V1.3 / V2 |
 
 ---
 
@@ -79,6 +79,7 @@ CRUD Clients (entité + relation `Chantier → Client`), CRUD sur les 3 platefor
 SQLite via expo-sqlite + Drizzle ORM, schéma local miroir des entités serveur (chantiers, clients, outbox), file d'attente des mutations (outbox), sync via worker (`useSyncWorker` sur AppState + reconnect), UI optimiste via `useOfflineMutation`, indicateur `SyncStatusBar`.
 
 **Patterns actés** :
+
 - queryFn hybride : SQLite synchrone + refresh API en background (ADR 0012)
 - `useOfflineMutation` : optimistic local + outbox push + processOutbox fire-and-forget. Le mobile génère un UUID v4 → l'API l'accepte tel quel via le champ `uuid` (idempotence 409 si collision)
 - Sync worker : event natif `expo-network` + `AppState=active` + polling 5 s en fallback (l'event natif est peu fiable sur iOS lors d'un toggle mode avion). `processOutbox` puis `refreshAll` séquentiels pour éviter la race « refreshAll écrase le cache avant que processOutbox finisse »
@@ -95,6 +96,7 @@ SQLite via expo-sqlite + Drizzle ORM, schéma local miroir des entités serveur 
 KnpUOAuth2ClientBundle + league/oauth2-google. Table `oauth_account` séparée (multi-providers ready). Flow web (redirect Symfony) + flow mobile (expo-auth-session + PKCE → endpoint `/auth/oauth/google/exchange` qui vérifie le `id_token` via `tokeninfo` Google et applique l'auto-link). Idempotence par 409 sur collision UUID.
 
 **Patterns actés (ADR 0013)** :
+
 - Auto-link silencieux par email si `email_verified=true` (Google a déjà validé l'email)
 - Table `oauth_account` extensible (provider varchar) — Apple, GitHub, etc. ajoutables sans migration
 - Ports `OAuthAccountStore`, `UserStore`, `GoogleUserResolver`, `GoogleIdTokenVerifier` pour testabilité (les repos Doctrine sont `final`)

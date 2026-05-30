@@ -21,6 +21,7 @@ Scope = nom d'app (`api`, `web`, `mobile`, `infra`, `ci`) ou bounded context (`c
 **Pas de trailer `Co-Authored-By:`** dans les commits Cordeau (préférence Maxime).
 
 Exemples :
+
 - `feat(chantier): add archivage use case`
 - `feat(lot): introduire ModeFacturation et Estimation`
 - `fix(api): handle null adresse on creation`
@@ -54,6 +55,7 @@ Toute décision structurante → ADR dans `docs/adr/NNNN-titre-court.md` **avant
 ## Trajectoire V1 manuelle → V1.2+ magie ([ADR 0017](../../docs/adr/0017-differer-ia-validation-manuelle.md))
 
 **Aucune dépendance LLM en V1.** Avant toute proposition de feature « IA / vocale / structuration automatique / chrono auto / détection risques », vérifier la trajectoire dans [ROADMAP.md](../../ROADMAP.md) :
+
 - V1 (Phases 5-9) : manuel, pas de LLM, pas de coût variable IA
 - V1.1 : UX fluidifiée, Whisper local (transcription brute offline) possible sans nouvel ADR
 - V1.2 : magie LLM (structuration, récap, descriptifs, chrono geofencé) **conditionnée au critère bêta levé** — nouvel ADR requis sur stack LLM

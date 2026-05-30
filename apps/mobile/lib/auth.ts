@@ -11,7 +11,10 @@ export async function getRefreshToken(): Promise<string | null> {
   return SecureStore.getItemAsync(KEY_REFRESH);
 }
 
-export async function setTokens(token: string, refreshToken: string): Promise<void> {
+export async function setTokens(
+  token: string,
+  refreshToken: string,
+): Promise<void> {
   await Promise.all([
     SecureStore.setItemAsync(KEY_TOKEN, token),
     SecureStore.setItemAsync(KEY_REFRESH, refreshToken),

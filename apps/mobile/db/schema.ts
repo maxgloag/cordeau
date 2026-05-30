@@ -2,7 +2,12 @@ import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export type OutboxEntityType = "chantier" | "client";
 export type OutboxOperation = "create" | "update" | "delete";
-export type OutboxStatus = "pending" | "syncing" | "synced" | "error" | "abandoned";
+export type OutboxStatus =
+  | "pending"
+  | "syncing"
+  | "synced"
+  | "error"
+  | "abandoned";
 
 export const chantiers = sqliteTable("chantiers", {
   id: text("id").primaryKey(),

@@ -18,11 +18,11 @@ Phase 2 (verticale Clients) implique justement de **dupliquer puis généraliser
 
 ### Options évaluées
 
-| Option | Verdict |
-|---|---|
-| **Statu quo** (Grep + Read + Edit) | Fonctionne, mais coûteux en tokens et fragile sur les refactors transverses. Acceptable Phase 1 (création), insuffisant Phase 2+ (évolution) |
-| Outils CLI dédiés (ast-grep, tree-sitter CLI) | Puissants mais non intégrés à Claude Code, friction à chaque usage |
-| **Serena MCP** | Plugin MCP open-source d'Oraios AI exposant des outils sémantiques pilotés par Language Server (Intelephense pour PHP, ts-language-server pour TS). Intégration native Claude Code |
+| Option                                        | Verdict                                                                                                                                                                            |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Statu quo** (Grep + Read + Edit)            | Fonctionne, mais coûteux en tokens et fragile sur les refactors transverses. Acceptable Phase 1 (création), insuffisant Phase 2+ (évolution)                                       |
+| Outils CLI dédiés (ast-grep, tree-sitter CLI) | Puissants mais non intégrés à Claude Code, friction à chaque usage                                                                                                                 |
+| **Serena MCP**                                | Plugin MCP open-source d'Oraios AI exposant des outils sémantiques pilotés par Language Server (Intelephense pour PHP, ts-language-server pour TS). Intégration native Claude Code |
 
 ## Decision
 

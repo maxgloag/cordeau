@@ -11,11 +11,11 @@ Phase 2 introduit la relation **Chantier → Client**. Un chantier peut apparten
 
 Trois options ont été évaluées :
 
-| Option | Verdict |
-|---|---|
-| **FK nullable simple** (`client_id` sur Chantier) | Standard relationnel. Impose un JOIN systématique sur les listes. Coût de lecture modeste mais récurrent, et N+1 facile à introduire via l'ORM |
+| Option                                                                      | Verdict                                                                                                                                               |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FK nullable simple** (`client_id` sur Chantier)                           | Standard relationnel. Impose un JOIN systématique sur les listes. Coût de lecture modeste mais récurrent, et N+1 facile à introduire via l'ORM        |
 | **Value Object `ClientRef` dénormalisé** (`client_id` + `client_nom_cache`) | Lectures sans JOIN, sémantique DDD plus claire (`chantier.lierClient($ref)`). Coût : maintenir la cohérence du cache au renommage et à la suppression |
-| **Table de liaison N-N** | Permettrait plusieurs clients par chantier (copropriété, sous-traitance). Pas de cas d'usage immédiat — YAGNI |
+| **Table de liaison N-N**                                                    | Permettrait plusieurs clients par chantier (copropriété, sous-traitance). Pas de cas d'usage immédiat — YAGNI                                         |
 
 Le mode rigoureux acté en Phase 1 sur Chantier (cf [ADR 0002](0002-architecture-hexagonale.md)) implique que le domaine Chantier porte des value objects métier explicites (`Adresse`, `Surface`, `Statut`). Ajouter un `ClientRef` poursuit cette logique — Chantier ne dépend pas du module Client, il dépend d'une **référence** à un client.
 

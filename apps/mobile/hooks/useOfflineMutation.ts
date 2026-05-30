@@ -22,7 +22,8 @@ export function useOfflineMutation<TPayload extends Record<string, unknown>>(
     try {
       const id = entityId ?? randomUUID();
       options.buildLocal(id, payload);
-      const apiPayload = options.operation === "create" ? { ...payload, uuid: id } : payload;
+      const apiPayload =
+        options.operation === "create" ? { ...payload, uuid: id } : payload;
       pushToOutbox({
         entityType: options.entityType,
         entityId: id,
@@ -32,7 +33,9 @@ export function useOfflineMutation<TPayload extends Record<string, unknown>>(
       void processOutbox(queryClient);
       return id;
     } finally {
-      setTimeout(() => { inFlight.current = false; }, 500);
+      setTimeout(() => {
+        inFlight.current = false;
+      }, 500);
     }
   }
 

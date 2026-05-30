@@ -22,11 +22,21 @@ export default function NewClientScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { control, handleSubmit, formState: { errors } } = useForm<ClientFormValues>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
-      nom: "", email: "", telephone: "",
-      adresseRue: "", adresseCodePostal: "", adresseVille: "", adressePays: "FR", notes: "",
+      nom: "",
+      email: "",
+      telephone: "",
+      adresseRue: "",
+      adresseCodePostal: "",
+      adresseVille: "",
+      adressePays: "FR",
+      notes: "",
     },
   });
 
@@ -36,9 +46,10 @@ export default function NewClientScreen() {
     buildLocal: (entityId, payload) => {
       const localClient: Client = { id: entityId, ...payload };
       upsertClients([localClient]);
-      queryClient.setQueryData(["clients"], (old: Client[] | undefined) =>
-        [...(old ?? []), localClient],
-      );
+      queryClient.setQueryData(["clients"], (old: Client[] | undefined) => [
+        ...(old ?? []),
+        localClient,
+      ]);
     },
   });
 
@@ -62,7 +73,10 @@ export default function NewClientScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, padding: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text
             className="text-2xl text-text mb-6"
             style={{ fontFamily: "BricolageGrotesque_700Bold" }}
