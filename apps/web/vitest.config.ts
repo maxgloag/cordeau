@@ -37,6 +37,19 @@ export default defineConfig({
             provider: playwright(),
             headless: true,
             instances: [{ browser: "chromium" }],
+            // En CI, PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH pointe sur Chrome for Testing
+            // installé depuis le CDN Google (browser-actions/setup-chrome). On le passe
+            // explicitement en executablePath car le headless-shell de Playwright ne
+            // respecte pas cette env var dans les versions 1.50+.
+            ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+              ? {
+                  providerOptions: {
+                    launch: {
+                      executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+                    },
+                  },
+                }
+              : {}),
           },
         },
       },
