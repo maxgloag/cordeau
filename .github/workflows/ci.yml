@@ -95,14 +95,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Chrome for Testing depuis le CDN Google (évite cdn.playwright.dev instable)
+      - name: Setup Chrome for Testing
+        uses: browser-actions/setup-chrome@latest
+        id: setup-chrome
+
       - name: Lint
         run: pnpm --filter @cordeau/web lint
 
-      # Vitest project "browser" (.test.tsx) skip en CI : download Chrome
-      # depuis cdn.playwright.dev hang sur runners GHA Ubuntu 24.04 (cf issue
-      # #48). Les tests browser continuent de tourner en local via `pnpm test`.
-      - name: Test (unit project only)
-        run: pnpm --filter @cordeau/web test --project unit
+      - name: Test
+        run: pnpm --filter @cordeau/web test
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+          PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
 
       - name: Build
         run: pnpm --filter @cordeau/web build
