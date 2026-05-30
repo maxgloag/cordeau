@@ -73,3 +73,4 @@ apps/web/src/test/__screenshots__/
 # Misc
 *.tsbuildinfo
 
+docs/superpowers/
