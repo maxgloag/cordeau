@@ -35,9 +35,7 @@ docker compose up -d        # Postgres + Redis (infra uniquement — PHP géré 
 pnpm install                # à la racine (workspaces pnpm)
 pnpm dev                    # turbo run dev
 
-# API Symfony — toujours via Symfony CLI (lit apps/api/.php-version → PHP 8.5)
-# Exemple : symfony console doctrine:migrations:migrate (depuis apps/api/)
-# Ne pas utiliser `php bin/console` nu : résoudrait PHP 8.2 si autre projet actif
+# API Symfony : toujours `symfony console`, jamais `php bin/console` (voir docs/ENV-SETUP.md)
 
 # Tests / lint / build
 pnpm test

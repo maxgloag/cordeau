@@ -1,7 +1,4 @@
-# Infra uniquement : Postgres + Redis.
-# PHP n'est PAS dans Docker en dev — Symfony CLI lit apps/api/.php-version (8.5)
-# et sélectionne la bonne version automatiquement (symfony console …).
-# Image de prod : apps/api/Dockerfile (FrankenPHP).
+# Infra dev : Postgres + Redis (PHP géré par Symfony CLI — voir docs/ENV-SETUP.md).
 services:
   postgres:
     image: postgres:18-alpine
