@@ -15,13 +15,13 @@ Phase 0 demande un déploiement gratuit des 3 environnements (API, web, mobile) 
 
 Plusieurs options ont été évaluées :
 
-| Option | Verdict |
-|---|---|
-| Oracle Cloud Free Tier (VM ARM) + Coolify | Sign-up bloqué (rejet anti-fraude opaque, problème connu et documenté côté Oracle) |
-| Hébergeurs français gratuits (Scaleway/Clever/OVH/Alwaysdata) | Pas de free tier 24/7 viable. Alwaysdata a un free plan mais 100 Mo de stockage = bloqué dès Phase 1 (`vendor/` Symfony fait déjà ~80 Mo) |
-| Render | Service free s'éteint après 15 min inactif (cold start ~1 min). DB free supprimée après 90 jours. No-go |
-| GCP e2-micro Always Free | Région US uniquement (~150ms latence FR). VM à maintenir comme Oracle |
-| **Fly.io hobby + Neon Postgres free** | Fly a une région Paris (`cdg`), Neon en Frankfurt. Free tier durable, pas de cold start agressif sur Fly Machines, Neon ne supprime pas la DB |
+| Option                                                        | Verdict                                                                                                                                       |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Oracle Cloud Free Tier (VM ARM) + Coolify                     | Sign-up bloqué (rejet anti-fraude opaque, problème connu et documenté côté Oracle)                                                            |
+| Hébergeurs français gratuits (Scaleway/Clever/OVH/Alwaysdata) | Pas de free tier 24/7 viable. Alwaysdata a un free plan mais 100 Mo de stockage = bloqué dès Phase 1 (`vendor/` Symfony fait déjà ~80 Mo)     |
+| Render                                                        | Service free s'éteint après 15 min inactif (cold start ~1 min). DB free supprimée après 90 jours. No-go                                       |
+| GCP e2-micro Always Free                                      | Région US uniquement (~150ms latence FR). VM à maintenir comme Oracle                                                                         |
+| **Fly.io hobby + Neon Postgres free**                         | Fly a une région Paris (`cdg`), Neon en Frankfurt. Free tier durable, pas de cold start agressif sur Fly Machines, Neon ne supprime pas la DB |
 
 **Sur la trajectoire long terme** : à partir du lancement bêta payante, on aura un budget infra (~10-30 €/mois). À ce moment, deux raisons motivent une migration vers un hébergeur français :
 

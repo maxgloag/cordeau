@@ -15,7 +15,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/lib/api";
-import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import {
+  AuthDivider,
+  GoogleSignInButton,
+} from "@/components/auth/GoogleSignInButton";
 
 const schema = z.object({
   email: z.string().min(1, "Email requis").email("Email invalide"),
@@ -29,7 +32,11 @@ export default function LoginScreen() {
   const [isPending, setIsPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", motDePasse: "" },
   });
@@ -115,7 +122,9 @@ export default function LoginScreen() {
                   )}
                 />
                 {errors.email && (
-                  <Text className="text-xs text-destructive mt-1">{errors.email.message}</Text>
+                  <Text className="text-xs text-destructive mt-1">
+                    {errors.email.message}
+                  </Text>
                 )}
               </View>
 
@@ -139,7 +148,9 @@ export default function LoginScreen() {
                   )}
                 />
                 {errors.motDePasse && (
-                  <Text className="text-xs text-destructive mt-1">{errors.motDePasse.message}</Text>
+                  <Text className="text-xs text-destructive mt-1">
+                    {errors.motDePasse.message}
+                  </Text>
                 )}
               </View>
             </View>

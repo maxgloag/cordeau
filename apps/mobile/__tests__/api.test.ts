@@ -1,4 +1,11 @@
-import { login, register, fetchChantiers, fetchChantier, creerChantier, archiverChantier } from "../lib/api";
+import {
+  login,
+  register,
+  fetchChantiers,
+  fetchChantier,
+  creerChantier,
+  archiverChantier,
+} from "../lib/api";
 
 jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn(),
@@ -31,7 +38,14 @@ beforeEach(() => {
 
 describe("auth API", () => {
   it("login envoie email + motDePasse avec X-Client-Type: mobile", async () => {
-    mockFetch.mockResolvedValueOnce(mockResponse(200, { id: "1", email: "a@b.com", token: "tok", refreshToken: "ref" }));
+    mockFetch.mockResolvedValueOnce(
+      mockResponse(200, {
+        id: "1",
+        email: "a@b.com",
+        token: "tok",
+        refreshToken: "ref",
+      }),
+    );
 
     const result = await login("a@b.com", "secret");
 
@@ -50,7 +64,14 @@ describe("auth API", () => {
   });
 
   it("register envoie email + motDePasse", async () => {
-    mockFetch.mockResolvedValueOnce(mockResponse(200, { id: "2", email: "b@b.com", token: "tok2", refreshToken: "ref2" }));
+    mockFetch.mockResolvedValueOnce(
+      mockResponse(200, {
+        id: "2",
+        email: "b@b.com",
+        token: "tok2",
+        refreshToken: "ref2",
+      }),
+    );
 
     await register("b@b.com", "pass");
 
@@ -80,24 +101,41 @@ describe("chantiers API", () => {
   });
 
   it("fetchChantier récupère un chantier par ID", async () => {
-    const chantier = { id: "abc", adresseRue: "1 rue Test", statut: "en_preparation" };
+    const chantier = {
+      id: "abc",
+      adresseRue: "1 rue Test",
+      statut: "en_preparation",
+    };
     mockFetch.mockResolvedValueOnce(mockResponse(200, chantier));
 
     const result = await fetchChantier("abc");
 
-    expect(mockFetch).toHaveBeenCalledWith("http://localhost:8000/api/chantiers/abc", expect.anything());
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:8000/api/chantiers/abc",
+      expect.anything(),
+    );
     expect(result.id).toBe("abc");
   });
 
   it("creerChantier envoie POST avec le payload", async () => {
-    const payload = { adresseRue: "2 av. Main", adresseCodePostal: "75001", adresseVille: "Paris", adressePays: "FR" };
-    mockFetch.mockResolvedValueOnce(mockResponse(200, { id: "new", ...payload, statut: "EN_PREPARATION" }));
+    const payload = {
+      adresseRue: "2 av. Main",
+      adresseCodePostal: "75001",
+      adresseVille: "Paris",
+      adressePays: "FR",
+    };
+    mockFetch.mockResolvedValueOnce(
+      mockResponse(200, { id: "new", ...payload, statut: "EN_PREPARATION" }),
+    );
 
     await creerChantier(payload);
 
     expect(mockFetch).toHaveBeenCalledWith(
       "http://localhost:8000/api/chantiers",
-      expect.objectContaining({ method: "POST", body: JSON.stringify(payload) }),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
     );
   });
 
@@ -106,13 +144,21 @@ describe("chantiers API", () => {
 
     await archiverChantier("xyz");
 
-    expect(mockFetch).toHaveBeenCalledWith("http://localhost:8000/api/chantiers/xyz", expect.objectContaining({ method: "DELETE" }));
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:8000/api/chantiers/xyz",
+      expect.objectContaining({ method: "DELETE" }),
+    );
   });
 
   it("lève une ApiError sur réponse non-ok", async () => {
-    mockFetch.mockResolvedValueOnce(mockResponse(404, { detail: "Chantier introuvable" }));
+    mockFetch.mockResolvedValueOnce(
+      mockResponse(404, { detail: "Chantier introuvable" }),
+    );
 
-    await expect(fetchChantier("unknown")).rejects.toMatchObject({ status: 404, message: "Chantier introuvable" });
+    await expect(fetchChantier("unknown")).rejects.toMatchObject({
+      status: 404,
+      message: "Chantier introuvable",
+    });
   });
 });
 
@@ -125,7 +171,14 @@ describe("auto-refresh sur 401", () => {
 
     mockFetch
       .mockResolvedValueOnce(mockResponse(401, {})) // premier appel → 401
-      .mockResolvedValueOnce(mockResponse(200, { token: "new-token", refreshToken: "new-ref", id: "u", email: "e@e.com" })) // refresh
+      .mockResolvedValueOnce(
+        mockResponse(200, {
+          token: "new-token",
+          refreshToken: "new-ref",
+          id: "u",
+          email: "e@e.com",
+        }),
+      ) // refresh
       .mockResolvedValueOnce(mockResponse(200, [])); // retry
 
     const result = await fetchChantiers();

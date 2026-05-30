@@ -8,9 +8,15 @@ const localStorageMock = (() => {
   const store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { Object.keys(store).forEach(k => delete store[k]); },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      Object.keys(store).forEach((k) => delete store[k]);
+    },
   };
 })();
 
@@ -50,11 +56,18 @@ describe("login", () => {
   it("lève une ApiError en cas de 401", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({ ok: false, status: 401, statusText: "Unauthorized", json: async () => ({}) }),
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+        json: async () => ({}),
+      }),
     );
 
     const { login } = await import("../lib/api");
-    await expect(login("x@x.fr", "wrong")).rejects.toMatchObject({ status: 401 });
+    await expect(login("x@x.fr", "wrong")).rejects.toMatchObject({
+      status: 401,
+    });
   });
 });
 
@@ -70,7 +83,11 @@ describe("fetchChantiers", () => {
     };
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => [chantier] }),
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => [chantier],
+      }),
     );
 
     const { fetchChantiers } = await import("../lib/api");

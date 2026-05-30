@@ -10,7 +10,12 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "@tanstack/react-router", "@tanstack/react-query"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "@tanstack/react-router",
+      "@tanstack/react-query",
+    ],
   },
   test: {
     projects: [
@@ -40,7 +45,12 @@ export default defineConfig({
             // le headless-shell de Playwright 1.50+ (l'env var seule est ignorée).
             provider: playwright(
               process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-                ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } }
+                ? {
+                    launchOptions: {
+                      executablePath:
+                        process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+                    },
+                  }
                 : {},
             ),
             headless: true,

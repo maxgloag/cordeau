@@ -14,11 +14,13 @@ Le cold start offline complet nécessite un build EAS preview (compte Apple Deve
 ## Prérequis
 
 ### Machine de dev
+
 - Docker Desktop lancé (`docker compose up -d` depuis la racine du repo → Postgres + Redis)
 - Node 24 + pnpm installés
 - iPhone et Mac sur **le même réseau Wi-Fi**
 
 ### iPhone
+
 - App **Expo Go** installée depuis l'App Store
 - Wi-Fi activé
 
@@ -78,7 +80,7 @@ Sur l'iPhone : ouvrir l'app **Caméra**, scanner le QR → Expo Go se lance avec
 4. **Critère** : navigation instantanée, données toujours visibles (lectures depuis SQLite via TanStack Query cache + `getAllChantiers`/`getAllClients`)
 5. Pull-to-refresh sur la liste chantiers
 6. **Critère** : pas d'erreur visible, la liste reste affichée (le refresh API silencieux échoue mais le cache tient)
-7. **Critère** : `SyncStatusBar` apparaît en gris : *"Hors-ligne — vos changements seront synchronisés à la reconnexion"*
+7. **Critère** : `SyncStatusBar` apparaît en gris : _"Hors-ligne — vos changements seront synchronisés à la reconnexion"_
 
 ### 4.3 — Création offline d'un chantier
 
@@ -86,7 +88,7 @@ Sur l'iPhone : ouvrir l'app **Caméra**, scanner le QR → Expo Go se lance avec
 
 1. Appuyer sur le + → créer un nouveau chantier (adresse + ville + CP)
 2. **Critère** : le chantier apparaît immédiatement dans la liste (optimistic update)
-3. **Critère** : `SyncStatusBar` passe en **orange** : *"Synchronisation en cours — 1 en attente"*
+3. **Critère** : `SyncStatusBar` passe en **orange** : _"Synchronisation en cours — 1 en attente"_
 
 ### 4.4 — Modification + suppression offline
 
@@ -150,6 +152,7 @@ psql postgresql://cordeau:cordeau@localhost:5432/cordeau \
 Si quelque chose semble bloqué, inspecter SQLite directement via les Expo Dev Tools (`j` dans le terminal expo pour ouvrir le debugger React Native), ou ajouter temporairement un `console.log(getPendingCount(), db.select().from(outbox).all())` dans un écran.
 
 Les états possibles d'une entrée outbox :
+
 - `pending` — en attente d'envoi
 - `syncing` — push en cours
 - `synced` — envoyée avec succès (sera purgée après 7 jours)

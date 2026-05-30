@@ -8,155 +8,155 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthedRouteImport } from './routes/_authed'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
-import { Route as AuthedClientsRouteImport } from './routes/_authed/clients'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as RegisterRouteImport } from "./routes/register";
+import { Route as LoginRouteImport } from "./routes/login";
+import { Route as AuthedRouteImport } from "./routes/_authed";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as AuthedDashboardRouteImport } from "./routes/_authed/dashboard";
+import { Route as AuthedClientsRouteImport } from "./routes/_authed/clients";
 
 const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
+  id: "/register",
+  path: "/register",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+  id: "/login",
+  path: "/login",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AuthedRoute = AuthedRouteImport.update({
-  id: '/_authed',
+  id: "/_authed",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+  id: "/dashboard",
+  path: "/dashboard",
   getParentRoute: () => AuthedRoute,
-} as any)
+} as any);
 const AuthedClientsRoute = AuthedClientsRouteImport.update({
-  id: '/clients',
-  path: '/clients',
+  id: "/clients",
+  path: "/clients",
   getParentRoute: () => AuthedRoute,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/clients': typeof AuthedClientsRoute
-  '/dashboard': typeof AuthedDashboardRoute
+  "/": typeof IndexRoute;
+  "/login": typeof LoginRoute;
+  "/register": typeof RegisterRoute;
+  "/clients": typeof AuthedClientsRoute;
+  "/dashboard": typeof AuthedDashboardRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/clients': typeof AuthedClientsRoute
-  '/dashboard': typeof AuthedDashboardRoute
+  "/": typeof IndexRoute;
+  "/login": typeof LoginRoute;
+  "/register": typeof RegisterRoute;
+  "/clients": typeof AuthedClientsRoute;
+  "/dashboard": typeof AuthedDashboardRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_authed': typeof AuthedRouteWithChildren
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/_authed/clients': typeof AuthedClientsRoute
-  '/_authed/dashboard': typeof AuthedDashboardRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/_authed": typeof AuthedRouteWithChildren;
+  "/login": typeof LoginRoute;
+  "/register": typeof RegisterRoute;
+  "/_authed/clients": typeof AuthedClientsRoute;
+  "/_authed/dashboard": typeof AuthedDashboardRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/clients' | '/dashboard'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/clients' | '/dashboard'
+  fileRoutesByFullPath: FileRoutesByFullPath;
+  fullPaths: "/" | "/login" | "/register" | "/clients" | "/dashboard";
+  fileRoutesByTo: FileRoutesByTo;
+  to: "/" | "/login" | "/register" | "/clients" | "/dashboard";
   id:
-    | '__root__'
-    | '/'
-    | '/_authed'
-    | '/login'
-    | '/register'
-    | '/_authed/clients'
-    | '/_authed/dashboard'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/_authed"
+    | "/login"
+    | "/register"
+    | "/_authed/clients"
+    | "/_authed/dashboard";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AuthedRoute: typeof AuthedRouteWithChildren
-  LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
+  IndexRoute: typeof IndexRoute;
+  AuthedRoute: typeof AuthedRouteWithChildren;
+  LoginRoute: typeof LoginRoute;
+  RegisterRoute: typeof RegisterRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authed': {
-      id: '/_authed'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authed/dashboard': {
-      id: '/_authed/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthedDashboardRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/clients': {
-      id: '/_authed/clients'
-      path: '/clients'
-      fullPath: '/clients'
-      preLoaderRoute: typeof AuthedClientsRouteImport
-      parentRoute: typeof AuthedRoute
-    }
+    "/register": {
+      id: "/register";
+      path: "/register";
+      fullPath: "/register";
+      preLoaderRoute: typeof RegisterRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/login": {
+      id: "/login";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof LoginRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_authed": {
+      id: "/_authed";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof AuthedRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_authed/dashboard": {
+      id: "/_authed/dashboard";
+      path: "/dashboard";
+      fullPath: "/dashboard";
+      preLoaderRoute: typeof AuthedDashboardRouteImport;
+      parentRoute: typeof AuthedRoute;
+    };
+    "/_authed/clients": {
+      id: "/_authed/clients";
+      path: "/clients";
+      fullPath: "/clients";
+      preLoaderRoute: typeof AuthedClientsRouteImport;
+      parentRoute: typeof AuthedRoute;
+    };
   }
 }
 
 interface AuthedRouteChildren {
-  AuthedClientsRoute: typeof AuthedClientsRoute
-  AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedClientsRoute: typeof AuthedClientsRoute;
+  AuthedDashboardRoute: typeof AuthedDashboardRoute;
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedClientsRoute: AuthedClientsRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
-}
+};
 
 const AuthedRouteWithChildren =
-  AuthedRoute._addFileChildren(AuthedRouteChildren)
+  AuthedRoute._addFileChildren(AuthedRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

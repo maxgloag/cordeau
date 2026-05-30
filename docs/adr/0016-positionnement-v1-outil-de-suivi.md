@@ -9,7 +9,7 @@
 
 Trois éléments de la vision Notion d'avril 2026 doivent être réarbitrés à la lumière du brainstorm de mai 2026 :
 
-1. **L'AR de mesure** était posée comme *wow feature V1* — différenciant principal vs Tolteck/Obat. À l'examen, sa valeur réelle pour l'artisan est marginale (un mètre ruban marche déjà bien), son coût d'intégration élevé (ARKit + ARCore + edge cases LiDAR), et son report en V2 ne casse pas la promesse produit dès lors que **la fonction métré existe en saisie manuelle** (cf [ADR 0015](0015-modele-chantier-lots-taches-mesures.md) — entité `Mesure` avec `Source: MANUEL | AR`).
+1. **L'AR de mesure** était posée comme _wow feature V1_ — différenciant principal vs Tolteck/Obat. À l'examen, sa valeur réelle pour l'artisan est marginale (un mètre ruban marche déjà bien), son coût d'intégration élevé (ARKit + ARCore + edge cases LiDAR), et son report en V2 ne casse pas la promesse produit dès lors que **la fonction métré existe en saisie manuelle** (cf [ADR 0015](0015-modele-chantier-lots-taches-mesures.md) — entité `Mesure` avec `Source: MANUEL | AR`).
 
 2. **La facturation électronique conforme PDP** devient obligatoire pour les entreprises au 1er septembre 2026 (réforme française). La vision d'avril prévoyait une Phase 8 « Facturation + conformité » avec audit expert (~2-4 k€). Le brainstorm mai propose de différer cette conformité V2 et de positionner Cordeau V1 comme **outil de suivi** produisant des **pré-documents** (devis et factures exportables non conformes PDP), l'artisan restant maître de sa conformité légale via son outil comptable habituel.
 

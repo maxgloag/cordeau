@@ -1,6 +1,7 @@
 import type { components } from "@cordeau/shared";
 
-export const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:8000";
+export const API_URL =
+  import.meta.env["VITE_API_URL"] ?? "http://localhost:8000";
 
 const TOKEN_KEY = "cordeau_token";
 const REFRESH_TOKEN_KEY = "cordeau_refresh_token";
@@ -48,7 +49,10 @@ async function tryRefresh(): Promise<boolean> {
   try {
     const res = await fetch(`${API_URL}/auth/refresh`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify({ refreshToken }),
     });
     if (!res.ok) {
@@ -66,7 +70,8 @@ async function tryRefresh(): Promise<boolean> {
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const defaultHeaders: Record<string, string> = { Accept: "application/json" };
-  if (init?.body !== undefined) defaultHeaders["Content-Type"] = "application/json";
+  if (init?.body !== undefined)
+    defaultHeaders["Content-Type"] = "application/json";
 
   const token = getToken();
   if (token) defaultHeaders["Authorization"] = `Bearer ${token}`;
@@ -79,17 +84,28 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 401) {
     const refreshed = await tryRefresh();
     if (refreshed) {
-      const retryHeaders = { ...defaultHeaders, Authorization: `Bearer ${getToken() ?? ""}` };
+      const retryHeaders = {
+        ...defaultHeaders,
+        Authorization: `Bearer ${getToken() ?? ""}`,
+      };
       const retry = await fetch(`${API_URL}${path}`, {
         ...init,
         headers: { ...retryHeaders, ...(init?.headers ?? {}) },
       });
       if (!retry.ok) {
-        const error: ApiError = { status: retry.status, message: retry.statusText };
+        const error: ApiError = {
+          status: retry.status,
+          message: retry.statusText,
+        };
         try {
-          const body = (await retry.json()) as { detail?: string; message?: string };
+          const body = (await retry.json()) as {
+            detail?: string;
+            message?: string;
+          };
           error.message = body.detail ?? body.message ?? retry.statusText;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
         throw error;
       }
       if (retry.status === 204) return undefined as T;
@@ -104,7 +120,9 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       const body = (await res.json()) as { detail?: string; message?: string };
       error.message = body.detail ?? body.message ?? res.statusText;
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     throw error;
   }
 
@@ -126,7 +144,10 @@ export async function exchangeOAuthCode(code: string): Promise<UserMe> {
   return { id: data.id, email: data.email };
 }
 
-export async function login(email: string, motDePasse: string): Promise<UserMe> {
+export async function login(
+  email: string,
+  motDePasse: string,
+): Promise<UserMe> {
   const data = await apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, motDePasse }),
@@ -135,7 +156,10 @@ export async function login(email: string, motDePasse: string): Promise<UserMe> 
   return { id: data.id, email: data.email };
 }
 
-export async function register(email: string, motDePasse: string): Promise<UserMe> {
+export async function register(
+  email: string,
+  motDePasse: string,
+): Promise<UserMe> {
   const data = await apiFetch<AuthResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify({ email, motDePasse }),
@@ -177,7 +201,9 @@ export type CreerChantierPayload = {
   clientId?: string | null;
 };
 
-export async function creerChantier(payload: CreerChantierPayload): Promise<Chantier> {
+export async function creerChantier(
+  payload: CreerChantierPayload,
+): Promise<Chantier> {
   return apiFetch<Chantier>("/api/chantiers", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -186,7 +212,10 @@ export async function creerChantier(payload: CreerChantierPayload): Promise<Chan
 
 export type ModifierChantierPayload = Partial<CreerChantierPayload>;
 
-export async function modifierChantier(id: string, payload: ModifierChantierPayload): Promise<Chantier> {
+export async function modifierChantier(
+  id: string,
+  payload: ModifierChantierPayload,
+): Promise<Chantier> {
   return apiFetch<Chantier>(`/api/chantiers/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/merge-patch+json" },
@@ -223,7 +252,9 @@ export type CreerClientPayload = {
   notes?: string | null;
 };
 
-export async function creerClient(payload: CreerClientPayload): Promise<Client> {
+export async function creerClient(
+  payload: CreerClientPayload,
+): Promise<Client> {
   return apiFetch<Client>("/api/clients", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -232,7 +263,10 @@ export async function creerClient(payload: CreerClientPayload): Promise<Client> 
 
 export type ModifierClientPayload = Partial<CreerClientPayload>;
 
-export async function modifierClient(id: string, payload: ModifierClientPayload): Promise<Client> {
+export async function modifierClient(
+  id: string,
+  payload: ModifierClientPayload,
+): Promise<Client> {
   return apiFetch<Client>(`/api/clients/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/merge-patch+json" },

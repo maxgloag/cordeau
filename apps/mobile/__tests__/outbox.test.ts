@@ -45,18 +45,29 @@ describe("Schéma outbox", () => {
 
 describe("OutboxEntry type", () => {
   it("entityType accepte chantier et client", () => {
-    const types: import("../db/schema").OutboxEntityType[] = ["chantier", "client"];
+    const types: import("../db/schema").OutboxEntityType[] = [
+      "chantier",
+      "client",
+    ];
     expect(types).toHaveLength(2);
   });
 
   it("operation accepte create, update, delete", () => {
-    const ops: import("../db/schema").OutboxOperation[] = ["create", "update", "delete"];
+    const ops: import("../db/schema").OutboxOperation[] = [
+      "create",
+      "update",
+      "delete",
+    ];
     expect(ops).toHaveLength(3);
   });
 
   it("status accepte les 5 états du cycle de vie", () => {
     const statuses: import("../db/schema").OutboxStatus[] = [
-      "pending", "syncing", "synced", "error", "abandoned",
+      "pending",
+      "syncing",
+      "synced",
+      "error",
+      "abandoned",
     ];
     expect(statuses).toHaveLength(5);
   });

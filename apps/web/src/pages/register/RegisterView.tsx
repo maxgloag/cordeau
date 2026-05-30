@@ -3,7 +3,10 @@ import { HardHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import {
+  AuthDivider,
+  GoogleSignInButton,
+} from "@/components/auth/GoogleSignInButton";
 
 export type RegisterFormValues = {
   email: string;
@@ -19,7 +22,13 @@ type Props = {
   loginHref: string;
 };
 
-export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHref }: Props) {
+export function RegisterView({
+  form,
+  onSubmit,
+  isPending,
+  errorMessage,
+  loginHref,
+}: Props) {
   const {
     register,
     handleSubmit,
@@ -29,7 +38,10 @@ export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHre
   return (
     <div
       className="flex min-h-screen items-center justify-center px-4"
-      style={{ background: "var(--color-background)", fontFamily: "var(--font-body)" }}
+      style={{
+        background: "var(--color-background)",
+        fontFamily: "var(--font-body)",
+      }}
     >
       <div className="w-full max-w-sm">
         {/* En-tête */}
@@ -67,7 +79,10 @@ export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHre
         <form
           onSubmit={(e) => void handleSubmit(onSubmit)(e)}
           className="rounded-lg border p-6 shadow-sm"
-          style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}
+          style={{
+            background: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+          }}
         >
           {errorMessage && (
             <div
@@ -87,7 +102,14 @@ export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHre
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" style={{ color: "var(--color-text)", fontSize: "0.8rem", fontWeight: 500 }}>
+              <Label
+                htmlFor="email"
+                style={{
+                  color: "var(--color-text)",
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                }}
+              >
                 Adresse email
               </Label>
               <Input
@@ -99,14 +121,24 @@ export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHre
                 aria-invalid={errors.email !== undefined}
               />
               {errors.email && (
-                <p className="text-xs" style={{ color: "var(--color-destructive)" }}>
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--color-destructive)" }}
+                >
                   {errors.email.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="motDePasse" style={{ color: "var(--color-text)", fontSize: "0.8rem", fontWeight: 500 }}>
+              <Label
+                htmlFor="motDePasse"
+                style={{
+                  color: "var(--color-text)",
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                }}
+              >
                 Mot de passe
               </Label>
               <Input
@@ -118,14 +150,24 @@ export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHre
                 aria-invalid={errors.motDePasse !== undefined}
               />
               {errors.motDePasse && (
-                <p className="text-xs" style={{ color: "var(--color-destructive)" }}>
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--color-destructive)" }}
+                >
                   {errors.motDePasse.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="confirmation" style={{ color: "var(--color-text)", fontSize: "0.8rem", fontWeight: 500 }}>
+              <Label
+                htmlFor="confirmation"
+                style={{
+                  color: "var(--color-text)",
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                }}
+              >
                 Confirmer le mot de passe
               </Label>
               <Input
@@ -137,7 +179,10 @@ export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHre
                 aria-invalid={errors.confirmation !== undefined}
               />
               {errors.confirmation && (
-                <p className="text-xs" style={{ color: "var(--color-destructive)" }}>
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--color-destructive)" }}
+                >
                   {errors.confirmation.message}
                 </p>
               )}
@@ -148,15 +193,25 @@ export function RegisterView({ form, onSubmit, isPending, errorMessage, loginHre
             type="submit"
             disabled={isPending}
             className="mt-6 w-full"
-            style={{ background: "var(--color-primary)", color: "var(--color-primary-foreground)" }}
+            style={{
+              background: "var(--color-primary)",
+              color: "var(--color-primary-foreground)",
+            }}
           >
             {isPending ? "Création…" : "Créer mon compte"}
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm" style={{ color: "var(--color-muted)" }}>
+        <p
+          className="mt-4 text-center text-sm"
+          style={{ color: "var(--color-muted)" }}
+        >
           Déjà un compte ?{" "}
-          <a href={loginHref} className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
+          <a
+            href={loginHref}
+            className="font-medium hover:underline"
+            style={{ color: "var(--color-primary)" }}
+          >
             Se connecter
           </a>
         </p>

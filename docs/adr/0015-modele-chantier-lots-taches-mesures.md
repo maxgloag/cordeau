@@ -18,11 +18,11 @@ Sans cette structure, on ne peut pas :
 
 Trois alternatives ont été évaluées :
 
-| Option | Verdict |
-|---|---|
-| **Conserver Chantier plat**, ajouter des champs (mode_facturation, surface_totale, etc.) directement sur Chantier | Simple court terme. Casse dès qu'un chantier a deux modes ou deux postes. Inadapté au métier. Rejeté |
-| **Lot comme aggregate central**, Chantier devient un regroupement léger | Alignement DDD strict avec le brainstorm. Impose un refacto profond des Phases 1-2 (entité Chantier, API, web, mobile). Coût immédiat élevé pour un gain conceptuel pur. Rejeté |
-| **Lot entité fille optionnelle de Chantier** (1-N), mode création express si 0 lot | Extension non destructive : Chantier garde tous ses champs et son API. Le découpage Lot/Tâche n'est imposé que quand l'artisan en a besoin. Compatible avec la discipline V1 manuel (cf [ADR 0017](0017-differer-ia-validation-manuelle.md)). **Retenu** |
+| Option                                                                                                            | Verdict                                                                                                                                                                                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Conserver Chantier plat**, ajouter des champs (mode_facturation, surface_totale, etc.) directement sur Chantier | Simple court terme. Casse dès qu'un chantier a deux modes ou deux postes. Inadapté au métier. Rejeté                                                                                                                                                     |
+| **Lot comme aggregate central**, Chantier devient un regroupement léger                                           | Alignement DDD strict avec le brainstorm. Impose un refacto profond des Phases 1-2 (entité Chantier, API, web, mobile). Coût immédiat élevé pour un gain conceptuel pur. Rejeté                                                                          |
+| **Lot entité fille optionnelle de Chantier** (1-N), mode création express si 0 lot                                | Extension non destructive : Chantier garde tous ses champs et son API. Le découpage Lot/Tâche n'est imposé que quand l'artisan en a besoin. Compatible avec la discipline V1 manuel (cf [ADR 0017](0017-differer-ia-validation-manuelle.md)). **Retenu** |
 
 Cette décision conditionne le code de Phase 6 (Verticale Lots/Tâches), Phase 7 (Capture terrain + Métré manuel) et Phase 8 (Devis + Facture brouillon).
 

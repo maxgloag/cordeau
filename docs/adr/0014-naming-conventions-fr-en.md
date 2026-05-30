@@ -7,7 +7,7 @@
 
 ## Context
 
-Cordeau s'adresse à des artisans BTP français. Le vocabulaire métier (`Chantier`, `Devis`, `Métré`, `TVA`) n'a pas de bon équivalent anglais sans perte sémantique : *site* / *project* / *job* ne couvrent pas *chantier*, *quote* est ambigu, *survey* recouvre mal *métré*. Eric Evans (*Domain-Driven Design*, 2003) défend que le code doit parler la langue du métier — l'*Ubiquitous Language* — pour éviter une traduction permanente entre stakeholders et code, source de bugs sémantiques.
+Cordeau s'adresse à des artisans BTP français. Le vocabulaire métier (`Chantier`, `Devis`, `Métré`, `TVA`) n'a pas de bon équivalent anglais sans perte sémantique : _site_ / _project_ / _job_ ne couvrent pas _chantier_, _quote_ est ambigu, _survey_ recouvre mal _métré_. Eric Evans (_Domain-Driven Design_, 2003) défend que le code doit parler la langue du métier — l'_Ubiquitous Language_ — pour éviter une traduction permanente entre stakeholders et code, source de bugs sémantiques.
 
 [docs/THESAURUS.md](../THESAURUS.md) acte déjà l'ubiquitous language en français côté concepts. [apps/api/CLAUDE.md](../../apps/api/CLAUDE.md) mentionne « Identifiants métier en français : `Chantier`, `Client`, `Devis`, `Facture`, `Metrage` ». Le code livré en Phase 1 et 2 respecte ce principe de fait (`Chantier`, `lierClient`, `proprietaireId`, `creeLe`, `StatutChantier::EN_PREPARATION`, use cases `CreerChantierUseCase`, `ArchiverChantierUseCase`…) mais **aucun document ne fixe la frontière** entre ce qui doit rester en français et ce qui reste en anglais. Trois ambiguïtés non couvertes :
 
@@ -23,24 +23,24 @@ Sans ADR, le risque est qu'à mesure que d'autres bounded contexts arrivent (Dev
 
 Le code suit un **partage par responsabilité**, pas un parti pris uniforme.
 
-| Couche / nature | Langue | Exemples |
-|---|---|---|
-| Entités métier, value objects, agrégats | **FR** | `Chantier`, `ClientRef`, `Adresse`, `Surface`, `Metre` |
-| Énums et valeurs métier | **FR** | `StatutChantier::EN_PREPARATION`, `EtatDevis::BROUILLON` |
-| Use cases (applicatif) | **FR** sur le verbe métier | `CreerChantierUseCase`, `ArchiverChantierUseCase`, `LierClientUseCase` |
-| Méthodes de transition métier sur entités | **FR** | `$chantier->lierClient()`, `$devis->signer()`, `$chantier->archiver()` |
-| Champs d'entité métier (PHP, schémas Drizzle) | **FR** | `proprietaireId`, `creeLe`, `modifieLe`, `nomCache` |
-| Routes API exposées | **FR** au pluriel | `/api/chantiers`, `/api/devis`, `/api/clients` |
-| Tables PostgreSQL et colonnes | **FR** | `chantier`, `client`, `proprietaire_id`, `cree_le` |
-| Repositories, providers, processors, factories | **EN** (primitives framework) + suffixe FR | `ChantierRepository`, `CreerChantierProcessor`, `ChantierFactory` |
-| Interfaces de port | **EN** sur le suffixe | `ChantierRepositoryInterface` |
-| Helpers techniques, utilitaires, types génériques | **EN** | `Maybe<T>`, `Result`, `dateFormatter`, `slugify` |
-| Variables locales courtes, paramètres techniques | **EN** | `$result`, `$count`, `$now`, `$payload` |
-| Tests, mocks, fixtures (noms de classes et méthodes) | **EN** sur le squelette, **FR** sur le sujet | `test_un_chantier_peut_etre_archive`, `ChantierFactory::createOne()` |
-| Composants React, hooks, props | **EN** sur le squelette, **FR** sur le sujet métier | `useChantier()`, `<ChantierCard>`, prop `chantier` |
-| Migrations Doctrine (méthodes du framework) | **EN** | `up()`, `down()`, `getDescription()` |
-| Commentaires, messages d'erreur utilisateur, doc | **FR** | — |
-| Messages d'exception techniques (dev-only) | **FR** acceptable | `TransitionStatutInvalideException` |
+| Couche / nature                                      | Langue                                              | Exemples                                                               |
+| ---------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------- |
+| Entités métier, value objects, agrégats              | **FR**                                              | `Chantier`, `ClientRef`, `Adresse`, `Surface`, `Metre`                 |
+| Énums et valeurs métier                              | **FR**                                              | `StatutChantier::EN_PREPARATION`, `EtatDevis::BROUILLON`               |
+| Use cases (applicatif)                               | **FR** sur le verbe métier                          | `CreerChantierUseCase`, `ArchiverChantierUseCase`, `LierClientUseCase` |
+| Méthodes de transition métier sur entités            | **FR**                                              | `$chantier->lierClient()`, `$devis->signer()`, `$chantier->archiver()` |
+| Champs d'entité métier (PHP, schémas Drizzle)        | **FR**                                              | `proprietaireId`, `creeLe`, `modifieLe`, `nomCache`                    |
+| Routes API exposées                                  | **FR** au pluriel                                   | `/api/chantiers`, `/api/devis`, `/api/clients`                         |
+| Tables PostgreSQL et colonnes                        | **FR**                                              | `chantier`, `client`, `proprietaire_id`, `cree_le`                     |
+| Repositories, providers, processors, factories       | **EN** (primitives framework) + suffixe FR          | `ChantierRepository`, `CreerChantierProcessor`, `ChantierFactory`      |
+| Interfaces de port                                   | **EN** sur le suffixe                               | `ChantierRepositoryInterface`                                          |
+| Helpers techniques, utilitaires, types génériques    | **EN**                                              | `Maybe<T>`, `Result`, `dateFormatter`, `slugify`                       |
+| Variables locales courtes, paramètres techniques     | **EN**                                              | `$result`, `$count`, `$now`, `$payload`                                |
+| Tests, mocks, fixtures (noms de classes et méthodes) | **EN** sur le squelette, **FR** sur le sujet        | `test_un_chantier_peut_etre_archive`, `ChantierFactory::createOne()`   |
+| Composants React, hooks, props                       | **EN** sur le squelette, **FR** sur le sujet métier | `useChantier()`, `<ChantierCard>`, prop `chantier`                     |
+| Migrations Doctrine (méthodes du framework)          | **EN**                                              | `up()`, `down()`, `getDescription()`                                   |
+| Commentaires, messages d'erreur utilisateur, doc     | **FR**                                              | —                                                                      |
+| Messages d'exception techniques (dev-only)           | **FR** acceptable                                   | `TransitionStatutInvalideException`                                    |
 
 **Heuristique de décision en une phrase** : si le concept existe dans le THESAURUS ou pourrait y être ajouté, c'est du métier → FR. Si le concept est dans la documentation du framework (Symfony, API Platform, Doctrine, React, TanStack), c'est de la primitive → EN.
 
@@ -50,17 +50,17 @@ Aucun identifier (classe, méthode, variable, propriété, énum, constante, fic
 
 Translittération canonique à appliquer :
 
-| Avec accent | Sans accent |
-|---|---|
-| `é`, `è`, `ê`, `ë` | `e` |
-| `à`, `â`, `ä` | `a` |
-| `î`, `ï` | `i` |
-| `ô`, `ö` | `o` |
-| `ù`, `û`, `ü` | `u` |
-| `ç` | `c` |
-| `œ` | `oe` |
-| `æ` | `ae` |
-| `ÿ` | `y` |
+| Avec accent        | Sans accent |
+| ------------------ | ----------- |
+| `é`, `è`, `ê`, `ë` | `e`         |
+| `à`, `â`, `ä`      | `a`         |
+| `î`, `ï`           | `i`         |
+| `ô`, `ö`           | `o`         |
+| `ù`, `û`, `ü`      | `u`         |
+| `ç`                | `c`         |
+| `œ`                | `oe`        |
+| `æ`                | `ae`        |
+| `ÿ`                | `y`         |
 
 Les variantes en majuscules suivent la même règle : `É → E`, `À → A`, `Î → I`, `Ô → O`, `Ù → U`, `Ç → C`, `Œ → OE`, `Æ → AE`, `Ÿ → Y`.
 

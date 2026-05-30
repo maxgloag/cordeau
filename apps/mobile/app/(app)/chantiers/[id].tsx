@@ -16,7 +16,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MapPin, Pencil, Archive, Maximize2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { Chantier } from "@/lib/api";
-import { STATUT_LABELS, STATUT_COLORS, chantierSchema, type ChantierFormValues } from "@/lib/chantier";
+import {
+  STATUT_LABELS,
+  STATUT_COLORS,
+  chantierSchema,
+  type ChantierFormValues,
+} from "@/lib/chantier";
 import { ChantierForm } from "@/components/ChantierForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { getAllChantiers, getAllClients, upsertChantiers } from "@/db/queries";
@@ -51,9 +56,20 @@ export default function ChantierDetailScreen() {
     staleTime: Infinity,
   });
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<ChantierFormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ChantierFormValues>({
     resolver: zodResolver(chantierSchema),
-    defaultValues: { adresseRue: "", adresseCodePostal: "", adresseVille: "", surfaceM2: "", clientId: "" },
+    defaultValues: {
+      adresseRue: "",
+      adresseCodePostal: "",
+      adresseVille: "",
+      surfaceM2: "",
+      clientId: "",
+    },
   });
 
   useEffect(() => {
@@ -84,14 +100,16 @@ export default function ChantierDetailScreen() {
 
   function onSubmitEdit(values: ChantierFormValues) {
     if (!id || !chantier) return;
-    const clientNom = clients.find((c) => c.id === values.clientId)?.nom ?? null;
+    const clientNom =
+      clients.find((c) => c.id === values.clientId)?.nom ?? null;
     submitUpdate(
       {
         adresseRue: values.adresseRue,
         adresseCodePostal: values.adresseCodePostal,
         adresseVille: values.adresseVille,
         adressePays: chantier.adressePays,
-        surfaceM2: values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
+        surfaceM2:
+          values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
         statut: chantier.statut,
         clientId: values.clientId || null,
         clientNom,
@@ -135,7 +153,10 @@ export default function ChantierDetailScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{ padding: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
           {!isEditing && (
             <View className="bg-surface rounded-2xl border border-border overflow-hidden mb-6">
               <View style={{ height: 4, backgroundColor: statusColor }} />
@@ -158,14 +179,19 @@ export default function ChantierDetailScreen() {
                     className="rounded-full px-3 py-1.5"
                     style={{ backgroundColor: `${statusColor}18` }}
                   >
-                    <Text className="text-sm font-medium" style={{ color: statusColor }}>
+                    <Text
+                      className="text-sm font-medium"
+                      style={{ color: statusColor }}
+                    >
                       {STATUT_LABELS[chantier.statut] ?? chantier.statut}
                     </Text>
                   </View>
                   {chantier.surfaceM2 != null && (
                     <View className="flex-row items-center gap-1 rounded-full px-3 py-1.5 bg-background border border-border">
                       <Maximize2 size={12} color="#6B6259" />
-                      <Text className="text-sm text-muted">{chantier.surfaceM2} m²</Text>
+                      <Text className="text-sm text-muted">
+                        {chantier.surfaceM2} m²
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -182,14 +208,20 @@ export default function ChantierDetailScreen() {
                 Modifier le chantier
               </Text>
 
-              <ChantierForm control={control} errors={errors} clients={clients} />
+              <ChantierForm
+                control={control}
+                errors={errors}
+                clients={clients}
+              />
 
               <View className="flex-row gap-3">
                 <TouchableOpacity
                   className="flex-1 border border-border rounded-xl py-4 items-center"
                   onPress={() => setIsEditing(false)}
                 >
-                  <Text className="text-base text-muted font-medium">Annuler</Text>
+                  <Text className="text-base text-muted font-medium">
+                    Annuler
+                  </Text>
                 </TouchableOpacity>
                 <SubmitButton
                   label="Enregistrer"
@@ -204,10 +236,15 @@ export default function ChantierDetailScreen() {
             <View className="gap-3">
               <TouchableOpacity
                 className="flex-row items-center gap-3 bg-surface border border-border rounded-xl px-5 py-4"
-                onPress={() => { if (chantier) reset(toFormValues(chantier)); setIsEditing(true); }}
+                onPress={() => {
+                  if (chantier) reset(toFormValues(chantier));
+                  setIsEditing(true);
+                }}
               >
                 <Pencil size={18} color="#B85C2A" />
-                <Text className="text-base text-text font-medium">Modifier le chantier</Text>
+                <Text className="text-base text-text font-medium">
+                  Modifier le chantier
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -215,7 +252,9 @@ export default function ChantierDetailScreen() {
                 onPress={confirmArchive}
               >
                 <Archive size={18} color="#6B6259" />
-                <Text className="text-base text-muted font-medium">Archiver le chantier</Text>
+                <Text className="text-base text-muted font-medium">
+                  Archiver le chantier
+                </Text>
               </TouchableOpacity>
             </View>
           )}

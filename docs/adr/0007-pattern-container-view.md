@@ -11,7 +11,10 @@ Le composant racine de `apps/web` consommait directement `useQuery` de TanStack 
 
 ```tsx
 export default function App() {
-  const { data, isLoading, isError } = useQuery({ queryKey: ["health"], queryFn: fetchHealth });
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["health"],
+    queryFn: fetchHealth,
+  });
   return <main>...</main>;
 }
 ```

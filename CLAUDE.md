@@ -18,12 +18,12 @@ La pensée stratégique et business vit sur Notion (vision, persona, roadmap bus
 
 ## Stack en un coup d'œil
 
-| App | Stack | CLAUDE |
-|---|---|---|
-| `apps/api` | Symfony 7 + API Platform 4 + PHP 8.5 + PostgreSQL 18 + Redis 8 | [apps/api/CLAUDE.md](apps/api/CLAUDE.md) |
-| `apps/web` | Vite + React 19 + TanStack Router/Query + Tailwind v4 + shadcn/ui | [apps/web/CLAUDE.md](apps/web/CLAUDE.md) |
-| `apps/mobile` | Expo SDK 54+ + expo-router + NativeWind + expo-sqlite/Drizzle | [apps/mobile/CLAUDE.md](apps/mobile/CLAUDE.md) |
-| `packages/shared` | Types partagés (générés via openapi-typescript) | — |
+| App               | Stack                                                             | CLAUDE                                         |
+| ----------------- | ----------------------------------------------------------------- | ---------------------------------------------- |
+| `apps/api`        | Symfony 7 + API Platform 4 + PHP 8.5 + PostgreSQL 18 + Redis 8    | [apps/api/CLAUDE.md](apps/api/CLAUDE.md)       |
+| `apps/web`        | Vite + React 19 + TanStack Router/Query + Tailwind v4 + shadcn/ui | [apps/web/CLAUDE.md](apps/web/CLAUDE.md)       |
+| `apps/mobile`     | Expo SDK 54+ + expo-router + NativeWind + expo-sqlite/Drizzle     | [apps/mobile/CLAUDE.md](apps/mobile/CLAUDE.md) |
+| `packages/shared` | Types partagés (générés via openapi-typescript)                   | —                                              |
 
 Détails et justifications dans [docs/adr/](docs/adr/).
 

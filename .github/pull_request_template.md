@@ -4,8 +4,8 @@
 
 ## What
 
-<!-- Résumé en 2-3 bullets de ce qui change -->
--
+## <!-- Résumé en 2-3 bullets de ce qui change -->
+
 -
 
 ## How to test

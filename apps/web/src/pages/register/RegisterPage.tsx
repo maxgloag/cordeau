@@ -47,7 +47,9 @@ export default function RegisterPage() {
       if (apiErr.status === 409) {
         setErrorMessage("Cette adresse email est déjà utilisée.");
       } else if (apiErr.status === 422) {
-        setErrorMessage("Mot de passe invalide (8 car. min., 1 maj., 1 chiffre).");
+        setErrorMessage(
+          "Mot de passe invalide (8 car. min., 1 maj., 1 chiffre).",
+        );
       } else {
         setErrorMessage("Une erreur est survenue. Veuillez réessayer.");
       }

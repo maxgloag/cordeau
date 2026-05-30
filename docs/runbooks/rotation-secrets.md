@@ -13,20 +13,21 @@
 
 Ce runbook est rédigé pour être suivi à la main, mais **la plupart des plateformes ont un MCP officiel** qui permet de déléguer l'exécution à Claude Code. État au 2026-05 :
 
-| Plateforme | MCP officiel | Installé en session ? | Lien |
-|---|---|---|---|
-| **Neon** | ✅ `mcp__Neon__*` (run_sql, get_connection_string, etc.) | ✅ oui | [neon.tech](https://neon.tech/docs/ai/neon-mcp-server) |
-| **Fly.io** | ✅ `mcp__fly__*` (secrets-set, logs, status, etc.) | ✅ oui | [fly.io/docs/mcp](https://fly.io/docs/mcp/) |
-| **Sentry** | ✅ `mcp__sentry__*` (find_dsns, create_dsn, find_projects, etc.) | ✅ oui | [mcp.sentry.dev](https://mcp.sentry.dev/) |
-| **Cloudflare** | ✅ catalogue de 13 MCP (Workers, Pages, DNS…) hébergés sur `*.workers.dev` | ❌ à activer | [blog.cloudflare.com/thirteen-new-mcp-servers](https://blog.cloudflare.com/thirteen-new-mcp-servers-from-cloudflare/) |
-| **Google Cloud** | ✅ MCP officiel avec OAuth client ID/secret | ❌ à activer | [docs.cloud.google.com/mcp](https://docs.cloud.google.com/mcp/overview) |
-| **GitHub Secrets** | (pas de MCP officiel, mais `gh` CLI couvre tout) | — | — |
+| Plateforme         | MCP officiel                                                               | Installé en session ? | Lien                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Neon**           | ✅ `mcp__Neon__*` (run_sql, get_connection_string, etc.)                   | ✅ oui                | [neon.tech](https://neon.tech/docs/ai/neon-mcp-server)                                                                |
+| **Fly.io**         | ✅ `mcp__fly__*` (secrets-set, logs, status, etc.)                         | ✅ oui                | [fly.io/docs/mcp](https://fly.io/docs/mcp/)                                                                           |
+| **Sentry**         | ✅ `mcp__sentry__*` (find_dsns, create_dsn, find_projects, etc.)           | ✅ oui                | [mcp.sentry.dev](https://mcp.sentry.dev/)                                                                             |
+| **Cloudflare**     | ✅ catalogue de 13 MCP (Workers, Pages, DNS…) hébergés sur `*.workers.dev` | ❌ à activer          | [blog.cloudflare.com/thirteen-new-mcp-servers](https://blog.cloudflare.com/thirteen-new-mcp-servers-from-cloudflare/) |
+| **Google Cloud**   | ✅ MCP officiel avec OAuth client ID/secret                                | ❌ à activer          | [docs.cloud.google.com/mcp](https://docs.cloud.google.com/mcp/overview)                                               |
+| **GitHub Secrets** | (pas de MCP officiel, mais `gh` CLI couvre tout)                           | —                     | —                                                                                                                     |
 
 **Recommandation** : Neon + Fly + Sentry sont déjà installés — Claude peut mener la rotation des secrets 1, 2, 3 et 6 en autonomie supervisée. Cloudflare et Google Cloud restent manuels (dashboard rapide, rotation moins fréquente).
 
 **Pour activer un MCP manquant** : généralement éditer `~/.claude/settings.json` ou via slash command `/mcp` selon ton client. Avant d'activer un MCP en prod, **vérifier les permissions** qu'il demande : un MCP avec scope `account:write` sur Cloudflare est plus dangereux qu'un MCP read-only.
 
 **Workflow recommandé** quand tu lances une rotation avec Claude (après activation des MCPs) :
+
 > « Lance le runbook `docs/runbooks/rotation-secrets.md` étape par étape, en utilisant les MCPs disponibles. Stoppe après chaque étape pour validation. »
 
 Pour les étapes sans MCP installé, Claude reste en mode "guide" : il dicte les commandes, tu les exécutes.
@@ -35,13 +36,13 @@ Pour les étapes sans MCP installé, Claude reste en mode "guide" : il dicte les
 
 Avant chaque exécution de ce runbook, **vérifier que les secrets dev et prod sont bien distincts** — sinon une rotation prod n'invalide pas l'usage dev (et vice-versa), et le principe même de la rotation est cassé.
 
-| Secret | Dev | Prod | Comment vérifier |
-|---|---|---|---|
-| `APP_SECRET` | `.env.local` (apps/api) | Fly secrets | Comparer la valeur `.env.local` avec `fly secrets list -a cordeau-api` (digests seuls visibles côté Fly). Si la même chaîne tourne dans les deux, **un seul secret partagé** = anti-pattern |
-| `DATABASE_URL` | `docker-compose` Postgres (`cordeau:cordeau@127.0.0.1`) | Neon Frankfurt (`*.aws.neon.tech`) | Univers disjoints par nature, vérifier juste qu'`.env.local` ne pointe pas accidentellement vers Neon |
-| `GOOGLE_CLIENT_ID/SECRET` | OAuth client "Dev" (origins `localhost`) | OAuth client "Prod" (origins `cordeau-web.pages.dev`) | Google Cloud Console → Credentials → **devrait afficher au moins 2 clients web** (dev + prod). Si un seul : trou de séparation (cf [ADR à venir si formalisé]) |
-| `GOOGLE_OAUTH_AUDIENCES` | Client iOS Dev (bundle ID dev) | Client iOS Prod (bundle ID prod) | Idem mais pour iOS — Phase 1 acceptable d'avoir 1 seul iOS client (pas de `secret`), à séparer Phase 6+ |
-| `SENTRY_DSN` (×3) | Même DSN que prod | DSN unique par projet | Vérifier dans Sentry projects qu'on a soit (a) 3 projets api/web/mobile avec `SENTRY_ENVIRONMENT=development|production` côté code, soit (b) 6 projets distincts. Sans environment ni séparation : pollution garantie |
+| Secret                    | Dev                                                     | Prod                                                  | Comment vérifier                                                                                                                                                                            |
+| ------------------------- | ------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `APP_SECRET`              | `.env.local` (apps/api)                                 | Fly secrets                                           | Comparer la valeur `.env.local` avec `fly secrets list -a cordeau-api` (digests seuls visibles côté Fly). Si la même chaîne tourne dans les deux, **un seul secret partagé** = anti-pattern |
+| `DATABASE_URL`            | `docker-compose` Postgres (`cordeau:cordeau@127.0.0.1`) | Neon Frankfurt (`*.aws.neon.tech`)                    | Univers disjoints par nature, vérifier juste qu'`.env.local` ne pointe pas accidentellement vers Neon                                                                                       |
+| `GOOGLE_CLIENT_ID/SECRET` | OAuth client "Dev" (origins `localhost`)                | OAuth client "Prod" (origins `cordeau-web.pages.dev`) | Google Cloud Console → Credentials → **devrait afficher au moins 2 clients web** (dev + prod). Si un seul : trou de séparation (cf [ADR à venir si formalisé])                              |
+| `GOOGLE_OAUTH_AUDIENCES`  | Client iOS Dev (bundle ID dev)                          | Client iOS Prod (bundle ID prod)                      | Idem mais pour iOS — Phase 1 acceptable d'avoir 1 seul iOS client (pas de `secret`), à séparer Phase 6+                                                                                     |
+| `SENTRY_DSN` (×3)         | Même DSN que prod                                       | DSN unique par projet                                 | Vérifier dans Sentry projects qu'on a soit (a) 3 projets api/web/mobile avec `SENTRY_ENVIRONMENT=development                                                                                | production` côté code, soit (b) 6 projets distincts. Sans environment ni séparation : pollution garantie |
 
 **Si un trou est détecté** : créer le 2e secret (côté dev OU prod selon le cas), mettre à jour les destinations, **puis** lancer la rotation. Pas l'inverse.
 
@@ -49,20 +50,21 @@ Avant chaque exécution de ce runbook, **vérifier que les secrets dev et prod s
 
 ## Inventaire des secrets
 
-| # | Secret | Stocké dans | Plateforme source | Blast radius si fuite |
-|---|---|---|---|---|
-| 1 | `APP_SECRET` | Fly secrets (`cordeau-api`) | généré localement (`openssl rand`) | Forge de tokens CSRF / signatures Symfony |
-| 2 | `DATABASE_URL` | Fly secrets (`cordeau-api`) | Neon console | Accès lecture/écriture DB prod |
-| 3 | `GOOGLE_CLIENT_SECRET` | Fly secrets (`cordeau-api`) | Google Cloud Console | Usurpation de l'OAuth flow Google |
-| 4 | `FLY_API_TOKEN` | GitHub Secrets (repo) | `fly tokens create` | Déploiement arbitraire sur Fly |
-| 5 | `CLOUDFLARE_API_TOKEN` | GitHub Secrets (repo) | Cloudflare dashboard | Déploiement arbitraire sur CF Pages |
-| 6 | `VITE_SENTRY_DSN` | GitHub Secrets (repo) + Cloudflare env | Sentry project (web) | Pollution du projet Sentry web |
-| 7 | `SENTRY_DSN` (api) | Fly secrets (`cordeau-api`) | Sentry project (api) | Pollution du projet Sentry api |
-| 8 | `EXPO_PUBLIC_SENTRY_DSN` | `apps/mobile/eas.json` (committé) | Sentry project (mobile) | Pollution du projet Sentry mobile |
+| #   | Secret                   | Stocké dans                            | Plateforme source                  | Blast radius si fuite                     |
+| --- | ------------------------ | -------------------------------------- | ---------------------------------- | ----------------------------------------- |
+| 1   | `APP_SECRET`             | Fly secrets (`cordeau-api`)            | généré localement (`openssl rand`) | Forge de tokens CSRF / signatures Symfony |
+| 2   | `DATABASE_URL`           | Fly secrets (`cordeau-api`)            | Neon console                       | Accès lecture/écriture DB prod            |
+| 3   | `GOOGLE_CLIENT_SECRET`   | Fly secrets (`cordeau-api`)            | Google Cloud Console               | Usurpation de l'OAuth flow Google         |
+| 4   | `FLY_API_TOKEN`          | GitHub Secrets (repo)                  | `fly tokens create`                | Déploiement arbitraire sur Fly            |
+| 5   | `CLOUDFLARE_API_TOKEN`   | GitHub Secrets (repo)                  | Cloudflare dashboard               | Déploiement arbitraire sur CF Pages       |
+| 6   | `VITE_SENTRY_DSN`        | GitHub Secrets (repo) + Cloudflare env | Sentry project (web)               | Pollution du projet Sentry web            |
+| 7   | `SENTRY_DSN` (api)       | Fly secrets (`cordeau-api`)            | Sentry project (api)               | Pollution du projet Sentry api            |
+| 8   | `EXPO_PUBLIC_SENTRY_DSN` | `apps/mobile/eas.json` (committé)      | Sentry project (mobile)            | Pollution du projet Sentry mobile         |
 
 > **Note** : pas de `JWT_SECRET` chez Cordeau — l'authentification API utilise des sessions Symfony + Bearer tokens auto-signés (selon la config `security.yaml`), pas du JWT signé manuellement. Vérifier dans `fly secrets list -a cordeau-api` avant chaque audit qu'aucun nouveau secret non listé ici n'est apparu.
 
 **Non-rotables / non-critiques** :
+
 - `CLOUDFLARE_ACCOUNT_ID` : identifiant statique du compte, pas un secret au sens strict
 - `GOOGLE_CLIENT_ID` : public par design OAuth (apparaît dans les URLs `accounts.google.com/oauth/authorize`)
 - CI fixtures Postgres (`cordeau:cordeau`, `ci_secret_for_tests`) : constantes de container éphémère, pas des secrets
@@ -82,6 +84,7 @@ gh auth status                                # vérifier le login GH
 ```
 
 Accès dashboards :
+
 - Fly : https://fly.io/dashboard
 - Neon : https://console.neon.tech
 - Cloudflare : https://dash.cloudflare.com
@@ -100,6 +103,7 @@ Du **moins disruptif** au **plus impactant** — pour pouvoir interrompre la rot
 6. **SENTRY_DSN ×3** (étape 6) : non-critique, peut être fait n'importe quand
 
 **Gotchas observés** :
+
 - `fly secrets set` redémarre l'app — donc 5-30s d'indisponibilité par rotation. Les étapes 1, 2 et 5 touchent toutes à `fly secrets set` : les enchaîner si possible (un seul `fly secrets set` multi-args restart) plutôt que d'en faire trois séparés
 - Toujours utiliser **single-quotes** dans `fly secrets set` pour échapper les caractères spéciaux (`@`, `&`, `$`) : `fly secrets set 'KEY=valeur@avec$caractères&speciaux'`
 - Après chaque rotation côté GitHub Secrets, **ne pas relancer manuellement** un workflow — attendre le prochain push ou un trigger explicite
@@ -292,6 +296,6 @@ gitleaks detect --source . --log-opts="--all" --verbose \
 
 À tenir à jour à chaque exécution du runbook — permet de prouver la diligence en cas d'audit.
 
-| Date | Déclencheur | Secrets rotatés | Opérateur | Notes |
-|---|---|---|---|---|
-| _vide_ | _vide_ | _vide_ | _vide_ | _vide_ |
+| Date   | Déclencheur | Secrets rotatés | Opérateur | Notes  |
+| ------ | ----------- | --------------- | --------- | ------ |
+| _vide_ | _vide_      | _vide_          | _vide_    | _vide_ |

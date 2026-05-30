@@ -17,11 +17,13 @@ Les artisans travaillent dans des conditions de réseau dégradé (sous-sols, zo
 Mécanisme :
 
 **Lecture** :
+
 - TanStack Query lit d'abord SQLite local → UI instantanée
 - Quand le réseau est disponible, fetch API → mise à jour du cache local
 - "Stale While Revalidate" : l'utilisateur voit toujours des données, fraîches si possible
 
 **Écriture (Outbox pattern)** :
+
 1. Mutation → écriture synchrone dans SQLite (table cible + table `outbox`)
 2. UI se met à jour immédiatement (optimiste)
 3. Worker background tente de pousser l'outbox vers l'API en loop
@@ -35,12 +37,14 @@ Mécanisme :
 ## Consequences
 
 **Bénéfices** :
+
 - L'app est 100% fonctionnelle sans réseau (critère différenciateur)
 - UI optimiste → ressenti "instantané" même avec une connexion lente
 - SQLite est embarqué dans l'app → pas de serveur à démarrer côté device
 - Drizzle ORM donne des types TypeScript sur le schéma local → cohérence avec le reste de la stack TS
 
 **Trade-offs** :
+
 - Complexité non triviale : deux sources de vérité (SQLite local + API) à maintenir en cohérence
 - L'"outbox pattern" demande une gestion rigoureuse des états (pending, syncing, synced, error)
 - Tests d'intégration plus complexes (simuler offline + reconnexion)

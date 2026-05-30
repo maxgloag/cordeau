@@ -48,11 +48,22 @@ export default function ClientDetailScreen() {
     select: (items) => items.find((c) => c.id === id),
   });
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<ClientFormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
-      nom: "", email: "", telephone: "",
-      adresseRue: "", adresseCodePostal: "", adresseVille: "", adressePays: "FR", notes: "",
+      nom: "",
+      email: "",
+      telephone: "",
+      adresseRue: "",
+      adresseCodePostal: "",
+      adresseVille: "",
+      adressePays: "FR",
+      notes: "",
     },
   });
 
@@ -133,7 +144,10 @@ export default function ClientDetailScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{ padding: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
           {!isEditing && (
             <View className="bg-surface rounded-2xl border border-border overflow-hidden mb-6">
               <View style={{ height: 4, backgroundColor: "#B85C2A" }} />
@@ -148,7 +162,8 @@ export default function ClientDetailScreen() {
                   </Text>
                 </View>
                 <Text className="text-base text-muted mb-3">
-                  {client.adresseRue}, {client.adresseCodePostal} {client.adresseVille}
+                  {client.adresseRue}, {client.adresseCodePostal}{" "}
+                  {client.adresseVille}
                 </Text>
                 {client.email && (
                   <View className="flex-row items-center gap-2 mb-1">
@@ -159,11 +174,15 @@ export default function ClientDetailScreen() {
                 {client.telephone && (
                   <View className="flex-row items-center gap-2">
                     <Phone size={13} color="#9B8F85" />
-                    <Text className="text-sm text-muted">{client.telephone}</Text>
+                    <Text className="text-sm text-muted">
+                      {client.telephone}
+                    </Text>
                   </View>
                 )}
                 {client.notes ? (
-                  <Text className="text-sm text-muted mt-3 italic">{client.notes}</Text>
+                  <Text className="text-sm text-muted mt-3 italic">
+                    {client.notes}
+                  </Text>
                 ) : null}
               </View>
             </View>
@@ -185,7 +204,9 @@ export default function ClientDetailScreen() {
                   className="flex-1 border border-border rounded-xl py-4 items-center"
                   onPress={() => setIsEditing(false)}
                 >
-                  <Text className="text-base text-muted font-medium">Annuler</Text>
+                  <Text className="text-base text-muted font-medium">
+                    Annuler
+                  </Text>
                 </TouchableOpacity>
                 <SubmitButton
                   label="Enregistrer"
@@ -200,10 +221,15 @@ export default function ClientDetailScreen() {
             <View className="gap-3">
               <TouchableOpacity
                 className="flex-row items-center gap-3 bg-surface border border-border rounded-xl px-5 py-4"
-                onPress={() => { if (client) reset(toFormValues(client)); setIsEditing(true); }}
+                onPress={() => {
+                  if (client) reset(toFormValues(client));
+                  setIsEditing(true);
+                }}
               >
                 <Pencil size={18} color="#B85C2A" />
-                <Text className="text-base text-text font-medium">Modifier le client</Text>
+                <Text className="text-base text-text font-medium">
+                  Modifier le client
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -211,7 +237,10 @@ export default function ClientDetailScreen() {
                 onPress={confirmSupprimer}
               >
                 <Trash2 size={18} color="#EF4444" />
-                <Text className="text-base font-medium" style={{ color: "#EF4444" }}>
+                <Text
+                  className="text-base font-medium"
+                  style={{ color: "#EF4444" }}
+                >
                   Supprimer le client
                 </Text>
               </TouchableOpacity>
