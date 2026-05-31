@@ -1,0 +1,48 @@
+# Mises à jour automatisées des dépendances (cf ADR 0019).
+# Trois écosystèmes : pnpm (npm), Composer (api), et GitHub Actions
+# (ce dernier maintient à jour les SHA épinglés dans les workflows).
+version: 2
+
+updates:
+  # JS / TS — workspace pnpm (lockfile à la racine)
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      js-dependencies:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # PHP — API Symfony
+  - package-ecosystem: composer
+    directory: "/apps/api"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(api)
+    groups:
+      php-dependencies:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # GitHub Actions — maintient les SHA épinglés des workflows
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns: ["*"]
+        update-types: [minor, patch]

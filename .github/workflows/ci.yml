@@ -6,23 +6,37 @@ on:
   pull_request:
     branches: [main]
 
+# Moindre privilège par défaut (cf ADR 0019). Élargir par job si nécessaire.
+permissions:
+  contents: read
+
+# Empêche lefthook d'installer des hooks git dans les runners éphémères.
+# Sans cette variable, le script `prepare` du package.json invoque `lefthook install`
+# à chaque `pnpm install`, ce qui écrit inutilement dans .git/hooks/.
+env:
+  LEFTHOOK: "0"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # On annule les runs superflus uniquement sur les PR.
+  # Sur main, les runs se mettent en file (jamais annulés) pour ne pas
+  # interrompre un déploiement / une migration en cours.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   format:
     name: ci / format
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 24
           cache: pnpm
@@ -33,9 +47,36 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+  audit:
+    name: ci / audit deps (js)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Non bloquant au départ : remonte les CVE sans casser les PR sur des
+      # advisories transitives (à durcir une fois le bruit maîtrisé — ADR 0019).
+      - name: pnpm audit
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
+
   api:
     name: ci / api
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: apps/api
@@ -63,10 +104,10 @@ jobs:
           --health-retries=5
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2
         with:
           php-version: "8.5"
           extensions: pdo_pgsql, redis, intl, mbstring
@@ -74,7 +115,7 @@ jobs:
           coverage: none
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: apps/api/vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('apps/api/composer.lock') }}
@@ -82,6 +123,9 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Audit Composer dependencies
+        run: composer audit
 
       - name: Run PHPStan
         run: ./vendor/bin/phpstan analyse --no-progress --error-format=github
@@ -101,30 +145,42 @@ jobs:
   web:
     name: ci / web
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 24
           cache: pnpm
+
+      # Mémoïsation des tâches Turbo entre runs (lint/test/build).
+      # Une PR qui ne touche pas le web rejoue le cache → job quasi instantané.
+      - name: Cache Turbo
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-web-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-turbo-web-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       # Chrome for Testing depuis le CDN Google (évite cdn.playwright.dev instable)
       - name: Setup Chrome for Testing
-        uses: browser-actions/setup-chrome@latest
+        uses: browser-actions/setup-chrome@2e1d749697dd1612b833dba4a722266286fbefcd # v2
         id: setup-chrome
 
       - name: Lint
-        run: pnpm --filter @cordeau/web lint
+        run: pnpm exec turbo run lint --filter=@cordeau/web
 
+      # Test en appel direct (pas via Turbo) : le mode strict de Turbo filtrerait
+      # les variables PLAYWRIGHT_* qui ne sont pas déclarées dans turbo.json.
       - name: Test
         run: pnpm --filter @cordeau/web test
         env:
@@ -132,46 +188,65 @@ jobs:
           PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
 
       - name: Build
-        run: pnpm --filter @cordeau/web build
+        run: pnpm exec turbo run build --filter=@cordeau/web
 
   mobile:
     name: ci / mobile
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 24
           cache: pnpm
+
+      - name: Cache Turbo
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-mobile-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-turbo-mobile-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm --filter @cordeau/mobile lint
+        run: pnpm exec turbo run lint --filter=@cordeau/mobile
 
       - name: Test
-        run: pnpm --filter @cordeau/mobile test
+        run: pnpm exec turbo run test --filter=@cordeau/mobile
 
-      - name: Build check
-        run: pnpm --filter @cordeau/mobile build
+      # Vrai bundling Metro (attrape erreurs de plugins natifs / transformers
+      # babel / résolution de modules que tsc + jest ne voient pas — ADR 0019).
+      # Deux passes séparées : --platform all inclut web (non supporté ici).
+      - name: Bundle check iOS (expo export)
+        run: pnpm --filter @cordeau/mobile exec expo export --platform ios --output-dir "$RUNNER_TEMP/expo-export-ios"
+      - name: Bundle check Android (expo export)
+        run: pnpm --filter @cordeau/mobile exec expo export --platform android --output-dir "$RUNNER_TEMP/expo-export-android"
 
   deploy-api:
     name: deploy / api
-    needs: api
+    needs: [ci-pass]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Sérialise les déploiements API et n'annule jamais un deploy en cours
+    # (protège le release_command de migration — ADR 0019).
+    concurrency:
+      group: deploy-api
+      cancel-in-progress: false
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # master
 
       - name: Deploy to Fly.io
         run: flyctl deploy --remote-only --config fly.toml
@@ -181,18 +256,25 @@ jobs:
 
   deploy-web:
     name: deploy / web
-    needs: web
+    # Attend deploy-api : garantit que l'API (+ ses migrations) est à jour
+    # avant que le front ne soit servi aux utilisateurs (évite une fenêtre
+    # où le web appelle des endpoints pas encore déployés).
+    needs: [ci-pass, deploy-api]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: deploy-web
+      cancel-in-progress: false
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 24
           cache: pnpm
@@ -214,9 +296,14 @@ jobs:
 
   ci-pass:
     name: ci / pass
+    # audit (pnpm) est volontairement absent : continue-on-error sur son step
+    # force result:success même en cas de CVE — il ne peut pas gater ci-pass.
+    # Retirer audit d'ici est la représentation honnête de son statut non-bloquant
+    # (ADR 0019 — à durcir une fois le bruit maîtrisé).
     needs: [format, api, web, mobile]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Check all required jobs passed
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
