@@ -225,9 +225,11 @@ jobs:
 
       # Vrai bundling Metro (attrape erreurs de plugins natifs / transformers
       # babel / résolution de modules que tsc + jest ne voient pas — ADR 0019).
-      # --platform all : couvre iOS ET Android dans le même pass Metro.
-      - name: Bundle check (expo export)
-        run: pnpm --filter @cordeau/mobile exec expo export --platform all --output-dir "$RUNNER_TEMP/expo-export"
+      # Deux passes séparées : --platform all inclut web (non supporté ici).
+      - name: Bundle check iOS (expo export)
+        run: pnpm --filter @cordeau/mobile exec expo export --platform ios --output-dir "$RUNNER_TEMP/expo-export-ios"
+      - name: Bundle check Android (expo export)
+        run: pnpm --filter @cordeau/mobile exec expo export --platform android --output-dir "$RUNNER_TEMP/expo-export-android"
 
   deploy-api:
     name: deploy / api
