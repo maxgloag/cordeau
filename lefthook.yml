@@ -1,0 +1,23 @@
+# Hooks Git locaux (shift-left) — cf ADR 0019.
+# Installé via le script `prepare` (pnpm install lance `lefthook install`).
+# Contournable en urgence avec `git commit --no-verify`.
+
+pre-commit:
+  parallel: true
+  commands:
+    prettier:
+      glob: "*.{ts,tsx,js,jsx,json,md,yml,yaml}"
+      run: pnpm exec prettier --write {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
+
+# Lint/type-check complet au push : plus lourd, donc hors du pre-commit
+# pour ne pas ralentir chaque commit, mais avant que ça parte en CI.
+pre-push:
+  commands:
+    lint:
+      run: pnpm lint

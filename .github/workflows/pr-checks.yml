@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: pr-checks-${{ github.ref }}
   cancel-in-progress: true
@@ -12,19 +15,27 @@ jobs:
   commitlint:
     name: Conventional Commits
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v6
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 24
+          cache: pnpm
 
-      - uses: pnpm/action-setup@v6
-
-      - name: Install commitlint
-        run: pnpm add -g @commitlint/cli @commitlint/config-conventional
+      # Install local (déterministe) plutôt qu'un `pnpm add -g` non versionné.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Lint commits
-        run: NODE_PATH=$(pnpm root -g) commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose
