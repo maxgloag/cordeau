@@ -10,6 +10,12 @@ on:
 permissions:
   contents: read
 
+# Empêche lefthook d'installer des hooks git dans les runners éphémères.
+# Sans cette variable, le script `prepare` du package.json invoque `lefthook install`
+# à chaque `pnpm install`, ce qui écrit inutilement dans .git/hooks/.
+env:
+  LEFTHOOK: "0"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # On annule les runs superflus uniquement sur les PR.
@@ -219,8 +225,9 @@ jobs:
 
       # Vrai bundling Metro (attrape erreurs de plugins natifs / transformers
       # babel / résolution de modules que tsc + jest ne voient pas — ADR 0019).
+      # --platform all : couvre iOS ET Android dans le même pass Metro.
       - name: Bundle check (expo export)
-        run: pnpm --filter @cordeau/mobile exec expo export --platform ios --output-dir "$RUNNER_TEMP/expo-export"
+        run: pnpm --filter @cordeau/mobile exec expo export --platform all --output-dir "$RUNNER_TEMP/expo-export"
 
   deploy-api:
     name: deploy / api
@@ -247,7 +254,10 @@ jobs:
 
   deploy-web:
     name: deploy / web
-    needs: [ci-pass]
+    # Attend deploy-api : garantit que l'API (+ ses migrations) est à jour
+    # avant que le front ne soit servi aux utilisateurs (évite une fenêtre
+    # où le web appelle des endpoints pas encore déployés).
+    needs: [ci-pass, deploy-api]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -284,7 +294,11 @@ jobs:
 
   ci-pass:
     name: ci / pass
-    needs: [format, audit, api, web, mobile]
+    # audit (pnpm) est volontairement absent : continue-on-error sur son step
+    # force result:success même en cas de CVE — il ne peut pas gater ci-pass.
+    # Retirer audit d'ici est la représentation honnête de son statut non-bloquant
+    # (ADR 0019 — à durcir une fois le bruit maîtrisé).
+    needs: [format, api, web, mobile]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
