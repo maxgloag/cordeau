@@ -7,8 +7,11 @@ namespace App\Tests\Integration\Api\Auth\OAuth;
 use App\Auth\Dto\GoogleUserInfo;
 use App\Auth\Exception\GoogleAuthenticationFailedException;
 use App\Auth\Port\GoogleIdTokenVerifier;
+use App\Auth\RegistrationPolicy;
+use App\Entity\User;
 use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -87,6 +90,68 @@ final class GoogleExchangeTest extends WebTestCase
         $count = $em->getRepository(\App\Entity\User::class)->count(['email' => 'reuse@example.com']);
         self::assertSame(1, $count);
         self::assertSame($existing->id->toRfc4122(), $existing->id->toRfc4122());
+    }
+
+    #[Test]
+    public function exchange_renvoie_403_et_ne_cree_aucun_compte_si_self_service_desactive_et_email_inconnu(): void
+    {
+        $httpClient = static::createClient();
+        $container = static::getContainer();
+
+        $container->set(RegistrationPolicy::class, new RegistrationPolicy(false));
+        $container->set(GoogleIdTokenVerifier::class, new class implements GoogleIdTokenVerifier {
+            public function verify(string $idToken): GoogleUserInfo
+            {
+                return new GoogleUserInfo(
+                    sub: 'google-sub-inconnu',
+                    email: 'inconnu@example.com',
+                    emailVerified: true,
+                );
+            }
+        });
+
+        $httpClient->request(
+            'POST',
+            '/auth/oauth/google/exchange',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['idToken' => 'fake']) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(403);
+
+        $em = $container->get(EntityManagerInterface::class);
+        \assert($em instanceof EntityManagerInterface);
+        self::assertSame(0, $em->getRepository(User::class)->count(['email' => 'inconnu@example.com']));
+    }
+
+    #[Test]
+    public function exchange_autorise_le_login_dun_user_existant_meme_si_self_service_desactive(): void
+    {
+        $httpClient = static::createClient();
+        $container = static::getContainer();
+
+        UserFactory::createOne(['email' => 'connu@example.com']);
+
+        $container->set(RegistrationPolicy::class, new RegistrationPolicy(false));
+        $container->set(GoogleIdTokenVerifier::class, new class implements GoogleIdTokenVerifier {
+            public function verify(string $idToken): GoogleUserInfo
+            {
+                return new GoogleUserInfo(
+                    sub: 'google-sub-connu',
+                    email: 'connu@example.com',
+                    emailVerified: true,
+                );
+            }
+        });
+
+        $httpClient->request(
+            'POST',
+            '/auth/oauth/google/exchange',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['idToken' => 'fake']) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(200);
     }
 
     #[Test]

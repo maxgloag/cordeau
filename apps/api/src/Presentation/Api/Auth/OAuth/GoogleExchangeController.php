@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Api\Auth\OAuth;
 
 use App\Auth\Exception\GoogleAuthenticationFailedException;
+use App\Auth\Exception\RegistrationClosedException;
 use App\Auth\Port\GoogleIdTokenVerifier;
 use App\Auth\UseCase\AuthentifierViaGoogleUseCase;
 use App\Entity\AuthToken;
@@ -50,7 +51,11 @@ final class GoogleExchangeController
             return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_UNAUTHORIZED);
         }
 
-        $user = $this->useCase->execute($googleInfo);
+        try {
+            $user = $this->useCase->execute($googleInfo);
+        } catch (RegistrationClosedException $e) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_FORBIDDEN);
+        }
 
         $access = $this->tokenGenerator->generateAccessToken();
         $refresh = $this->tokenGenerator->generateRefreshToken();

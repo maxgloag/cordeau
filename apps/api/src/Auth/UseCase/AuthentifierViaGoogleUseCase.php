@@ -6,8 +6,10 @@ namespace App\Auth\UseCase;
 
 use App\Auth\Dto\GoogleUserInfo;
 use App\Auth\Entity\OAuthAccount;
+use App\Auth\Exception\RegistrationClosedException;
 use App\Auth\Port\OAuthAccountStore;
 use App\Auth\Port\UserStore;
+use App\Auth\RegistrationPolicy;
 use App\Entity\User;
 use Symfony\Component\Uid\Uuid;
 
@@ -24,6 +26,7 @@ final class AuthentifierViaGoogleUseCase
     public function __construct(
         private readonly OAuthAccountStore $oauthAccountStore,
         private readonly UserStore $userStore,
+        private readonly RegistrationPolicy $registrationPolicy,
     ) {
     }
 
@@ -47,6 +50,10 @@ final class AuthentifierViaGoogleUseCase
 
                 return $user;
             }
+        }
+
+        if (!$this->registrationPolicy->selfServiceEnabled()) {
+            throw new RegistrationClosedException('Les inscriptions sont actuellement fermees.');
         }
 
         $user = new User(Uuid::v7(), $googleUser->email, '');
