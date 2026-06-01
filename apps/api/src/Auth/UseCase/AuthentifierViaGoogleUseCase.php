@@ -53,7 +53,7 @@ final class AuthentifierViaGoogleUseCase
         }
 
         if (!$this->registrationPolicy->selfServiceEnabled()) {
-            throw new RegistrationClosedException('Les inscriptions sont actuellement fermees.');
+            throw new RegistrationClosedException('Les inscriptions sont actuellement fermées.');
         }
 
         $user = new User(Uuid::v7(), $googleUser->email, '');

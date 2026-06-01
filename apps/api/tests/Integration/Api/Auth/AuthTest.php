@@ -41,7 +41,8 @@ final class AuthTest extends WebTestCase
     public function register_renvoie_403_et_ne_cree_aucun_compte_quand_self_service_desactive(): void
     {
         $client = static::createClient();
-        static::getContainer()->set(RegistrationPolicy::class, new RegistrationPolicy(false));
+        $container = static::getContainer();
+        $container->set(RegistrationPolicy::class, new RegistrationPolicy(false));
 
         $client->request(
             'POST',
@@ -52,7 +53,7 @@ final class AuthTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(403);
 
-        $em = static::getContainer()->get(EntityManagerInterface::class);
+        $em = $container->get(EntityManagerInterface::class);
         \assert($em instanceof EntityManagerInterface);
         self::assertSame(0, $em->getRepository(User::class)->count(['email' => 'intrus@test.fr']));
     }

@@ -67,7 +67,7 @@ final class CreateUserCommand extends Command
         }
 
         if ($this->userRepository->emailExiste($email)) {
-            $io->error(sprintf('Un compte existe deja avec l\'email %s.', $email));
+            $io->error(sprintf('Un compte existe déjà avec l\'email %s.', $email));
 
             return Command::FAILURE;
         }
@@ -80,10 +80,10 @@ final class CreateUserCommand extends Command
         $user->motDePasseHash = $this->passwordHasher->hashPassword($user, $motDePasse);
         $this->userRepository->save($user);
 
-        $io->success(sprintf('Compte cree : %s', $email));
+        $io->success(sprintf('Compte créé : %s', $email));
         if ($genere) {
-            $io->writeln(sprintf('Mot de passe genere : <comment>%s</comment>', $motDePasse));
-            $io->writeln('Transmettez-le au testeur par un canal sur, puis invitez-le a le changer.');
+            $io->writeln(sprintf('Mot de passe généré : <comment>%s</comment>', $motDePasse));
+            $io->writeln('Transmettez-le au testeur par un canal sûr, puis invitez-le à le changer.');
         }
 
         return Command::SUCCESS;
@@ -91,8 +91,14 @@ final class CreateUserCommand extends Command
 
     private function genererMotDePasse(): string
     {
-        // 18 octets en base64url => respecte les regles register (>=8, majuscule, chiffre tres probable).
-        // On force une majuscule et un chiffre pour garantir la conformite.
-        return 'A1' . rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
+        // Prefixe 'A1' => garantit une majuscule et un chiffre (regles register), puis
+        // 16 caracteres alphanumeriques tires aleatoirement (random_int est cryptographique).
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $motDePasse = 'A1';
+        for ($i = 0; $i < 16; ++$i) {
+            $motDePasse .= $alphabet[random_int(0, \strlen($alphabet) - 1)];
+        }
+
+        return $motDePasse;
     }
 }
