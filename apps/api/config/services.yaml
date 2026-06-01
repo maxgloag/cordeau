@@ -40,5 +40,9 @@ services:
         arguments:
             $allowedAudiencesCsv: '%env(GOOGLE_OAUTH_AUDIENCES)%'
 
+    App\Auth\RegistrationPolicy:
+        arguments:
+            $selfServiceEnabled: '%env(bool:REGISTRATION_SELF_SERVICE_ENABLED)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

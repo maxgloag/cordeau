@@ -58,3 +58,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0017](0017-differer-ia-validation-manuelle.md)     | Différer l'IA : validation manuelle V1, magie V1.2+                        | Accepted |
 | [0018](0018-documentation-architecture-as-code.md)  | Documentation d'architecture as-code (C4 + Mermaid) et enforcement         | Accepted |
 | [0019](0019-durcissement-ci-cd.md)                  | Durcissement de la chaîne CI/CD                                            | Accepted |
+| [0021](0021-acces-restreint-beta.md)                | Accès restreint en bêta privée (kill-switch d'inscription réversible)      | Accepted |

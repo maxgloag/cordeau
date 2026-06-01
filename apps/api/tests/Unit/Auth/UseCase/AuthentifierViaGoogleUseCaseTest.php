@@ -6,8 +6,10 @@ namespace App\Tests\Unit\Auth\UseCase;
 
 use App\Auth\Dto\GoogleUserInfo;
 use App\Auth\Entity\OAuthAccount;
+use App\Auth\Exception\RegistrationClosedException;
 use App\Auth\Port\OAuthAccountStore;
 use App\Auth\Port\UserStore;
+use App\Auth\RegistrationPolicy;
 use App\Auth\UseCase\AuthentifierViaGoogleUseCase;
 use App\Entity\User;
 use PHPUnit\Framework\Attributes\Test;
@@ -33,7 +35,7 @@ final class AuthentifierViaGoogleUseCaseTest extends TestCase
         $userRepo->expects(self::never())->method('findByEmail');
         $userRepo->expects(self::never())->method('save');
 
-        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo);
+        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo, new RegistrationPolicy(true));
 
         $result = $useCase->execute(new GoogleUserInfo(
             sub: 'google-sub-123',
@@ -64,7 +66,7 @@ final class AuthentifierViaGoogleUseCaseTest extends TestCase
             ->willReturn($existingUser);
         $userRepo->expects(self::never())->method('save');
 
-        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo);
+        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo, new RegistrationPolicy(true));
 
         $result = $useCase->execute(new GoogleUserInfo(
             sub: 'google-sub-456',
@@ -92,7 +94,7 @@ final class AuthentifierViaGoogleUseCaseTest extends TestCase
                 return $u->email === 'alice@example.com' && $u->motDePasseHash === '';
             }));
 
-        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo);
+        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo, new RegistrationPolicy(true));
 
         $result = $useCase->execute(new GoogleUserInfo(
             sub: 'google-sub-789',
@@ -102,6 +104,52 @@ final class AuthentifierViaGoogleUseCaseTest extends TestCase
 
         self::assertNotNull($createdUser);
         self::assertSame($createdUser, $result);
+    }
+
+    #[Test]
+    public function refuse_la_creation_dun_nouveau_user_si_self_service_desactive(): void
+    {
+        $oauthRepo = $this->createMock(OAuthAccountStore::class);
+        $oauthRepo->method('findByProviderAndProviderUserId')->willReturn(null);
+        $oauthRepo->expects(self::never())->method('save');
+
+        $userRepo = $this->createMock(UserStore::class);
+        $userRepo->method('findByEmail')->willReturn(null);
+        $userRepo->expects(self::never())->method('save');
+
+        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo, new RegistrationPolicy(false));
+
+        $this->expectException(RegistrationClosedException::class);
+
+        $useCase->execute(new GoogleUserInfo(
+            sub: 'google-sub-inconnu',
+            email: 'inconnu@example.com',
+            emailVerified: true,
+        ));
+    }
+
+    #[Test]
+    public function autorise_le_login_dun_oauth_account_existant_meme_si_self_service_desactive(): void
+    {
+        $existingUser = new User(Uuid::v7(), 'connu@example.com', 'hash');
+        $existingAccount = new OAuthAccount(Uuid::v7(), $existingUser, 'google', 'google-sub-connu', 'connu@example.com');
+
+        $oauthRepo = $this->createMock(OAuthAccountStore::class);
+        $oauthRepo->method('findByProviderAndProviderUserId')->willReturn($existingAccount);
+        $oauthRepo->expects(self::never())->method('save');
+
+        $userRepo = $this->createMock(UserStore::class);
+        $userRepo->expects(self::never())->method('save');
+
+        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo, new RegistrationPolicy(false));
+
+        $result = $useCase->execute(new GoogleUserInfo(
+            sub: 'google-sub-connu',
+            email: 'connu@example.com',
+            emailVerified: true,
+        ));
+
+        self::assertSame($existingUser, $result);
     }
 
     #[Test]
@@ -123,7 +171,7 @@ final class AuthentifierViaGoogleUseCaseTest extends TestCase
         $userRepo->expects(self::once())->method('save');
         $oauthRepo->expects(self::once())->method('save');
 
-        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo);
+        $useCase = new AuthentifierViaGoogleUseCase($oauthRepo, $userRepo, new RegistrationPolicy(true));
 
         $result = $useCase->execute(new GoogleUserInfo(
             sub: 'google-sub-eve',

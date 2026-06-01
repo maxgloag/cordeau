@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Api\Auth\OAuth;
 
 use App\Auth\Exception\GoogleAuthenticationFailedException;
+use App\Auth\Exception\RegistrationClosedException;
 use App\Auth\Port\GoogleUserResolver;
 use App\Auth\UseCase\AuthentifierViaGoogleUseCase;
 use App\Entity\AuthToken;
@@ -38,7 +39,11 @@ final class GoogleCallbackController
             return new RedirectResponse($this->webAppUrl . '/login?oauth_error=provider');
         }
 
-        $user = $this->useCase->execute($googleInfo);
+        try {
+            $user = $this->useCase->execute($googleInfo);
+        } catch (RegistrationClosedException) {
+            return new RedirectResponse($this->webAppUrl . '/login?oauth_error=registration_closed');
+        }
 
         $access = $this->tokenGenerator->generateAccessToken();
         $refresh = $this->tokenGenerator->generateRefreshToken();

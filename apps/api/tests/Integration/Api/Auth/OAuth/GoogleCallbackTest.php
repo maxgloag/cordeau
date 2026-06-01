@@ -8,6 +8,7 @@ use App\Auth\Dto\GoogleUserInfo;
 use App\Auth\Entity\OAuthAccount;
 use App\Auth\Exception\GoogleAuthenticationFailedException;
 use App\Auth\Port\GoogleUserResolver;
+use App\Auth\RegistrationPolicy;
 use App\Auth\Repository\OAuthAccountRepository;
 use App\Infrastructure\Persistence\Doctrine\Auth\Repository\DoctrineUserRepository;
 use App\Tests\Factory\UserFactory;
@@ -127,6 +128,35 @@ final class GoogleCallbackTest extends WebTestCase
         // Pas de nouvel OAuthAccount cree
         $count = $entityManager->getRepository(OAuthAccount::class)->count(['provider' => 'google']);
         self::assertSame(1, $count);
+    }
+
+    #[Test]
+    public function callback_redirect_avec_erreur_et_ne_cree_aucun_compte_si_inscription_fermee(): void
+    {
+        $httpClient = static::createClient();
+        $container = static::getContainer();
+
+        $container->set(RegistrationPolicy::class, new RegistrationPolicy(false));
+        $container->set(GoogleUserResolver::class, new class implements GoogleUserResolver {
+            public function resolveFromCurrentRequest(): GoogleUserInfo
+            {
+                return new GoogleUserInfo(
+                    sub: 'google-sub-ferme',
+                    email: 'ferme@example.com',
+                    emailVerified: true,
+                );
+            }
+        });
+
+        $httpClient->request('GET', '/auth/oauth/google/callback?code=fake&state=fake');
+
+        self::assertResponseRedirects();
+        $location = $httpClient->getResponse()->headers->get('Location') ?? '';
+        self::assertStringContainsString('oauth_error=registration_closed', $location);
+
+        $userRepo = $container->get(DoctrineUserRepository::class);
+        \assert($userRepo instanceof DoctrineUserRepository);
+        self::assertNull($userRepo->findByEmail('ferme@example.com'));
     }
 
     #[Test]
