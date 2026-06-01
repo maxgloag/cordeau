@@ -52,9 +52,9 @@ Points de garde :
 
 Commande `app:user:create <email> [--mot-de-passe=]` (Symfony Console) : crée un `User` avec mot de passe hashé (généré aléatoirement et affiché si non fourni), idempotente sur email existant (erreur explicite). Elle **ne dépend pas** du flag : c'est le canal d'onboarding admin pendant la fermeture.
 
-### Bonus sécurité : `login_throttling`
+### Sécurité connexe : `login_throttling` (suivi séparé)
 
-Activation de `login_throttling` (Symfony Security, `max_attempts: 5`) sur le firewall `main`, adossé à `symfony/rate-limiter`. Ferme le brute-force sur le login. Hors périmètre du contrôle d'accès stricto sensu, mais le même PR touche l'auth — autant fermer la fente tant qu'on y est.
+L'absence de rate limiting sur le login expose au brute-force. C'est un sujet **distinct** du contrôle d'accès (il ne change rien à « qui peut avoir un compte ») et il introduit une dépendance (`symfony/rate-limiter`) plus un test stateful. Pour garder cette décision et son implémentation chirurgicales, le `login_throttling` est traité dans une issue dédiée (**#63**), pas dans cette PR.
 
 ### Alternatives écartées
 
@@ -69,7 +69,7 @@ Activation de `login_throttling` (Symfony Security, `max_attempts: 5`) sur le fi
 - **Auth / tokens** : la garde ne change pas le modèle de tokens (cf [ADR 0003](0003-tokens-opaques-mobile.md)) ; elle empêche seulement l'émission d'un token à un `User` nouvellement créé quand le flag est faux. Le login des comptes existants est volontairement intact.
 - **Données personnelles (RGPD)** : la décision **diminue** la collecte — moins de comptes (donc moins d'emails) créés par des tiers non sollicités. La commande console crée des comptes pour des testeurs ayant consenti à la bêta. Base légale : exécution de la relation de test/contrat bêta.
 - **Points de fuite potentiels** : risque de **divergence entre les deux gardes** (fermer `register` mais oublier l'auto-provisioning OAuth laisserait une porte ouverte). Mitigation : tests d'intégration couvrant explicitement les deux chemins + le maintien du login existant. Risque de **mauvais défaut** (flag à `true` en prod par accident) : défaut `false` au niveau applicatif, et valeur prod posée explicitement via secret Fly.
-- **Brute-force** : `login_throttling` ferme la fente sur le login. `register` étant fermé en prod, sa surface est nulle tant que le flag est faux ; à la réouverture self-service (V1), prévoir un rate limiter dédié sur `register` (noté ci-dessous).
+- **Brute-force** : non couvert par cette décision. `login_throttling` est suivi en #63. `register` étant fermé en prod, sa surface est nulle tant que le flag est faux ; à la réouverture self-service (V1), prévoir un rate limiter dédié sur `register` (noté ci-dessous).
 
 ## Consequences
 
@@ -88,5 +88,6 @@ Activation de `login_throttling` (Symfony Security, `max_attempts: 5`) sur le fi
 **Décisions différées** :
 
 - **Invitation-only** : à introduire si le volume de testeurs dépasse l'onboarding manuel. La commande console en est le germe.
+- **`login_throttling` (anti brute-force)** : suivi en #63, hors de cette PR.
 - **Rate limiter sur `register`** : à ajouter au moment de la réouverture self-service (V1), quand l'endpoint redeviendra public.
 - **Vérification d'email** : hors scope ici ; à trancher avec la réouverture self-service.
