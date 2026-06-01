@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\Auth;
 
+use App\Auth\RegistrationPolicy;
 use App\Entity\AuthToken;
 use App\Entity\User;
 use App\Infrastructure\Persistence\Doctrine\Auth\Repository\DoctrineAuthTokenRepository;
@@ -26,12 +27,17 @@ final class RegisterController
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly TokenGenerator $tokenGenerator,
         private readonly ValidatorInterface $validator,
+        private readonly RegistrationPolicy $registrationPolicy,
     ) {
     }
 
     #[Route('/auth/register', name: 'auth_register', methods: ['POST'])]
     public function __invoke(Request $request): JsonResponse
     {
+        if (!$this->registrationPolicy->selfServiceEnabled()) {
+            return new JsonResponse(['message' => 'Les inscriptions sont actuellement fermées.'], Response::HTTP_FORBIDDEN);
+        }
+
         $body = json_decode((string) $request->getContent(), true);
         if (!\is_array($body)) {
             return new JsonResponse(['message' => 'Corps JSON invalide.'], Response::HTTP_BAD_REQUEST);

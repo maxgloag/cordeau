@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Api\Auth;
 
+use App\Auth\RegistrationPolicy;
+use App\Entity\User;
 use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -32,6 +35,26 @@ final class AuthTest extends WebTestCase
         $data = self::decodeJson((string) $client->getResponse()->getContent());
         self::assertSame('artisan@test.fr', $data['email']);
         self::assertArrayHasKey('id', $data);
+    }
+
+    #[Test]
+    public function register_renvoie_403_et_ne_cree_aucun_compte_quand_self_service_desactive(): void
+    {
+        $client = static::createClient();
+        static::getContainer()->set(RegistrationPolicy::class, new RegistrationPolicy(false));
+
+        $client->request(
+            'POST',
+            '/auth/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['email' => 'intrus@test.fr', 'motDePasse' => 'Password1']) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(403);
+
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        \assert($em instanceof EntityManagerInterface);
+        self::assertSame(0, $em->getRepository(User::class)->count(['email' => 'intrus@test.fr']));
     }
 
     #[Test]
