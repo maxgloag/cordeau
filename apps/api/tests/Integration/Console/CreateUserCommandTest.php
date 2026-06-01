@@ -72,7 +72,9 @@ final class CreateUserCommandTest extends KernelTestCase
         self::assertMatchesRegularExpression('/Mot de passe/i', $output);
 
         // Le mot de passe affiche doit reellement permettre de s'authentifier.
-        self::assertSame(1, preg_match('/Mot de passe[^:]*:\s*(\S+)/i', $output, $m));
+        if (preg_match('/Mot de passe[^:]*:\s*(\S+)/i', $output, $m) !== 1) {
+            self::fail('Le mot de passe genere doit etre affiche dans la sortie.');
+        }
         $motDePasseGenere = $m[1];
 
         $userRepo = self::getContainer()->get(DoctrineUserRepository::class);

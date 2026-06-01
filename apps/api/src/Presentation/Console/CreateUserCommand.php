@@ -48,7 +48,13 @@ final class CreateUserCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $email = (string) $input->getArgument('email');
+        $email = $input->getArgument('email');
+        if (!\is_string($email)) {
+            $io->error('Email invalide.');
+
+            return Command::FAILURE;
+        }
+
         $violations = $this->validator->validate($email, [
             new Assert\NotBlank(),
             new Assert\Email(),
