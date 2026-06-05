@@ -17,3 +17,5 @@
 ###> deptrac/deptrac ###
 /.deptrac.cache
 ###< deptrac/deptrac ###
+
+/config/reference.php
