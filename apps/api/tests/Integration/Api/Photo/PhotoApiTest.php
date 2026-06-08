@@ -43,8 +43,35 @@ final class PhotoApiTest extends WebTestCase
         $body = self::decodeJson($httpClient->getResponse()->getContent() ?: '');
         self::assertArrayHasKey('uploadUrl', $body);
         self::assertArrayHasKey('remoteKey', $body);
-        self::assertStringStartsWith('photos/', $body['remoteKey']);
-        self::assertSame('https://r2.example.com/presigned?sig=test', $body['uploadUrl']);
+        $uploadUrl = $body['uploadUrl'];
+        \assert(\is_string($uploadUrl));
+        $remoteKey = $body['remoteKey'];
+        \assert(\is_string($remoteKey));
+        self::assertSame('https://r2.example.com/presigned?sig=test', $uploadUrl);
+        self::assertStringStartsWith('photos/', $remoteKey);
+    }
+
+    #[Test]
+    public function prepare_chantier_autre_user_retourne_403(): void
+    {
+        $httpClient = static::createClient();
+        $autreUser = UserFactory::createOne();
+        $chantier = ChantierFactory::createOne(['proprietaire' => $autreUser]);
+
+        $user = UserFactory::createOne();
+        $httpClient->loginUser($user->_real());
+
+        $mockStorage = $this->createMock(StorageAdapterInterface::class);
+        static::getContainer()->set(StorageAdapterInterface::class, $mockStorage);
+
+        $httpClient->request(
+            'POST',
+            '/api/photos/prepare',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['chantierId' => $chantier->id->toRfc4122()]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(403);
     }
 
     #[Test]
