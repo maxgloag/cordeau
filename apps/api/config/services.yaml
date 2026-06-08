@@ -44,5 +44,21 @@ services:
         arguments:
             $selfServiceEnabled: '%env(bool:REGISTRATION_SELF_SERVICE_ENABLED)%'
 
+    Aws\S3\S3Client:
+        arguments:
+            -   version: 'latest'
+                region: 'auto'
+                endpoint: '%env(R2_ENDPOINT)%'
+                credentials:
+                    key: '%env(R2_ACCESS_KEY_ID)%'
+                    secret: '%env(R2_SECRET_ACCESS_KEY)%'
+
+    App\Infrastructure\Storage\StorageAdapterInterface:
+        class: App\Infrastructure\Storage\R2StorageAdapter
+        arguments:
+            $s3: '@Aws\S3\S3Client'
+            $bucket: '%env(R2_BUCKET)%'
+            $publicUrl: '%env(R2_PUBLIC_URL)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
