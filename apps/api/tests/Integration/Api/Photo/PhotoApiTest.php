@@ -84,4 +84,35 @@ final class PhotoApiTest extends WebTestCase
         );
         self::assertResponseStatusCodeSame(401);
     }
+
+    #[Test]
+    public function confirm_cree_photo_en_db_et_retourne_resource(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $chantier = ChantierFactory::createOne(['proprietaire' => $user]);
+        $httpClient->loginUser($user->_real());
+
+        $mockStorage = $this->createMock(StorageAdapterInterface::class);
+        $mockStorage->method('getPublicUrl')
+            ->willReturnCallback(fn (string $key) => 'https://photos.example.com/' . $key);
+        static::getContainer()->set(StorageAdapterInterface::class, $mockStorage);
+
+        $httpClient->request(
+            'POST',
+            '/api/photos/confirm',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'remoteKey' => 'photos/test-uuid',
+                'chantierId' => $chantier->id->toRfc4122(),
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(201);
+        $body = self::decodeJson($httpClient->getResponse()->getContent() ?: '');
+        self::assertArrayHasKey('id', $body);
+        self::assertSame('photos/test-uuid', $body['remoteKey']);
+        self::assertSame('https://photos.example.com/photos/test-uuid', $body['photoUrl']);
+        self::assertNull($body['thumbnailUrl']);
+    }
 }
