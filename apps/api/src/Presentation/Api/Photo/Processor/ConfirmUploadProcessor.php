@@ -36,6 +36,7 @@ final class ConfirmUploadProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): PhotoResource
     {
+        \assert($data instanceof ConfirmUploadPayload);
         $user = $this->security->getUser();
         \assert($user instanceof User);
 

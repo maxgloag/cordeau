@@ -30,6 +30,7 @@ final class PrepareUploadProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): PrepareUploadResource
     {
+        \assert($data instanceof PrepareUploadPayload);
         $user = $this->security->getUser();
         \assert($user instanceof User);
 

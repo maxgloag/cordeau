@@ -115,4 +115,40 @@ final class PhotoApiTest extends WebTestCase
         self::assertSame('https://photos.example.com/photos/test-uuid', $body['photoUrl']);
         self::assertNull($body['thumbnailUrl']);
     }
+
+    #[Test]
+    public function confirm_sans_auth_retourne_401(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', '/api/photos/confirm',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: '{"remoteKey":"photos/test","chantierId":"00000000-0000-0000-0000-000000000001"}',
+        );
+        self::assertResponseStatusCodeSame(401);
+    }
+
+    #[Test]
+    public function confirm_chantier_autre_user_retourne_403(): void
+    {
+        $httpClient = static::createClient();
+        $owner = UserFactory::createOne();
+        $autreUser = UserFactory::createOne();
+        $chantier = ChantierFactory::createOne(['proprietaire' => $owner]);
+        $httpClient->loginUser($autreUser->_real());
+
+        $mockStorage = $this->createMock(StorageAdapterInterface::class);
+        static::getContainer()->set(StorageAdapterInterface::class, $mockStorage);
+
+        $httpClient->request(
+            'POST',
+            '/api/photos/confirm',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'remoteKey' => 'photos/test-uuid',
+                'chantierId' => $chantier->id->toRfc4122(),
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(403);
+    }
 }
