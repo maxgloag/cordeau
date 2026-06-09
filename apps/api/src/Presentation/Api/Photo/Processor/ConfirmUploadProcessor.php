@@ -47,6 +47,11 @@ final class ConfirmUploadProcessor implements ProcessorInterface
             throw new AccessDeniedHttpException('Chantier introuvable ou accès refusé.');
         }
 
+        $expectedPrefix = 'photos/' . $user->id->toRfc4122() . '/';
+        if (!str_starts_with($data->remoteKey, $expectedPrefix)) {
+            throw new AccessDeniedHttpException('Clé R2 invalide ou non autorisée.');
+        }
+
         $now = new \DateTimeImmutable();
         $photo = new Photo(
             id: Uuid::v7(),

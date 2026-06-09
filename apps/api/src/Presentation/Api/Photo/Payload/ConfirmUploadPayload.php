@@ -10,6 +10,7 @@ final class ConfirmUploadPayload
 {
     public function __construct(
         #[Assert\NotBlank]
+        #[Assert\Regex(pattern: '/^photos\/[0-9a-f-]{36}\/[0-9a-f-]{36}$/', message: 'Format de clé invalide.')]
         public readonly string $remoteKey,
         #[Assert\NotBlank]
         #[Assert\Uuid]

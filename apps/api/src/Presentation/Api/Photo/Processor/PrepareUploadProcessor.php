@@ -41,7 +41,7 @@ final class PrepareUploadProcessor implements ProcessorInterface
             throw new AccessDeniedHttpException('Chantier introuvable ou accès refusé.');
         }
 
-        $key = 'photos/' . Uuid::v7()->toRfc4122();
+        $key = 'photos/' . $user->id->toRfc4122() . '/' . Uuid::v7()->toRfc4122();
         $uploadUrl = $this->storage->generatePresignedPutUrl($key);
 
         return new PrepareUploadResource(uploadUrl: $uploadUrl, remoteKey: $key);

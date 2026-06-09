@@ -99,12 +99,15 @@ final class PhotoApiTest extends WebTestCase
             ->willReturnCallback(fn (string $key) => 'https://photos.example.com/' . $key);
         static::getContainer()->set(StorageAdapterInterface::class, $mockStorage);
 
+        $userId = $user->_real()->id->toRfc4122();
+        $remoteKey = 'photos/' . $userId . '/00000000-0000-7000-8000-000000000001';
+
         $httpClient->request(
             'POST',
             '/api/photos/confirm',
             server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
             content: json_encode([
-                'remoteKey' => 'photos/test-uuid',
+                'remoteKey' => $remoteKey,
                 'chantierId' => $chantier->id->toRfc4122(),
             ]) ?: '',
         );
@@ -112,8 +115,8 @@ final class PhotoApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(201);
         $body = self::decodeJson($httpClient->getResponse()->getContent() ?: '');
         self::assertArrayHasKey('id', $body);
-        self::assertSame('photos/test-uuid', $body['remoteKey']);
-        self::assertSame('https://photos.example.com/photos/test-uuid', $body['photoUrl']);
+        self::assertSame($remoteKey, $body['remoteKey']);
+        self::assertSame('https://photos.example.com/' . $remoteKey, $body['photoUrl']);
         self::assertNull($body['thumbnailUrl']);
     }
 
@@ -140,12 +143,15 @@ final class PhotoApiTest extends WebTestCase
         $mockStorage = $this->createMock(StorageAdapterInterface::class);
         static::getContainer()->set(StorageAdapterInterface::class, $mockStorage);
 
+        // autreUser envoie une clé appartenant à owner : IDOR doit être refusé
+        $ownerKey = 'photos/' . $owner->_real()->id->toRfc4122() . '/00000000-0000-7000-8000-000000000001';
+
         $httpClient->request(
             'POST',
             '/api/photos/confirm',
             server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
             content: json_encode([
-                'remoteKey' => 'photos/test-uuid',
+                'remoteKey' => $ownerKey,
                 'chantierId' => $chantier->id->toRfc4122(),
             ]) ?: '',
         );
