@@ -5,6 +5,7 @@ includes:
 parameters:
     level: 9
     treatPhpDocTypesAsCertain: false
+    phpVersion: 80500
     paths:
         - src
         - tests
