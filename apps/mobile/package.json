@@ -30,6 +30,7 @@
     "expo-auth-session": "~56.0.13",
     "expo-constants": "~56.0.16",
     "expo-crypto": "~56.0.4",
+    "expo-file-system": "^56.0.7",
     "expo-font": "~56.0.5",
     "expo-image-picker": "^56.0.16",
     "expo-linking": "~56.0.9",
