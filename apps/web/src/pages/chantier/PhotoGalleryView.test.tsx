@@ -42,8 +42,8 @@ describe("PhotoGalleryView", () => {
         onPhotoClick={vi.fn()}
       />,
     );
-    // Two photos with thumbnailUrl → two img elements (alt="" → use css selector)
-    const imgs = await screen.locator.locator("img").all();
+    // Two photos with thumbnailUrl → two img elements (alt="" → use container)
+    const imgs = screen.container.querySelectorAll("img");
     expect(imgs).toHaveLength(2);
   });
 

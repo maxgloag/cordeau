@@ -1,4 +1,5 @@
 import { Plus, Pencil, Archive, MapPin, Maximize2, User } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -259,12 +260,14 @@ export function DashboardView({
                         style={{ color: "var(--color-primary)" }}
                       />
                       <div>
-                        <p
-                          className="font-medium"
+                        <Link
+                          to="/chantiers/$id"
+                          params={{ id: c.id }}
+                          className="font-medium hover:text-blue-600 hover:underline"
                           style={{ color: "var(--color-text)" }}
                         >
                           {c.adresseRue}
-                        </p>
+                        </Link>
                         <p
                           className="text-xs"
                           style={{ color: "var(--color-muted)" }}

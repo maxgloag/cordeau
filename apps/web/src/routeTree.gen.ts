@@ -15,6 +15,7 @@ import { Route as AuthedRouteImport } from "./routes/_authed";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as AuthedDashboardRouteImport } from "./routes/_authed/dashboard";
 import { Route as AuthedClientsRouteImport } from "./routes/_authed/clients";
+import { Route as AuthedChantiersIdRouteImport } from "./routes/_authed/chantiers.$id";
 
 const RegisterRoute = RegisterRouteImport.update({
   id: "/register",
@@ -45,6 +46,11 @@ const AuthedClientsRoute = AuthedClientsRouteImport.update({
   path: "/clients",
   getParentRoute: () => AuthedRoute,
 } as any);
+const AuthedChantiersIdRoute = AuthedChantiersIdRouteImport.update({
+  id: "/chantiers/$id",
+  path: "/chantiers/$id",
+  getParentRoute: () => AuthedRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   "/register": typeof RegisterRoute;
   "/clients": typeof AuthedClientsRoute;
   "/dashboard": typeof AuthedDashboardRoute;
+  "/chantiers/$id": typeof AuthedChantiersIdRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   "/register": typeof RegisterRoute;
   "/clients": typeof AuthedClientsRoute;
   "/dashboard": typeof AuthedDashboardRoute;
+  "/chantiers/$id": typeof AuthedChantiersIdRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -68,12 +76,25 @@ export interface FileRoutesById {
   "/register": typeof RegisterRoute;
   "/_authed/clients": typeof AuthedClientsRoute;
   "/_authed/dashboard": typeof AuthedDashboardRoute;
+  "/_authed/chantiers/$id": typeof AuthedChantiersIdRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/login" | "/register" | "/clients" | "/dashboard";
+  fullPaths:
+    | "/"
+    | "/login"
+    | "/register"
+    | "/clients"
+    | "/dashboard"
+    | "/chantiers/$id";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/login" | "/register" | "/clients" | "/dashboard";
+  to:
+    | "/"
+    | "/login"
+    | "/register"
+    | "/clients"
+    | "/dashboard"
+    | "/chantiers/$id";
   id:
     | "__root__"
     | "/"
@@ -81,7 +102,8 @@ export interface FileRouteTypes {
     | "/login"
     | "/register"
     | "/_authed/clients"
-    | "/_authed/dashboard";
+    | "/_authed/dashboard"
+    | "/_authed/chantiers/$id";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -135,17 +157,26 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthedClientsRouteImport;
       parentRoute: typeof AuthedRoute;
     };
+    "/_authed/chantiers/$id": {
+      id: "/_authed/chantiers/$id";
+      path: "/chantiers/$id";
+      fullPath: "/chantiers/$id";
+      preLoaderRoute: typeof AuthedChantiersIdRouteImport;
+      parentRoute: typeof AuthedRoute;
+    };
   }
 }
 
 interface AuthedRouteChildren {
   AuthedClientsRoute: typeof AuthedClientsRoute;
   AuthedDashboardRoute: typeof AuthedDashboardRoute;
+  AuthedChantiersIdRoute: typeof AuthedChantiersIdRoute;
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedClientsRoute: AuthedClientsRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedChantiersIdRoute: AuthedChantiersIdRoute,
 };
 
 const AuthedRouteWithChildren =
