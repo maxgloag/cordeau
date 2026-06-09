@@ -23,7 +23,6 @@ export function ChantierDetailPage() {
 
   return (
     <ChantierDetailView
-      chantierId={id}
       photos={photosList}
       uploads={uploads}
       isLoading={isLoading}

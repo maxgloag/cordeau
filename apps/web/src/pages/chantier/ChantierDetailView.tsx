@@ -5,7 +5,6 @@ import { PhotoGalleryView } from "./PhotoGalleryView";
 import { PhotoLightbox } from "./PhotoLightbox";
 
 type Props = {
-  chantierId: string;
   photos: Photo[];
   uploads: FileUploadState[];
   isLoading: boolean;
@@ -14,7 +13,6 @@ type Props = {
 };
 
 export function ChantierDetailView({
-  chantierId: _chantierId,
   photos,
   uploads,
   isLoading,
