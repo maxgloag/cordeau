@@ -108,6 +108,86 @@ export interface paths {
         patch: operations["api_clients_id_patch"];
         trace?: never;
     };
+    "/api/chantiers/{chantierId}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of Photo resources.
+         * @description Retrieves the collection of Photo resources.
+         */
+        get: operations["api_chantiers_chantierIdphotos_get_collection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/photos/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Photo resource.
+         * @description Creates a Photo resource.
+         */
+        post: operations["api_photosconfirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/photos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Removes the Photo resource.
+         * @description Removes the Photo resource.
+         */
+        delete: operations["api_photos_id_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/photos/prepare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a PrepareUploadResource resource.
+         * @description Creates a PrepareUploadResource resource.
+         */
+        post: operations["api_photosprepare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -337,6 +417,43 @@ export interface components {
             });
             "@id": string;
             "@type": string;
+        };
+        Photo: {
+            id?: string;
+            chantierId?: string;
+            lotId?: string | null;
+            tacheId?: string | null;
+            remoteKey?: string;
+            photoUrl?: string;
+            thumbnailUrl?: string | null;
+            creeLe?: string;
+        };
+        "Photo.ConfirmUploadPayload": {
+            remoteKey: string;
+            /** Format: uuid */
+            chantierId: string;
+        };
+        "Photo.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            chantierId?: string;
+            lotId?: string | null;
+            tacheId?: string | null;
+            remoteKey?: string;
+            photoUrl?: string;
+            thumbnailUrl?: string | null;
+            creeLe?: string;
+        };
+        PrepareUploadResource: {
+            uploadUrl?: string;
+            remoteKey?: string;
+        };
+        "PrepareUploadResource.PrepareUploadPayload": {
+            /** Format: uuid */
+            chantierId: string;
+        };
+        "PrepareUploadResource.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            uploadUrl?: string;
+            remoteKey?: string;
         };
     };
     responses: never;
@@ -733,6 +850,165 @@ export interface operations {
             };
             /** @description Not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_chantiers_chantierIdphotos_get_collection: {
+        parameters: {
+            query?: {
+                /** @description The collection page number */
+                page?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Photo identifier */
+                chantierId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Photo collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Photo"][];
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
+                        member: components["schemas"]["Photo.jsonld"][];
+                    };
+                };
+            };
+        };
+    };
+    api_photosconfirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new Photo resource */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Photo.ConfirmUploadPayload"];
+                "application/ld+json": components["schemas"]["Photo.ConfirmUploadPayload"];
+            };
+        };
+        responses: {
+            /** @description Photo resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Photo"];
+                    "application/ld+json": components["schemas"]["Photo.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_photos_id_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Photo identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Photo resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_photosprepare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new PrepareUploadResource resource */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrepareUploadResource.PrepareUploadPayload"];
+                "application/ld+json": components["schemas"]["PrepareUploadResource.PrepareUploadPayload"];
+            };
+        };
+        responses: {
+            /** @description PrepareUploadResource resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrepareUploadResource"];
+                    "application/ld+json": components["schemas"]["PrepareUploadResource.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
