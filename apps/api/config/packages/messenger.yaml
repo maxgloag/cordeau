@@ -5,6 +5,7 @@ framework:
 
         routing:
             App\Messenger\Message\GenerateThumbnailMessage: async
+            App\Messenger\Message\DeleteR2ObjectMessage: async
 
 when@test:
     framework:

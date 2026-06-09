@@ -7,6 +7,7 @@ namespace App\Presentation\Api\Photo\Resource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use App\Photo\Entity\Photo;
 use App\Presentation\Api\Photo\Payload\ConfirmUploadPayload;
@@ -26,6 +27,9 @@ use App\Presentation\Api\Photo\Provider\PhotoItemProvider;
         ),
         new GetCollection(
             uriTemplate: '/chantiers/{chantierId}/photos',
+            uriVariables: [
+                'chantierId' => new Link(parameterName: 'chantierId'),
+            ],
             provider: PhotoCollectionProvider::class,
         ),
         new Delete(

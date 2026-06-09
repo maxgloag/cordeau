@@ -6,6 +6,7 @@ namespace App\Tests\Integration\Api\Photo;
 
 use App\Infrastructure\Storage\StorageAdapterInterface;
 use App\Tests\Factory\ChantierFactory;
+use App\Tests\Factory\PhotoFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
 use PHPUnit\Framework\Attributes\Test;
@@ -150,5 +151,45 @@ final class PhotoApiTest extends WebTestCase
         );
 
         self::assertResponseStatusCodeSame(403);
+    }
+
+    #[Test]
+    public function get_collection_retourne_les_photos_du_chantier(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $chantier = ChantierFactory::createOne(['proprietaire' => $user]);
+        $autreChantier = ChantierFactory::createOne(['proprietaire' => $user]);
+        $httpClient->loginUser($user->_real());
+
+        PhotoFactory::createMany(3, ['chantierId' => $chantier->id, 'proprietaire' => $user]);
+        PhotoFactory::createOne(['chantierId' => $autreChantier->id, 'proprietaire' => $user]);
+
+        $httpClient->request('GET', '/api/chantiers/' . $chantier->id->toRfc4122() . '/photos',
+            server: ['HTTP_ACCEPT' => 'application/json'],
+        );
+
+        self::assertResponseStatusCodeSame(200);
+        $body = self::decodeJson($httpClient->getResponse()->getContent() ?: '');
+        self::assertCount(3, $body);
+    }
+
+    #[Test]
+    public function delete_supprime_la_photo_de_la_db(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $photo = PhotoFactory::createOne(['proprietaire' => $user]);
+        $httpClient->loginUser($user->_real());
+
+        $mockStorage = $this->createMock(StorageAdapterInterface::class);
+        $mockStorage->expects($this->never())->method('delete'); // deletion is async
+        static::getContainer()->set(StorageAdapterInterface::class, $mockStorage);
+
+        $httpClient->request('DELETE', '/api/photos/' . $photo->id->toRfc4122(),
+            server: ['HTTP_ACCEPT' => 'application/json'],
+        );
+
+        self::assertResponseStatusCodeSame(204);
     }
 }
