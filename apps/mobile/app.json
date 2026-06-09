@@ -40,7 +40,14 @@
       "expo-router",
       "expo-secure-store",
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Cordeau accède à vos photos pour les rattacher à vos chantiers.",
+          "cameraPermission": "Cordeau accède à l'appareil photo pour photographier vos chantiers."
+        }
+      ]
     ]
   }
 }
