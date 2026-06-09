@@ -4,9 +4,9 @@
   "main": "expo-router/entry",
   "private": true,
   "scripts": {
-    "dev": "expo start --dev-client",
-    "android": "expo start --dev-client --android",
-    "ios": "expo start --dev-client --ios",
+    "dev": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
     "lint": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "type-check": "tsc --noEmit",
@@ -51,7 +51,6 @@
     "react-native-safe-area-context": "~5.8.0",
     "react-native-screens": "~4.25.2",
     "react-native-svg": "~15.15.5",
-    "react-native-worklets": "~0.8.3",
     "tailwindcss": "^3.4.19",
     "zod": "^4.4.3"
   },

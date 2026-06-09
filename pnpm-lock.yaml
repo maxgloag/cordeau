@@ -127,9 +127,6 @@ importers:
       react-native-svg:
         specifier: ~15.15.5
         version: 15.15.5(react-native@0.85.3(@babel/core@7.29.7)(@react-native/jest-preset@0.85.3(@babel/core@7.29.7)(react@19.1.0))(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.1.8)(react@19.1.0))(react@19.1.0)
-      react-native-worklets:
-        specifier: ~0.8.3
-        version: 0.8.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/jest-preset@0.85.3(@babel/core@7.29.7)(react@19.1.0))(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.1.8)(react@19.1.0))(react@19.1.0)
       tailwindcss:
         specifier: ^3.4.19
         version: 3.4.19(tsx@4.22.0)(yaml@2.8.4)
@@ -7098,11 +7095,13 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.7
       '@babel/helper-plugin-utils': 7.29.7
+    optional: true
 
   '@babel/plugin-transform-react-jsx-source@7.27.1(@babel/core@7.29.7)':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/helper-plugin-utils': 7.29.7
+    optional: true
 
   '@babel/plugin-transform-react-jsx@7.28.6(@babel/core@7.29.7)':
     dependencies:
@@ -7125,6 +7124,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.7
       '@babel/helper-plugin-utils': 7.29.7
+    optional: true
 
   '@babel/plugin-transform-runtime@7.29.0(@babel/core@7.29.7)':
     dependencies:
@@ -8609,6 +8609,7 @@ snapshots:
       react-refresh: 0.14.2
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@react-native/codegen@0.85.3(@babel/core@7.29.7)':
     dependencies:
@@ -8689,6 +8690,7 @@ snapshots:
       nullthrows: 1.1.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@react-native/metro-config@0.85.3(@babel/core@7.29.7)':
     dependencies:
@@ -8699,6 +8701,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
+    optional: true
 
   '@react-native/normalize-colors@0.85.3': {}
 
@@ -12452,6 +12455,7 @@ snapshots:
       semver: 7.8.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   react-native@0.85.3(@babel/core@7.29.7)(@react-native/jest-preset@0.85.3(@babel/core@7.29.7)(react@19.1.0))(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.1.8)(react@19.1.0):
     dependencies:
