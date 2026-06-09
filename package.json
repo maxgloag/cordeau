@@ -16,7 +16,8 @@
     "type-check": "turbo run type-check",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore --ignore-path .prettierignore",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "postinstall": "sh scripts/patch-expo-cli.sh"
   },
   "pnpm": {
     "overrides": {
