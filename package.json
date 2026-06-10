@@ -16,15 +16,14 @@
     "type-check": "turbo run type-check",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore --ignore-path .prettierignore",
-    "prepare": "lefthook install",
-    "postinstall": "sh scripts/patch-expo-cli.sh"
+    "prepare": "lefthook install"
   },
   "pnpm": {
     "overrides": {
-      "react": "19.1.0",
-      "react-dom": "19.1.0",
-      "@types/react": "19.1.8",
-      "@types/react-dom": "19.1.5"
+      "react": "19.2.3",
+      "react-dom": "19.2.3",
+      "@types/react": "^19.2.0",
+      "@types/react-dom": "^19.2.0"
     },
     "peerDependencyRules": {
       "ignoreMissing": [

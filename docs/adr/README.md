@@ -59,3 +59,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0018](0018-documentation-architecture-as-code.md)  | Documentation d'architecture as-code (C4 + Mermaid) et enforcement         | Accepted |
 | [0019](0019-durcissement-ci-cd.md)                  | Durcissement de la chaîne CI/CD                                            | Accepted |
 | [0021](0021-acces-restreint-beta.md)                | Accès restreint en bêta privée (kill-switch d'inscription réversible)      | Accepted |
+| [0022](0022-monorepo-pnpm-hoisting-metro.md)        | Hoisting pnpm pour le toolchain Metro (monorepo)                           | Accepted |
