@@ -64,4 +64,24 @@ describe("usePhotoUpload", () => {
       "chantier-id",
     );
   });
+
+  it("ne confirme pas si le PUT R2 est refusé", async () => {
+    vi.mocked(api.prepareUpload).mockResolvedValue({
+      uploadUrl: "https://r2.example.com/put?sig=x",
+      remoteKey: "photos/test-key",
+    });
+    (g.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: false,
+      status: 403,
+    });
+
+    const { result } = await renderHook(() => usePhotoUpload("chantier-id"), {
+      wrapper,
+    });
+
+    const file = new File(["img"], "photo.jpg", { type: "image/jpeg" });
+    await result.current.upload([file]);
+
+    expect(api.confirmUpload).not.toHaveBeenCalled();
+  });
 });

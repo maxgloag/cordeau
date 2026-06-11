@@ -40,11 +40,14 @@ export function usePhotoUpload(chantierId: string) {
             contentType,
           );
 
-          await fetch(uploadUrl, {
+          const putResponse = await fetch(uploadUrl, {
             method: "PUT",
             body: file,
             headers: { "Content-Type": contentType },
           });
+          if (!putResponse.ok) {
+            throw new Error(`Upload R2 refusé (${putResponse.status})`);
+          }
 
           await confirmUpload(remoteKey, chantierId);
           setFileStatus(file.name, "done", 100);

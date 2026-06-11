@@ -143,10 +143,19 @@ async function uploadStep(
     remoteKey: string;
   },
 ): Promise<void> {
-  await FileSystem.uploadAsync(entry.uploadUrl, entry.localUri, {
-    httpMethod: "PUT",
-    headers: { "Content-Type": "image/jpeg" },
-  });
+  // uploadAsync ne rejette pas sur un statut HTTP d'erreur : sans ce check,
+  // un PUT refusé par R2 serait quand même confirmé côté API.
+  const uploadResult = await FileSystem.uploadAsync(
+    entry.uploadUrl,
+    entry.localUri,
+    {
+      httpMethod: "PUT",
+      headers: { "Content-Type": "image/jpeg" },
+    },
+  );
+  if (uploadResult.status < 200 || uploadResult.status >= 300) {
+    throw new Error(`Upload R2 refusé (${uploadResult.status})`);
+  }
 
   db.update(outboxPhotos)
     .set({
