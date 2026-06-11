@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 WebBrowser.maybeCompleteAuthSession();
 
 const IOS_CLIENT_ID = process.env["EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID"];
+const ANDROID_CLIENT_ID = process.env["EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID"];
 
 type Props = {
   label?: string;
@@ -23,6 +24,7 @@ export function GoogleSignInButton({
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     iosClientId: IOS_CLIENT_ID,
+    androidClientId: ANDROID_CLIENT_ID,
   });
 
   useEffect(() => {
