@@ -1,5 +1,7 @@
 import { eq } from "drizzle-orm";
-import * as FileSystem from "expo-file-system";
+// uploadAsync (upload HTTP PUT vers presigned URL) n'a pas d'équivalent dans la
+// nouvelle API File/Directory de SDK 56 → import de l'API legacy maintenue par Expo.
+import * as FileSystem from "expo-file-system/legacy";
 import { randomUUID } from "expo-crypto";
 import { db } from "./index";
 import { outboxPhotos, photos } from "./schema";
@@ -67,7 +69,8 @@ async function processPendingEntries(): Promise<void> {
 
     try {
       await processEntry(entry);
-    } catch {
+    } catch (e) {
+      console.log("[photoOutbox] processEntry error", entry.photoId, e);
       db.update(outboxPhotos)
         .set({
           status: "pending" as OutboxPhotoStatus,

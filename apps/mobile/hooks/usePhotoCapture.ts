@@ -3,7 +3,7 @@ import { randomUUID } from "expo-crypto";
 import { useQueryClient } from "@tanstack/react-query";
 import { db } from "@/db";
 import { photos } from "@/db/schema";
-import { pushToPhotoOutbox } from "@/db/photoOutbox";
+import { pushToPhotoOutbox, processPhotoOutbox } from "@/db/photoOutbox";
 
 export function usePhotoCapture(chantierId: string) {
   const queryClient = useQueryClient();
@@ -59,4 +59,5 @@ function insertPhotos(
     pushToPhotoOutbox({ photoId: id, localUri, chantierId });
   }
   queryClient.invalidateQueries({ queryKey: ["photos", chantierId] });
+  void processPhotoOutbox();
 }
