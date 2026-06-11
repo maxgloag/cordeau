@@ -759,6 +759,307 @@
                     "required": true
                 }
             }
+        },
+        "/api/chantiers/{chantierId}/photos": {
+            "get": {
+                "operationId": "api_chantiers_chantierIdphotos_get_collection",
+                "tags": [
+                    "Photo"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Photo collection",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Photo"
+                                    }
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "Photo.jsonld collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchema"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Photo.jsonld"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Retrieves the collection of Photo resources.",
+                "description": "Retrieves the collection of Photo resources.",
+                "parameters": [
+                    {
+                        "name": "chantierId",
+                        "in": "path",
+                        "description": "Photo identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The collection page number",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            }
+        },
+        "/api/photos/confirm": {
+            "post": {
+                "operationId": "api_photosconfirm_post",
+                "tags": [
+                    "Photo"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Photo resource created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Photo"
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Photo.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Photo resource.",
+                "description": "Creates a Photo resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new Photo resource",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Photo.ConfirmUploadPayload"
+                            }
+                        },
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Photo.ConfirmUploadPayload"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/photos/{id}": {
+            "delete": {
+                "operationId": "api_photos_id_delete",
+                "tags": [
+                    "Photo"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Photo resource deleted"
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Removes the Photo resource.",
+                "description": "Removes the Photo resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Photo identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
+        "/api/photos/prepare": {
+            "post": {
+                "operationId": "api_photosprepare_post",
+                "tags": [
+                    "PrepareUploadResource"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PrepareUploadResource resource created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PrepareUploadResource"
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PrepareUploadResource.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a PrepareUploadResource resource.",
+                "description": "Creates a PrepareUploadResource resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new PrepareUploadResource resource",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PrepareUploadResource.PrepareUploadPayload"
+                            }
+                        },
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PrepareUploadResource.PrepareUploadPayload"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
         }
     },
     "components": {
@@ -1584,6 +1885,163 @@
                     "@id",
                     "@type"
                 ]
+            },
+            "Photo": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "chantierId": {
+                        "type": "string"
+                    },
+                    "lotId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "tacheId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "remoteKey": {
+                        "type": "string"
+                    },
+                    "photoUrl": {
+                        "type": "string"
+                    },
+                    "thumbnailUrl": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "creeLe": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Photo.ConfirmUploadPayload": {
+                "type": "object",
+                "required": [
+                    "remoteKey",
+                    "chantierId"
+                ],
+                "properties": {
+                    "remoteKey": {
+                        "pattern": "^(photos/[0-9a-f-]{36}/[0-9a-f-]{36})$",
+                        "type": "string"
+                    },
+                    "chantierId": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": "string"
+                    }
+                }
+            },
+            "Photo.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "chantierId": {
+                                "type": "string"
+                            },
+                            "lotId": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "tacheId": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "remoteKey": {
+                                "type": "string"
+                            },
+                            "photoUrl": {
+                                "type": "string"
+                            },
+                            "thumbnailUrl": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "creeLe": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "PrepareUploadResource": {
+                "type": "object",
+                "properties": {
+                    "uploadUrl": {
+                        "type": "string"
+                    },
+                    "remoteKey": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PrepareUploadResource.PrepareUploadPayload": {
+                "type": "object",
+                "required": [
+                    "chantierId",
+                    "contentType"
+                ],
+                "properties": {
+                    "chantierId": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": "string"
+                    },
+                    "contentType": {
+                        "enum": [
+                            "image/jpeg",
+                            "image/png",
+                            "image/webp",
+                            "image/heic"
+                        ],
+                        "type": "string"
+                    }
+                }
+            },
+            "PrepareUploadResource.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "uploadUrl": {
+                                "type": "string"
+                            },
+                            "remoteKey": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
             }
         },
         "responses": {},
@@ -1602,6 +2060,14 @@
         {
             "name": "Client",
             "description": "Resource 'Client' operations."
+        },
+        {
+            "name": "Photo",
+            "description": "Resource 'Photo' operations."
+        },
+        {
+            "name": "PrepareUploadResource",
+            "description": "Resource 'PrepareUploadResource' operations."
         }
     ],
     "webhooks": {}

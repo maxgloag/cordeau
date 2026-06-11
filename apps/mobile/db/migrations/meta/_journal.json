@@ -8,6 +8,13 @@
       "when": 1778842567630,
       "tag": "0000_flashy_wither",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1780986832685,
+      "tag": "0001_grey_masque",
+      "breakpoints": true
     }
   ]
 }

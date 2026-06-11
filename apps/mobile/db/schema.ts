@@ -48,3 +48,41 @@ export const outbox = sqliteTable("outbox", {
   createdAt: integer("created_at").notNull(),
   lastAttemptAt: integer("last_attempt_at"),
 });
+
+export type PhotoStatus = "local" | "confirmed";
+export type OutboxPhotoStatus =
+  | "pending"
+  | "uploading"
+  | "confirming"
+  | "confirmed"
+  | "failed";
+
+export const photos = sqliteTable("photos", {
+  id: text("id").primaryKey(),
+  chantierId: text("chantier_id").notNull(),
+  lotId: text("lot_id"),
+  tacheId: text("tache_id"),
+  remoteKey: text("remote_key"),
+  localUri: text("local_uri"),
+  photoUrl: text("photo_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  status: text("status").$type<PhotoStatus>().notNull().default("local"),
+  createdAt: integer("created_at").notNull(),
+  syncedAt: integer("synced_at"),
+});
+
+export const outboxPhotos = sqliteTable("outbox_photos", {
+  id: text("id").primaryKey(),
+  photoId: text("photo_id").notNull(),
+  localUri: text("local_uri").notNull(),
+  chantierId: text("chantier_id").notNull(),
+  status: text("status")
+    .$type<OutboxPhotoStatus>()
+    .notNull()
+    .default("pending"),
+  uploadUrl: text("upload_url"),
+  remoteKey: text("remote_key"),
+  retryCount: integer("retry_count").notNull().default(0),
+  createdAt: integer("created_at").notNull(),
+  lastAttemptAt: integer("last_attempt_at"),
+});

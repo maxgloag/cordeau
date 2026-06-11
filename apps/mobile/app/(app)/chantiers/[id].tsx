@@ -8,6 +8,8 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Image,
+  FlatList,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,8 +26,14 @@ import {
 } from "@/lib/chantier";
 import { ChantierForm } from "@/components/ChantierForm";
 import { SubmitButton } from "@/components/SubmitButton";
-import { getAllChantiers, getAllClients, upsertChantiers } from "@/db/queries";
+import {
+  getAllChantiers,
+  getAllClients,
+  upsertChantiers,
+  getPhotosForChantier,
+} from "@/db/queries";
 import { useOfflineMutation } from "@/hooks/useOfflineMutation";
+import { usePhotoCapture } from "@/hooks/usePhotoCapture";
 
 function toFormValues(c: Chantier): ChantierFormValues {
   return {
@@ -55,6 +63,22 @@ export default function ChantierDetailScreen() {
     queryFn: getAllClients,
     staleTime: Infinity,
   });
+
+  const { data: photosList = [] } = useQuery({
+    queryKey: ["photos", id],
+    queryFn: () => getPhotosForChantier(id ?? ""),
+    staleTime: Infinity,
+  });
+
+  const { captureFromCamera, captureFromGallery } = usePhotoCapture(id ?? "");
+
+  function onAjouterPhoto(): void {
+    Alert.alert("Ajouter une photo", undefined, [
+      { text: "Prendre une photo", onPress: captureFromCamera },
+      { text: "Choisir dans la galerie", onPress: captureFromGallery },
+      { text: "Annuler", style: "cancel" },
+    ]);
+  }
 
   const {
     control,
@@ -258,6 +282,59 @@ export default function ChantierDetailScreen() {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Section Photos */}
+          <View className="mt-6 mb-4">
+            <View className="flex-row items-center justify-between mb-3 px-4">
+              <Text className="text-lg font-semibold text-gray-900">
+                Photos
+              </Text>
+              <TouchableOpacity
+                onPress={onAjouterPhoto}
+                className="bg-blue-600 rounded-full w-8 h-8 items-center justify-center"
+              >
+                <Text className="text-white text-xl font-bold">+</Text>
+              </TouchableOpacity>
+            </View>
+
+            {photosList.length === 0 ? (
+              <TouchableOpacity
+                onPress={onAjouterPhoto}
+                className="mx-4 h-24 border-2 border-dashed border-gray-300 rounded-xl items-center justify-center"
+              >
+                <Text className="text-gray-400 text-sm">
+                  Ajouter des photos
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <FlatList
+                data={photosList}
+                keyExtractor={(item) => item.id}
+                numColumns={3}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <View className="flex-1 aspect-square m-0.5">
+                    <Image
+                      source={{
+                        uri:
+                          item.thumbnailUrl ??
+                          item.localUri ??
+                          item.photoUrl ??
+                          "",
+                      }}
+                      className="flex-1"
+                      resizeMode="cover"
+                    />
+                    {item.status === "local" && (
+                      <View className="absolute bottom-1 right-1 bg-black/50 rounded px-1">
+                        <Text className="text-white text-xs">⏳</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              />
+            )}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

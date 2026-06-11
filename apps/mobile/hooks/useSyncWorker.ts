@@ -4,6 +4,7 @@ import { AppState } from "react-native";
 import * as Network from "expo-network";
 import { useQueryClient } from "@tanstack/react-query";
 import { processOutbox } from "@/db/outbox";
+import { processPhotoOutbox } from "@/db/photoOutbox";
 import { refreshAll } from "@/lib/sync";
 import { useNetworkStatus } from "./useNetworkStatus";
 
@@ -20,6 +21,9 @@ async function syncIfOnline(
   if (!ns?.isConnected) return;
   await processOutbox(queryClient).catch((e) =>
     console.log("[sync] processOutbox error", e),
+  );
+  await processPhotoOutbox().catch((e) =>
+    console.log("[sync] processPhotoOutbox error", e),
   );
   await refreshAll(queryClient).catch((e) =>
     console.log("[sync] refreshAll error", e),

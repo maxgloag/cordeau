@@ -277,3 +277,46 @@ export async function modifierClient(
 export async function supprimerClient(id: string): Promise<void> {
   return apiFetch<void>(`/api/clients/${id}`, { method: "DELETE" });
 }
+
+// Photos
+export type Photo = {
+  id: string;
+  chantierId: string;
+  lotId: string | null;
+  tacheId: string | null;
+  remoteKey: string;
+  photoUrl: string;
+  thumbnailUrl: string | null;
+  creeLe: string;
+};
+
+export async function prepareUpload(
+  chantierId: string,
+  contentType: string,
+): Promise<{ uploadUrl: string; remoteKey: string }> {
+  return apiFetch<{ uploadUrl: string; remoteKey: string }>(
+    "/api/photos/prepare",
+    {
+      method: "POST",
+      body: JSON.stringify({ chantierId, contentType }),
+    },
+  );
+}
+
+export async function confirmUpload(
+  remoteKey: string,
+  chantierId: string,
+): Promise<Photo> {
+  return apiFetch<Photo>("/api/photos/confirm", {
+    method: "POST",
+    body: JSON.stringify({ remoteKey, chantierId }),
+  });
+}
+
+export async function fetchPhotos(chantierId: string): Promise<Photo[]> {
+  return apiFetch<Photo[]>(`/api/chantiers/${chantierId}/photos`);
+}
+
+export async function deletePhoto(id: string): Promise<void> {
+  return apiFetch<void>(`/api/photos/${id}`, { method: "DELETE" });
+}

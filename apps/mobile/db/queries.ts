@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "./index";
-import { chantiers, clients } from "./schema";
+import { chantiers, clients, photos } from "./schema";
 import type { Chantier, Client } from "@/lib/api";
 
 export function getAllChantiers(): Chantier[] {
@@ -72,6 +72,15 @@ export function getAllClients(): Client[] {
 
 export function deleteClientLocal(id: string) {
   db.delete(clients).where(eq(clients.id, id)).run();
+}
+
+export function getPhotosForChantier(chantierId: string) {
+  return db
+    .select()
+    .from(photos)
+    .where(eq(photos.chantierId, chantierId))
+    .orderBy(photos.createdAt)
+    .all();
 }
 
 export function upsertClients(items: Client[]) {

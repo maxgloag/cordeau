@@ -221,3 +221,45 @@ export async function modifierClient(
 export async function supprimerClient(id: string): Promise<void> {
   return apiFetch<void>(`/api/clients/${id}`, { method: "DELETE" });
 }
+
+export type PrepareUploadResponse = {
+  uploadUrl: string;
+  remoteKey: string;
+};
+
+export type PhotoApiResponse = {
+  id: string;
+  chantierId: string;
+  lotId: string | null;
+  tacheId: string | null;
+  remoteKey: string;
+  photoUrl: string;
+  thumbnailUrl: string | null;
+  creeLe: string;
+};
+
+export async function prepareUpload(
+  chantierId: string,
+  contentType: string,
+): Promise<PrepareUploadResponse> {
+  return apiFetch<PrepareUploadResponse>("/api/photos/prepare", {
+    method: "POST",
+    body: JSON.stringify({ chantierId, contentType }),
+  });
+}
+
+export async function confirmUpload(
+  remoteKey: string,
+  chantierId: string,
+): Promise<PhotoApiResponse> {
+  return apiFetch<PhotoApiResponse>("/api/photos/confirm", {
+    method: "POST",
+    body: JSON.stringify({ remoteKey, chantierId }),
+  });
+}
+
+export async function fetchPhotos(
+  chantierId: string,
+): Promise<PhotoApiResponse[]> {
+  return apiFetch<PhotoApiResponse[]>(`/api/chantiers/${chantierId}/photos`);
+}

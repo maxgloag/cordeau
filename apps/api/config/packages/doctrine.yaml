@@ -38,6 +38,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Auth/Entity'
                 prefix: 'App\Auth\Entity'
                 alias: AuthEntities
+            PhotoEntities:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Photo/Entity'
+                prefix: 'App\Photo\Entity'
+                alias: PhotoEntities
 
 when@test:
     doctrine:

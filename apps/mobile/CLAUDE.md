@@ -1,8 +1,10 @@
-# CLAUDE.md — apps/mobile (Expo SDK 54 + React Native 0.81)
+# CLAUDE.md — apps/mobile (Expo SDK 56 + React Native 0.85)
 
 ## Stack
 
-Node 24 · Expo SDK 54 · React Native 0.81 · TypeScript strict · Jest 29 + jest-expo · @testing-library/react-native
+Node 24 · Expo SDK 56 · React Native 0.85 · TypeScript strict · Jest 29 + jest-expo · @testing-library/react-native
+
+> **Monorepo pnpm** : le toolchain Metro de SDK 56 exige un `node_modules` plat. Le repo force `node-linker=hoisted` via `.npmrc` racine (cf [ADR 0022](../../docs/adr/0022-monorepo-pnpm-hoisting-metro.md)). Ne pas repasser en mode isolated : le bundling Metro casse (duplication de `metro`).
 
 **Ajouté en Phase 1** : expo-router, expo-secure-store, NativeWind, TanStack Query, react-hook-form + zod
 **Ajouté en Phase 3** : expo-sqlite + Drizzle ORM, expo-network, expo-crypto, outbox pattern
@@ -40,10 +42,16 @@ eas build --profile production --platform all    # build prod
 
 ## Dev sur device physique
 
-1. `pnpm dev` → QR code
-2. Installer **Expo Go** sur le device (iOS App Store / Google Play)
-3. Scanner le QR code
-4. Pour les modules natifs custom (Phase 7 AR) → Dev Client, pas Expo Go
+> ⚠️ Depuis SDK 55, **Expo Go n'est plus publié sur l'App Store / Play Store** (seul SDK 54 y reste, sans ETA de mise à jour côté Apple). Pour SDK 56, installer Expo Go hors store.
+
+- **Android** (recommandé, gratuit, vraie caméra) :
+  1. Sur le téléphone, ouvrir <https://expo.dev/go?sdkVersion=56&platform=android&device=true> et installer l'APK (autoriser les sources inconnues)
+  2. Mac et téléphone sur le **même WiFi**, `EXPO_PUBLIC_API_URL` = IP locale du Mac (pas `localhost`)
+  3. `pnpm dev` → scanner le QR depuis l'app Expo Go
+- **iOS** :
+  - Simulateur : `pnpm ios` (gratuit, mais **pas de caméra** — galerie seulement)
+  - iPhone physique : `expo run:ios` via Xcode « Personal Team » (Apple ID gratuit, certificat 7 j) ou `eas go` + TestFlight (Apple Developer Program 99 $/an, différé au 1er user payant)
+- Modules natifs custom (Phase 7 AR) → Dev Client, pas Expo Go
 
 ## Connexion à l'API
 
