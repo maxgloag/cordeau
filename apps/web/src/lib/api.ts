@@ -292,12 +292,13 @@ export type Photo = {
 
 export async function prepareUpload(
   chantierId: string,
+  contentType: string,
 ): Promise<{ uploadUrl: string; remoteKey: string }> {
   return apiFetch<{ uploadUrl: string; remoteKey: string }>(
     "/api/photos/prepare",
     {
       method: "POST",
-      body: JSON.stringify({ chantierId }),
+      body: JSON.stringify({ chantierId, contentType }),
     },
   );
 }

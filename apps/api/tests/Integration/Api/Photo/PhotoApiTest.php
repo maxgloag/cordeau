@@ -30,6 +30,7 @@ final class PhotoApiTest extends WebTestCase
 
         $mockStorage = $this->createMock(StorageAdapterInterface::class);
         $mockStorage->method('generatePresignedPutUrl')
+            ->with(self::anything(), 'image/jpeg')
             ->willReturn('https://r2.example.com/presigned?sig=test');
         static::getContainer()->set(StorageAdapterInterface::class, $mockStorage);
 
@@ -37,7 +38,10 @@ final class PhotoApiTest extends WebTestCase
             'POST',
             '/api/photos/prepare',
             server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
-            content: json_encode(['chantierId' => $chantier->id->toRfc4122()]) ?: '',
+            content: json_encode([
+                'chantierId' => $chantier->id->toRfc4122(),
+                'contentType' => 'image/jpeg',
+            ]) ?: '',
         );
 
         self::assertResponseStatusCodeSame(200);
@@ -69,10 +73,39 @@ final class PhotoApiTest extends WebTestCase
             'POST',
             '/api/photos/prepare',
             server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
-            content: json_encode(['chantierId' => $chantier->id->toRfc4122()]) ?: '',
+            content: json_encode([
+                'chantierId' => $chantier->id->toRfc4122(),
+                'contentType' => 'image/jpeg',
+            ]) ?: '',
         );
 
         self::assertResponseStatusCodeSame(403);
+    }
+
+    #[Test]
+    public function prepare_content_type_non_image_retourne_422(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $chantier = ChantierFactory::createOne(['proprietaire' => $user]);
+        $httpClient->loginUser($user->_real());
+
+        $mockStorage = $this->createMock(StorageAdapterInterface::class);
+        $mockStorage->expects($this->never())->method('generatePresignedPutUrl');
+        static::getContainer()->set(StorageAdapterInterface::class, $mockStorage);
+
+        // text/html accepté = hébergement de contenu arbitraire sur le domaine public photos
+        $httpClient->request(
+            'POST',
+            '/api/photos/prepare',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'chantierId' => $chantier->id->toRfc4122(),
+                'contentType' => 'text/html',
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(422);
     }
 
     #[Test]

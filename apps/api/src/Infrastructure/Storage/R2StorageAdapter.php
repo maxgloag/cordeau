@@ -15,11 +15,14 @@ final class R2StorageAdapter implements StorageAdapterInterface
     ) {
     }
 
-    public function generatePresignedPutUrl(string $key): string
+    public function generatePresignedPutUrl(string $key, string $contentType): string
     {
+        // ContentType entre dans les SignedHeaders SigV4 : R2 rejette tout PUT
+        // dont le Content-Type diffère de celui validé au prepare.
         $cmd = $this->s3->getCommand('PutObject', [
             'Bucket' => $this->bucket,
             'Key' => $key,
+            'ContentType' => $contentType,
         ]);
         $request = $this->s3->createPresignedRequest($cmd, '+15 minutes');
 

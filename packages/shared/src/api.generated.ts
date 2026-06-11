@@ -450,6 +450,8 @@ export interface components {
         "PrepareUploadResource.PrepareUploadPayload": {
             /** Format: uuid */
             chantierId: string;
+            /** @enum {string} */
+            contentType: "image/jpeg" | "image/png" | "image/webp" | "image/heic";
         };
         "PrepareUploadResource.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             uploadUrl?: string;

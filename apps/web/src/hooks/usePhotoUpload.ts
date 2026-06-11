@@ -33,12 +33,17 @@ export function usePhotoUpload(chantierId: string) {
     await Promise.allSettled(
       files.map(async (file) => {
         try {
-          const { uploadUrl, remoteKey } = await prepareUpload(chantierId);
+          // Doit correspondre exactement au Content-Type signé dans l'URL pré-signée
+          const contentType = file.type || "image/jpeg";
+          const { uploadUrl, remoteKey } = await prepareUpload(
+            chantierId,
+            contentType,
+          );
 
           await fetch(uploadUrl, {
             method: "PUT",
             body: file,
-            headers: { "Content-Type": file.type || "image/jpeg" },
+            headers: { "Content-Type": contentType },
           });
 
           await confirmUpload(remoteKey, chantierId);

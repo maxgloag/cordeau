@@ -240,10 +240,11 @@ export type PhotoApiResponse = {
 
 export async function prepareUpload(
   chantierId: string,
+  contentType: string,
 ): Promise<PrepareUploadResponse> {
   return apiFetch<PrepareUploadResponse>("/api/photos/prepare", {
     method: "POST",
-    body: JSON.stringify({ chantierId }),
+    body: JSON.stringify({ chantierId, contentType }),
   });
 }
 

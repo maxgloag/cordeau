@@ -6,7 +6,7 @@ namespace App\Infrastructure\Storage;
 
 interface StorageAdapterInterface
 {
-    public function generatePresignedPutUrl(string $key): string;
+    public function generatePresignedPutUrl(string $key, string $contentType): string;
 
     public function getPublicUrl(string $key): string;
 

@@ -50,10 +50,14 @@ describe("usePhotoUpload", () => {
     const file = new File(["img"], "photo.jpg", { type: "image/jpeg" });
     await result.current.upload([file]);
 
-    expect(api.prepareUpload).toHaveBeenCalledWith("chantier-id");
+    expect(api.prepareUpload).toHaveBeenCalledWith("chantier-id", "image/jpeg");
+    // Le Content-Type du PUT doit être celui déclaré au prepare (signé dans l'URL R2)
     expect(g.fetch).toHaveBeenCalledWith(
       "https://r2.example.com/put?sig=x",
-      expect.objectContaining({ method: "PUT" }),
+      expect.objectContaining({
+        method: "PUT",
+        headers: { "Content-Type": "image/jpeg" },
+      }),
     );
     expect(api.confirmUpload).toHaveBeenCalledWith(
       "photos/test-key",

@@ -42,7 +42,7 @@ final class PrepareUploadProcessor implements ProcessorInterface
         }
 
         $key = 'photos/' . $user->id->toRfc4122() . '/' . Uuid::v7()->toRfc4122();
-        $uploadUrl = $this->storage->generatePresignedPutUrl($key);
+        $uploadUrl = $this->storage->generatePresignedPutUrl($key, $data->contentType);
 
         return new PrepareUploadResource(uploadUrl: $uploadUrl, remoteKey: $key);
     }

@@ -115,7 +115,10 @@ async function resumeStuckUploading(): Promise<void> {
 async function processEntry(
   entry: typeof outboxPhotos.$inferSelect,
 ): Promise<void> {
-  const { uploadUrl, remoteKey } = await prepareUpload(entry.chantierId);
+  const { uploadUrl, remoteKey } = await prepareUpload(
+    entry.chantierId,
+    "image/jpeg",
+  );
   db.update(outboxPhotos)
     .set({
       status: "uploading" as OutboxPhotoStatus,

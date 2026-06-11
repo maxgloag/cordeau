@@ -1932,6 +1932,7 @@
                 ],
                 "properties": {
                     "remoteKey": {
+                        "pattern": "^(photos/[0-9a-f-]{36}/[0-9a-f-]{36})$",
                         "type": "string"
                     },
                     "chantierId": {
@@ -2002,7 +2003,8 @@
             "PrepareUploadResource.PrepareUploadPayload": {
                 "type": "object",
                 "required": [
-                    "chantierId"
+                    "chantierId",
+                    "contentType"
                 ],
                 "properties": {
                     "chantierId": {
@@ -2010,6 +2012,15 @@
                         "externalDocs": {
                             "url": "https://schema.org/identifier"
                         },
+                        "type": "string"
+                    },
+                    "contentType": {
+                        "enum": [
+                            "image/jpeg",
+                            "image/png",
+                            "image/webp",
+                            "image/heic"
+                        ],
                         "type": "string"
                     }
                 }
