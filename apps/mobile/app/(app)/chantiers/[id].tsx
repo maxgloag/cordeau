@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactElement } from "react";
 import {
   View,
   Text,
@@ -68,7 +68,6 @@ export default function ChantierDetailScreen() {
   const isConnected = useNetworkStatus();
   const [isEditing, setIsEditing] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
-  const [legendeDraft, setLegendeDraft] = useState("");
 
   const { data: chantier } = useQuery({
     queryKey: ["chantiers"],
@@ -177,25 +176,13 @@ export default function ChantierDetailScreen() {
     );
   }
 
-  function openViewer(index: number): void {
-    setViewerIndex(index);
-    setLegendeDraft(photosList[index]?.legende ?? "");
+  function handleSaveLegende(photoId: string, legende: string | null): void {
+    if (!id) return;
+    submitLegende({ legende, chantierId: id }, photoId);
   }
 
-  function saveLegende(): void {
-    if (viewerIndex === null || !id) return;
-    const photo = photosList[viewerIndex];
-    if (!photo) return;
-    const trimmed = legendeDraft.trim();
-    const value = trimmed === "" ? null : trimmed;
-    if (value === (photo.legende ?? null)) return;
-    submitLegende({ legende: value, chantierId: id }, photo.id);
-  }
-
-  function confirmDeletePhoto(): void {
-    if (viewerIndex === null || !id) return;
-    const photo = photosList[viewerIndex];
-    if (!photo) return;
+  function confirmDeletePhoto(photo: PhotoRow): void {
+    if (!id) return;
     Alert.alert("Supprimer cette photo ?", "Cette action est définitive.", [
       { text: "Annuler", style: "cancel" },
       {
@@ -236,7 +223,7 @@ export default function ChantierDetailScreen() {
       ]);
       return;
     }
-    openViewer(index);
+    setViewerIndex(index);
   }
 
   function onSubmitEdit(values: ChantierFormValues) {
@@ -472,33 +459,79 @@ export default function ChantierDetailScreen() {
         imageIndex={viewerIndex ?? 0}
         visible={viewerIndex !== null}
         onRequestClose={() => setViewerIndex(null)}
-        onImageIndexChange={(i) => {
-          setViewerIndex(i);
-          setLegendeDraft(photosList[i]?.legende ?? "");
-        }}
-        FooterComponent={() => (
-          <View className="px-5 pb-8 pt-3 bg-black/60">
-            <TextInput
-              value={legendeDraft}
-              onChangeText={setLegendeDraft}
-              onBlur={saveLegende}
-              placeholder="Ajouter une légende"
-              placeholderTextColor="#9CA3AF"
-              multiline
-              className="text-white text-base mb-3"
-            />
-            <TouchableOpacity
-              onPress={confirmDeletePhoto}
-              className="flex-row items-center gap-2 self-start"
-            >
-              <Trash2 size={18} color="#F87171" />
-              <Text className="text-red-400 text-base font-medium">
-                Supprimer la photo
-              </Text>
-            </TouchableOpacity>
-          </View>
+        // react-native-image-viewing appelle onImageIndexChange(0) au montage (même
+        // visible=false). On ignore donc tout changement tant que la visionneuse est
+        // fermée, sinon elle s'ouvrirait toute seule à l'ouverture du chantier.
+        onImageIndexChange={(i) =>
+          setViewerIndex((current) => (current === null ? null : i))
+        }
+        FooterComponent={({ imageIndex }) => (
+          <LightboxFooter
+            photo={photosList[imageIndex]}
+            onSave={handleSaveLegende}
+            onDelete={confirmDeletePhoto}
+          />
         )}
       />
     </SafeAreaView>
+  );
+}
+
+/**
+ * Pied de la visionneuse : légende éditable + suppression.
+ * Le brouillon de légende est un état INTERNE — taper ne re-rend pas l'écran parent,
+ * donc le footer n'est pas remonté à chaque frappe (sinon le clavier se fermerait).
+ * Le brouillon se réinitialise quand on navigue vers une autre photo (changement d'id).
+ */
+function LightboxFooter({
+  photo,
+  onSave,
+  onDelete,
+}: {
+  photo: PhotoRow | undefined;
+  onSave: (photoId: string, legende: string | null) => void;
+  onDelete: (photo: PhotoRow) => void;
+}): ReactElement | null {
+  const [draft, setDraft] = useState(photo?.legende ?? "");
+  const [shownPhotoId, setShownPhotoId] = useState(photo?.id);
+
+  if (photo && photo.id !== shownPhotoId) {
+    setShownPhotoId(photo.id);
+    setDraft(photo.legende ?? "");
+  }
+
+  if (!photo) return null;
+  const current = photo;
+
+  function save(): void {
+    const trimmed = draft.trim();
+    const value = trimmed === "" ? null : trimmed;
+    if (value === (current.legende ?? null)) return;
+    onSave(current.id, value);
+  }
+
+  return (
+    <View className="px-5 pb-8 pt-3 bg-black/60">
+      <TextInput
+        value={draft}
+        onChangeText={setDraft}
+        onBlur={save}
+        placeholder="Ajouter une légende"
+        placeholderTextColor="#9CA3AF"
+        maxLength={280}
+        returnKeyType="done"
+        onSubmitEditing={save}
+        className="text-white text-base border-b border-white/30 pb-1 mb-3"
+      />
+      <TouchableOpacity
+        onPress={() => onDelete(current)}
+        className="flex-row items-center gap-2 self-start"
+      >
+        <Trash2 size={18} color="#F87171" />
+        <Text className="text-red-400 text-base font-medium">
+          Supprimer la photo
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }

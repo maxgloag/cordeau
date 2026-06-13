@@ -22,9 +22,9 @@ async function syncIfOnline(
   await processOutbox(queryClient).catch((e) =>
     console.log("[sync] processOutbox error", e),
   );
-  await processPhotoOutbox().catch((e) =>
-    console.log("[sync] processPhotoOutbox error", e),
-  );
+  await processPhotoOutbox((cid) =>
+    queryClient.invalidateQueries({ queryKey: ["photos", cid] }),
+  ).catch((e) => console.log("[sync] processPhotoOutbox error", e));
   await refreshAll(queryClient).catch((e) =>
     console.log("[sync] refreshAll error", e),
   );
