@@ -13,13 +13,45 @@
     "build": "echo 'Mobile build via EAS: eas build --profile preview'"
   },
   "jest": {
-    "preset": "jest-expo",
-    "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|drizzle-orm)"
-    ],
-    "moduleNameMapper": {
-      "@cordeau/shared": "<rootDir>/../../packages/shared/src/index.ts"
-    }
+    "projects": [
+      {
+        "displayName": "expo",
+        "preset": "jest-expo",
+        "transformIgnorePatterns": [
+          "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|drizzle-orm)"
+        ],
+        "moduleNameMapper": {
+          "@cordeau/shared": "<rootDir>/../../packages/shared/src/index.ts"
+        },
+        "testPathIgnorePatterns": [
+          "/node_modules/",
+          "\\.node\\.test\\."
+        ]
+      },
+      {
+        "displayName": "node",
+        "testEnvironment": "node",
+        "testMatch": [
+          "**/*.node.test.[jt]s?(x)"
+        ],
+        "transform": {
+          "^.+\\.[jt]sx?$": [
+            "babel-jest",
+            {
+              "presets": [
+                "babel-preset-expo"
+              ]
+            }
+          ]
+        },
+        "transformIgnorePatterns": [
+          "node_modules/(?!(drizzle-orm)/)"
+        ],
+        "moduleNameMapper": {
+          "@cordeau/shared": "<rootDir>/../../packages/shared/src/index.ts"
+        }
+      }
+    ]
   },
   "dependencies": {
     "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
@@ -46,6 +78,7 @@
     "react": "19.2.7",
     "react-hook-form": "^7.77.0",
     "react-native": "0.85.3",
+    "react-native-image-viewing": "^0.2.2",
     "react-native-safe-area-context": "~5.8.0",
     "react-native-screens": "~4.25.2",
     "react-native-svg": "~15.15.5",
@@ -56,11 +89,13 @@
     "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.16",
+    "@types/sql.js": "^1.4.11",
     "babel-plugin-inline-import": "^3.0.0",
     "drizzle-kit": "^0.31.10",
     "jest": "^29.7.0",
     "jest-expo": "~56.0.4",
     "react-test-renderer": "19.2.7",
+    "sql.js": "^1.14.1",
     "typescript": "~5.9.2"
   }
 }

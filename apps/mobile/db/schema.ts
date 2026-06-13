@@ -1,6 +1,6 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-export type OutboxEntityType = "chantier" | "client";
+export type OutboxEntityType = "chantier" | "client" | "photo";
 export type OutboxOperation = "create" | "update" | "delete";
 export type OutboxStatus =
   | "pending"
@@ -66,6 +66,7 @@ export const photos = sqliteTable("photos", {
   localUri: text("local_uri"),
   photoUrl: text("photo_url"),
   thumbnailUrl: text("thumbnail_url"),
+  legende: text("legende"),
   status: text("status").$type<PhotoStatus>().notNull().default("local"),
   createdAt: integer("created_at").notNull(),
   syncedAt: integer("synced_at"),

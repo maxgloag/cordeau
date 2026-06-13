@@ -10,6 +10,7 @@ type Props = {
   isLoading: boolean;
   onUpload: (files: File[]) => void;
   onDelete: (photoId: string) => void;
+  onSaveLegende: (photoId: string, legende: string | null) => void;
 };
 
 export function ChantierDetailView({
@@ -18,8 +19,9 @@ export function ChantierDetailView({
   isLoading,
   onUpload,
   onDelete,
+  onSaveLegende,
 }: Props) {
-  const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -31,12 +33,21 @@ export function ChantierDetailView({
         isLoading={isLoading}
         onUpload={onUpload}
         onDelete={onDelete}
-        onPhotoClick={setLightboxPhoto}
+        onPhotoClick={(photo) =>
+          setLightboxIndex(photos.findIndex((p) => p.id === photo.id))
+        }
       />
 
       <PhotoLightbox
-        photo={lightboxPhoto}
-        onClose={() => setLightboxPhoto(null)}
+        photos={photos}
+        index={lightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+        onNavigate={setLightboxIndex}
+        onDelete={(photoId) => {
+          onDelete(photoId);
+          setLightboxIndex(null);
+        }}
+        onSaveLegende={onSaveLegende}
       />
     </div>
   );

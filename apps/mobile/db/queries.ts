@@ -1,7 +1,8 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "./index";
-import { chantiers, clients, photos } from "./schema";
-import type { Chantier, Client } from "@/lib/api";
+import { chantiers, clients, outboxPhotos, photos } from "./schema";
+import { planPhotoDeletions } from "./photoSync";
+import type { Chantier, Client, PhotoApiResponse } from "@/lib/api";
 
 export function getAllChantiers(): Chantier[] {
   const rows = db.select().from(chantiers).all();
@@ -74,13 +75,98 @@ export function deleteClientLocal(id: string) {
   db.delete(clients).where(eq(clients.id, id)).run();
 }
 
+/**
+ * Supprime une photo encore locale (jamais confirmée par le serveur) : la ligne
+ * photo ET son entrée d'outbox, pour ne pas laisser un upload fantôme retenter une
+ * photo qui n'existe plus. N'effectue AUCUN appel réseau.
+ */
+export function deleteLocalPhoto(photoId: string): void {
+  db.delete(photos).where(eq(photos.id, photoId)).run();
+  db.delete(outboxPhotos).where(eq(outboxPhotos.photoId, photoId)).run();
+}
+
 export function getPhotosForChantier(chantierId: string) {
   return db
-    .select()
+    .select({
+      id: photos.id,
+      chantierId: photos.chantierId,
+      lotId: photos.lotId,
+      tacheId: photos.tacheId,
+      remoteKey: photos.remoteKey,
+      localUri: photos.localUri,
+      photoUrl: photos.photoUrl,
+      thumbnailUrl: photos.thumbnailUrl,
+      legende: photos.legende,
+      status: photos.status,
+      createdAt: photos.createdAt,
+      syncedAt: photos.syncedAt,
+      // statut + id de l'entrée d'outbox d'upload (pour badge ⚠️ + retry)
+      outboxId: outboxPhotos.id,
+      outboxStatus: outboxPhotos.status,
+    })
     .from(photos)
+    .leftJoin(outboxPhotos, eq(outboxPhotos.photoId, photos.id))
     .where(eq(photos.chantierId, chantierId))
     .orderBy(photos.createdAt)
     .all();
+}
+
+export function setPhotoLegendeLocal(
+  photoId: string,
+  legende: string | null,
+): void {
+  db.update(photos).set({ legende }).where(eq(photos.id, photoId)).run();
+}
+
+/**
+ * Réconcilie les photos locales d'un chantier avec la liste serveur :
+ * - upsert des photos distantes (status "confirmed"),
+ * - suppression des photos locales "confirmed" absentes du serveur (supprimées ailleurs),
+ * - préservation des photos "local" (upload en cours via l'outbox — jamais supprimées).
+ */
+export function reconcilePhotos(
+  chantierId: string,
+  remote: PhotoApiResponse[],
+): void {
+  const local = getPhotosForChantier(chantierId);
+  const toDelete = planPhotoDeletions(local, remote);
+
+  if (remote.length > 0) {
+    const now = Date.now();
+    db.insert(photos)
+      .values(
+        remote.map((p) => ({
+          id: p.id,
+          chantierId: p.chantierId,
+          lotId: p.lotId,
+          tacheId: p.tacheId,
+          remoteKey: p.remoteKey,
+          localUri: null,
+          photoUrl: p.photoUrl,
+          thumbnailUrl: p.thumbnailUrl,
+          legende: p.legende,
+          status: "confirmed" as const,
+          createdAt: Date.parse(p.creeLe) || now,
+          syncedAt: now,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: photos.id,
+        set: {
+          remoteKey: sql`excluded.remote_key`,
+          photoUrl: sql`excluded.photo_url`,
+          thumbnailUrl: sql`excluded.thumbnail_url`,
+          legende: sql`excluded.legende`,
+          status: sql`excluded.status`,
+          syncedAt: now,
+        },
+      })
+      .run();
+  }
+
+  if (toDelete.length > 0) {
+    db.delete(photos).where(inArray(photos.id, toDelete)).run();
+  }
 }
 
 export function upsertClients(items: Client[]) {

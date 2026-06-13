@@ -1,7 +1,7 @@
 // TODO: migrate console.log to Sentry breadcrumbs en Phase 4+
 import { eq, and, lt } from "drizzle-orm";
 import { db } from "./index";
-import { outbox } from "./schema";
+import { outbox, photos } from "./schema";
 import type { OutboxEntityType, OutboxOperation, OutboxStatus } from "./schema";
 import {
   creerChantier,
@@ -10,9 +10,15 @@ import {
   creerClient,
   modifierClient,
   supprimerClient,
+  patchPhotoLegende,
+  deletePhoto,
 } from "@/lib/api";
 import type { QueryClient } from "@tanstack/react-query";
-import { upsertChantiers, upsertClients } from "./queries";
+import {
+  getPhotosForChantier,
+  upsertChantiers,
+  upsertClients,
+} from "./queries";
 import { randomUUID } from "expo-crypto";
 
 const MAX_RETRY = 10;
@@ -211,6 +217,25 @@ async function pushEntry(
         ((old ?? []) as { id: string }[]).filter((c) => c.id !== entityId),
       );
     }
+  } else if (entityType === "photo") {
+    const chantierId = payload["chantierId"] as string;
+    if (operation === "update") {
+      const updated = await patchPhotoLegende(
+        entityId,
+        (payload["legende"] as string | null) ?? null,
+      );
+      db.update(photos)
+        .set({ legende: updated.legende })
+        .where(eq(photos.id, entityId))
+        .run();
+    } else if (operation === "delete") {
+      await deletePhoto(entityId);
+      db.delete(photos).where(eq(photos.id, entityId)).run();
+    }
+    queryClient.setQueryData(
+      ["photos", chantierId],
+      getPhotosForChantier(chantierId),
+    );
   }
 }
 

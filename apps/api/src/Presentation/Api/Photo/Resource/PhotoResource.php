@@ -8,10 +8,13 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Photo\Entity\Photo;
 use App\Presentation\Api\Photo\Payload\ConfirmUploadPayload;
+use App\Presentation\Api\Photo\Payload\ModifierLegendePayload;
 use App\Presentation\Api\Photo\Processor\ConfirmUploadProcessor;
+use App\Presentation\Api\Photo\Processor\ModifierLegendeProcessor;
 use App\Presentation\Api\Photo\Processor\SupprimerPhotoProcessor;
 use App\Presentation\Api\Photo\Provider\PhotoCollectionProvider;
 use App\Presentation\Api\Photo\Provider\PhotoItemProvider;
@@ -32,6 +35,11 @@ use App\Presentation\Api\Photo\Provider\PhotoItemProvider;
             ],
             provider: PhotoCollectionProvider::class,
         ),
+        new Patch(
+            provider: PhotoItemProvider::class,
+            input: ModifierLegendePayload::class,
+            processor: ModifierLegendeProcessor::class,
+        ),
         new Delete(
             provider: PhotoItemProvider::class,
             processor: SupprimerPhotoProcessor::class,
@@ -49,6 +57,7 @@ final class PhotoResource
         public readonly string $photoUrl,
         public readonly ?string $thumbnailUrl,
         public readonly string $creeLe,
+        public readonly ?string $legende,
     ) {
     }
 
@@ -63,6 +72,7 @@ final class PhotoResource
             photoUrl: $photo->photoUrl,
             thumbnailUrl: $photo->thumbnailUrl,
             creeLe: $photo->creeLe->format(\DateTimeInterface::ATOM),
+            legende: $photo->legende,
         );
     }
 }

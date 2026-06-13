@@ -59,5 +59,7 @@ function insertPhotos(
     pushToPhotoOutbox({ photoId: id, localUri, chantierId });
   }
   queryClient.invalidateQueries({ queryKey: ["photos", chantierId] });
-  void processPhotoOutbox();
+  void processPhotoOutbox((cid) =>
+    queryClient.invalidateQueries({ queryKey: ["photos", cid] }),
+  );
 }

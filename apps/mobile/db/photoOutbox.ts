@@ -29,17 +29,40 @@ export function pushToPhotoOutbox(entry: {
     .run();
 }
 
-let isSyncing = false;
+/**
+ * Relance manuelle d'une entrée d'upload en échec : repasse en "pending" et remet
+ * le compteur de tentatives à 0 pour que `processPhotoOutbox` la retente sans backoff.
+ */
+export function retryFailedEntry(entryId: string): void {
+  db.update(outboxPhotos)
+    .set({
+      status: "pending" as OutboxPhotoStatus,
+      retryCount: 0,
+      lastAttemptAt: null,
+    })
+    .where(eq(outboxPhotos.id, entryId))
+    .run();
+}
 
-export async function processPhotoOutbox(): Promise<void> {
+let isSyncing = false;
+// Notifie les chantiers dont une photo vient d'être confirmée, pour que l'appelant
+// rafraîchisse sa query ["photos", chantierId] (sinon la vignette reste en ⏳ "local").
+// Variable de module sûre car processPhotoOutbox est single-flight (isSyncing).
+let notifyConfirmed: ((chantierId: string) => void) | null = null;
+
+export async function processPhotoOutbox(
+  onConfirmed?: (chantierId: string) => void,
+): Promise<void> {
   if (isSyncing) return;
   isSyncing = true;
+  notifyConfirmed = onConfirmed ?? null;
 
   try {
     await processPendingEntries();
     await resumeStuckUploading();
   } finally {
     isSyncing = false;
+    notifyConfirmed = null;
   }
 }
 
@@ -173,6 +196,7 @@ async function uploadStep(
       remoteKey: confirmedPhoto.remoteKey,
       photoUrl: confirmedPhoto.photoUrl,
       thumbnailUrl: confirmedPhoto.thumbnailUrl,
+      legende: confirmedPhoto.legende,
       syncedAt: Date.now(),
     })
     .where(eq(photos.id, entry.photoId))
@@ -182,4 +206,7 @@ async function uploadStep(
     .set({ status: "confirmed" as OutboxPhotoStatus })
     .where(eq(outboxPhotos.id, entry.id))
     .run();
+
+  // Réveille l'UI : la photo passe de "local" (⏳) à "confirmed".
+  notifyConfirmed?.(entry.chantierId);
 }

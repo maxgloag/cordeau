@@ -57,10 +57,11 @@ final class ChantierResource
         public readonly string $modifieLe,
         public readonly ?string $clientId = null,
         public readonly ?string $clientNom = null,
+        public readonly int $photosCount = 0,
     ) {
     }
 
-    public static function fromDomain(Chantier $chantier): self
+    public static function fromDomain(Chantier $chantier, int $photosCount = 0): self
     {
         return new self(
             id: $chantier->id->toRfc4122(),
@@ -74,6 +75,7 @@ final class ChantierResource
             modifieLe: $chantier->modifieLe->format(\DateTimeInterface::ATOM),
             clientId: $chantier->client?->id->toRfc4122(),
             clientNom: $chantier->client?->nomCache,
+            photosCount: $photosCount,
         );
     }
 }

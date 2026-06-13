@@ -41,6 +41,7 @@ describe("usePhotoUpload", () => {
       photoUrl: "https://photos.example.com/photos/test-key",
       thumbnailUrl: null,
       creeLe: new Date().toISOString(),
+      legende: null,
     });
 
     const { result } = await renderHook(() => usePhotoUpload("chantier-id"), {

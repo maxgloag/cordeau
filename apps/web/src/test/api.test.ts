@@ -71,6 +71,29 @@ describe("login", () => {
   });
 });
 
+describe("patchLegende", () => {
+  it("envoie un PATCH merge-patch avec la légende et retourne la photo", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ id: "p1", legende: "Mur nord" }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { patchLegende } = await import("../lib/api");
+    const result = await patchLegende("p1", "Mur nord");
+
+    expect(result.legende).toBe("Mur nord");
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/api/photos/p1");
+    expect(init.method).toBe("PATCH");
+    expect(init.headers).toMatchObject({
+      "Content-Type": "application/merge-patch+json",
+    });
+    expect(init.body).toBe(JSON.stringify({ legende: "Mur nord" }));
+  });
+});
+
 describe("fetchChantiers", () => {
   it("retourne la liste des chantiers", async () => {
     const chantier = {

@@ -1,4 +1,4 @@
-import { chantiers, clients, outbox } from "../db/schema";
+import { chantiers, clients, outbox, photos } from "../db/schema";
 import { getTableConfig } from "drizzle-orm/sqlite-core";
 
 jest.mock("expo-sqlite", () => ({
@@ -55,5 +55,12 @@ describe("Schéma Drizzle — tables et colonnes", () => {
     const config = getTableConfig(chantiers);
     const statutCol = config.columns.find((c) => c.name === "statut");
     expect(statutCol?.default).toBe("en_preparation");
+  });
+
+  it("table photos a une colonne legende nullable", () => {
+    const config = getTableConfig(photos);
+    const legendeCol = config.columns.find((c) => c.name === "legende");
+    expect(legendeCol).toBeDefined();
+    expect(legendeCol?.notNull).toBeFalsy();
   });
 });

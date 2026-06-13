@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactElement } from "react";
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
@@ -11,11 +12,18 @@ import {
   Image,
   FlatList,
 } from "react-native";
+import ImageView from "react-native-image-viewing";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MapPin, Pencil, Archive, Maximize2 } from "lucide-react-native";
+import {
+  MapPin,
+  Pencil,
+  Archive,
+  Maximize2,
+  Trash2,
+} from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { Chantier } from "@/lib/api";
 import {
@@ -31,9 +39,17 @@ import {
   getAllClients,
   upsertChantiers,
   getPhotosForChantier,
+  deleteLocalPhoto,
+  setPhotoLegendeLocal,
 } from "@/db/queries";
+import { requiresRemoteDeletion } from "@/db/photoSync";
+import { retryFailedEntry } from "@/db/photoOutbox";
+import { refreshPhotos } from "@/lib/sync";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useOfflineMutation } from "@/hooks/useOfflineMutation";
 import { usePhotoCapture } from "@/hooks/usePhotoCapture";
+
+type PhotoRow = ReturnType<typeof getPhotosForChantier>[number];
 
 function toFormValues(c: Chantier): ChantierFormValues {
   return {
@@ -49,7 +65,9 @@ export default function ChantierDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isConnected = useNetworkStatus();
   const [isEditing, setIsEditing] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   const { data: chantier } = useQuery({
     queryKey: ["chantiers"],
@@ -66,8 +84,11 @@ export default function ChantierDetailScreen() {
 
   const { data: photosList = [] } = useQuery({
     queryKey: ["photos", id],
-    queryFn: () => getPhotosForChantier(id ?? ""),
-    staleTime: Infinity,
+    queryFn: () => {
+      const local = getPhotosForChantier(id ?? "");
+      if (isConnected && id) void refreshPhotos(queryClient, id);
+      return local;
+    },
   });
 
   const { captureFromCamera, captureFromGallery } = usePhotoCapture(id ?? "");
@@ -121,6 +142,89 @@ export default function ChantierDetailScreen() {
       );
     },
   });
+
+  const { mutate: submitLegende } = useOfflineMutation<{
+    legende: string | null;
+    chantierId: string;
+  }>({
+    entityType: "photo",
+    operation: "update",
+    buildLocal: (photoId, payload) => {
+      setPhotoLegendeLocal(photoId, payload.legende);
+      queryClient.setQueryData(["photos", id], (old: PhotoRow[] | undefined) =>
+        (old ?? []).map((p) =>
+          p.id === photoId ? { ...p, legende: payload.legende } : p,
+        ),
+      );
+    },
+  });
+
+  const { mutate: submitDeletePhoto } = useOfflineMutation<{
+    chantierId: string;
+  }>({
+    entityType: "photo",
+    operation: "delete",
+    buildLocal: (photoId) => {
+      deleteLocalPhoto(photoId);
+      removePhotoFromCache(photoId);
+    },
+  });
+
+  function removePhotoFromCache(photoId: string): void {
+    queryClient.setQueryData(["photos", id], (old: PhotoRow[] | undefined) =>
+      (old ?? []).filter((p) => p.id !== photoId),
+    );
+  }
+
+  function handleSaveLegende(photoId: string, legende: string | null): void {
+    if (!id) return;
+    submitLegende({ legende, chantierId: id }, photoId);
+  }
+
+  function confirmDeletePhoto(photo: PhotoRow): void {
+    if (!id) return;
+    Alert.alert("Supprimer cette photo ?", "Cette action est définitive.", [
+      { text: "Annuler", style: "cancel" },
+      {
+        text: "Supprimer",
+        style: "destructive",
+        onPress: () => {
+          if (requiresRemoteDeletion(photo.status)) {
+            submitDeletePhoto({ chantierId: id }, photo.id);
+          } else {
+            deleteLocalPhoto(photo.id);
+            removePhotoFromCache(photo.id);
+          }
+          setViewerIndex(null);
+        },
+      },
+    ]);
+  }
+
+  function onThumbnailPress(index: number): void {
+    const photo = photosList[index];
+    if (photo?.outboxStatus === "failed") {
+      Alert.alert("Upload échoué", "Que veux-tu faire de cette photo ?", [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Réessayer",
+          onPress: () => {
+            if (photo.outboxId) retryFailedEntry(photo.outboxId);
+          },
+        },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => {
+            deleteLocalPhoto(photo.id);
+            removePhotoFromCache(photo.id);
+          },
+        },
+      ]);
+      return;
+    }
+    setViewerIndex(index);
+  }
 
   function onSubmitEdit(values: ChantierFormValues) {
     if (!id || !chantier) return;
@@ -312,8 +416,12 @@ export default function ChantierDetailScreen() {
                 keyExtractor={(item) => item.id}
                 numColumns={3}
                 scrollEnabled={false}
-                renderItem={({ item }) => (
-                  <View className="flex-1 aspect-square m-0.5">
+                renderItem={({ item, index }) => (
+                  <TouchableOpacity
+                    className="flex-1 aspect-square m-0.5"
+                    onPress={() => onThumbnailPress(index)}
+                    activeOpacity={0.8}
+                  >
                     <Image
                       source={{
                         uri:
@@ -325,18 +433,105 @@ export default function ChantierDetailScreen() {
                       className="flex-1"
                       resizeMode="cover"
                     />
-                    {item.status === "local" && (
-                      <View className="absolute bottom-1 right-1 bg-black/50 rounded px-1">
-                        <Text className="text-white text-xs">⏳</Text>
+                    {item.outboxStatus === "failed" ? (
+                      <View className="absolute bottom-1 right-1 bg-red-600/80 rounded px-1">
+                        <Text className="text-white text-xs">⚠️</Text>
                       </View>
+                    ) : (
+                      item.status === "local" && (
+                        <View className="absolute bottom-1 right-1 bg-black/50 rounded px-1">
+                          <Text className="text-white text-xs">⏳</Text>
+                        </View>
+                      )
                     )}
-                  </View>
+                  </TouchableOpacity>
                 )}
               />
             )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <ImageView
+        images={photosList.map((p) => ({
+          uri: p.photoUrl ?? p.localUri ?? "",
+        }))}
+        imageIndex={viewerIndex ?? 0}
+        visible={viewerIndex !== null}
+        onRequestClose={() => setViewerIndex(null)}
+        // react-native-image-viewing appelle onImageIndexChange(0) au montage (même
+        // visible=false). On ignore donc tout changement tant que la visionneuse est
+        // fermée, sinon elle s'ouvrirait toute seule à l'ouverture du chantier.
+        onImageIndexChange={(i) =>
+          setViewerIndex((current) => (current === null ? null : i))
+        }
+        FooterComponent={({ imageIndex }) => (
+          <LightboxFooter
+            photo={photosList[imageIndex]}
+            onSave={handleSaveLegende}
+            onDelete={confirmDeletePhoto}
+          />
+        )}
+      />
     </SafeAreaView>
+  );
+}
+
+/**
+ * Pied de la visionneuse : légende éditable + suppression.
+ * Le brouillon de légende est un état INTERNE — taper ne re-rend pas l'écran parent,
+ * donc le footer n'est pas remonté à chaque frappe (sinon le clavier se fermerait).
+ * Le brouillon se réinitialise quand on navigue vers une autre photo (changement d'id).
+ */
+function LightboxFooter({
+  photo,
+  onSave,
+  onDelete,
+}: {
+  photo: PhotoRow | undefined;
+  onSave: (photoId: string, legende: string | null) => void;
+  onDelete: (photo: PhotoRow) => void;
+}): ReactElement | null {
+  const [draft, setDraft] = useState(photo?.legende ?? "");
+  const [shownPhotoId, setShownPhotoId] = useState(photo?.id);
+
+  if (photo && photo.id !== shownPhotoId) {
+    setShownPhotoId(photo.id);
+    setDraft(photo.legende ?? "");
+  }
+
+  if (!photo) return null;
+  const current = photo;
+
+  function save(): void {
+    const trimmed = draft.trim();
+    const value = trimmed === "" ? null : trimmed;
+    if (value === (current.legende ?? null)) return;
+    onSave(current.id, value);
+  }
+
+  return (
+    <View className="px-5 pb-8 pt-3 bg-black/60">
+      <TextInput
+        value={draft}
+        onChangeText={setDraft}
+        onBlur={save}
+        placeholder="Ajouter une légende"
+        placeholderTextColor="#9CA3AF"
+        maxLength={280}
+        returnKeyType="done"
+        onSubmitEditing={save}
+        className="text-white text-base border-b border-white/30 pb-1 mb-3"
+      />
+      <TouchableOpacity
+        onPress={() => onDelete(current)}
+        className="flex-row items-center gap-2 self-start"
+      >
+        <Trash2 size={18} color="#F87171" />
+        <Text className="text-red-400 text-base font-medium">
+          Supprimer la photo
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }

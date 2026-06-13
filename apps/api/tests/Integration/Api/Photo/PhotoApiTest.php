@@ -214,6 +214,63 @@ final class PhotoApiTest extends WebTestCase
     }
 
     #[Test]
+    public function patch_legende_retourne_200(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $photo = PhotoFactory::createOne(['proprietaire' => $user]);
+        $httpClient->loginUser($user->_real());
+
+        $httpClient->request(
+            'PATCH',
+            '/api/photos/' . $photo->id->toRfc4122(),
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
+            content: json_encode(['legende' => 'Fissure mur porteur salon']) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(200);
+        $body = self::decodeJson($httpClient->getResponse()->getContent() ?: '');
+        self::assertSame('Fissure mur porteur salon', $body['legende']);
+    }
+
+    #[Test]
+    public function patch_legende_autre_user_retourne_404(): void
+    {
+        $httpClient = static::createClient();
+        $owner = UserFactory::createOne();
+        $autreUser = UserFactory::createOne();
+        $photo = PhotoFactory::createOne(['proprietaire' => $owner]);
+        $httpClient->loginUser($autreUser->_real());
+
+        $httpClient->request(
+            'PATCH',
+            '/api/photos/' . $photo->id->toRfc4122(),
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
+            content: json_encode(['legende' => 'Tentative IDOR']) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    #[Test]
+    public function patch_legende_trop_longue_retourne_422(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $photo = PhotoFactory::createOne(['proprietaire' => $user]);
+        $httpClient->loginUser($user->_real());
+
+        $httpClient->request(
+            'PATCH',
+            '/api/photos/' . $photo->id->toRfc4122(),
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
+            content: json_encode(['legende' => str_repeat('a', 281)]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(422);
+    }
+
+    #[Test]
     public function delete_supprime_la_photo_de_la_db(): void
     {
         $httpClient = static::createClient();
