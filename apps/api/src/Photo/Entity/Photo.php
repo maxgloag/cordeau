@@ -40,6 +40,8 @@ class Photo
         public readonly \DateTimeImmutable $uploadeLe,
         #[ORM\Column(name: 'cree_le', type: Types::DATETIMETZ_IMMUTABLE)]
         public readonly \DateTimeImmutable $creeLe,
+        #[ORM\Column(name: 'legende', type: Types::STRING, length: 280, nullable: true)]
+        public ?string $legende = null,
     ) {
     }
 }

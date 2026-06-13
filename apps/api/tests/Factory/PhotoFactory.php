@@ -34,6 +34,7 @@ final class PhotoFactory extends PersistentProxyObjectFactory
             'thumbnailUrl' => null,
             'uploadeLe' => $now,
             'creeLe' => $now,
+            'legende' => null,
         ];
     }
 }
