@@ -12,6 +12,7 @@ const makePhoto = (overrides: Partial<Photo> = {}): Photo => ({
   photoUrl: "https://example.com/photo.jpg",
   thumbnailUrl: "https://example.com/thumb.jpg",
   creeLe: new Date().toISOString(),
+  legende: null,
   ...overrides,
 });
 
@@ -47,10 +48,15 @@ describe("PhotoGalleryView", () => {
     expect(imgs).toHaveLength(2);
   });
 
-  it("affiche un spinner quand thumbnailUrl est null", async () => {
+  it("affiche la photo originale en fallback quand thumbnailUrl est null", async () => {
     const screen = await render(
       <PhotoGalleryView
-        photos={[makePhoto({ thumbnailUrl: null })]}
+        photos={[
+          makePhoto({
+            thumbnailUrl: null,
+            photoUrl: "https://example.com/original.jpg",
+          }),
+        ]}
         uploads={[]}
         isLoading={false}
         onUpload={vi.fn()}
@@ -58,6 +64,10 @@ describe("PhotoGalleryView", () => {
         onPhotoClick={vi.fn()}
       />,
     );
-    await expect.element(screen.getByTestId("thumbnail-spinner")).toBeVisible();
+    const imgs = screen.container.querySelectorAll("img");
+    expect(imgs).toHaveLength(1);
+    expect(imgs[0]?.getAttribute("src")).toBe(
+      "https://example.com/original.jpg",
+    );
   });
 });

@@ -1,6 +1,6 @@
 import { useParams } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchPhotos, deletePhoto } from "@/lib/api";
+import { fetchPhotos, deletePhoto, patchLegende } from "@/lib/api";
 import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { ChantierDetailView } from "./ChantierDetailView";
 
@@ -21,6 +21,11 @@ export function ChantierDetailPage() {
     await queryClient.invalidateQueries({ queryKey: ["photos", id] });
   }
 
+  async function handleSaveLegende(photoId: string, legende: string | null) {
+    await patchLegende(photoId, legende);
+    await queryClient.invalidateQueries({ queryKey: ["photos", id] });
+  }
+
   return (
     <ChantierDetailView
       photos={photosList}
@@ -28,6 +33,7 @@ export function ChantierDetailPage() {
       isLoading={isLoading}
       onUpload={upload}
       onDelete={handleDelete}
+      onSaveLegende={handleSaveLegende}
     />
   );
 }

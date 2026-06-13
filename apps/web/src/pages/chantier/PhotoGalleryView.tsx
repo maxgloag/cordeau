@@ -84,22 +84,14 @@ export function PhotoGalleryView({
           >
             {photos.map((photo) => (
               <div key={photo.id} className="relative group aspect-square">
-                {photo.thumbnailUrl ? (
-                  <img
-                    src={photo.thumbnailUrl}
-                    alt=""
-                    className="w-full h-full object-cover rounded cursor-pointer"
-                    onClick={() => onPhotoClick(photo)}
-                  />
-                ) : (
-                  <div
-                    data-testid="thumbnail-spinner"
-                    className="w-full h-full bg-gray-100 rounded flex items-center justify-center"
-                    style={{ minHeight: "64px" }}
-                  >
-                    <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
-                  </div>
-                )}
+                {/* Fallback sur l'original si la vignette n'est pas (ou pas
+                    encore) disponible — ex. HEIC non convertible côté serveur. */}
+                <img
+                  src={photo.thumbnailUrl ?? photo.photoUrl}
+                  alt={photo.legende ?? ""}
+                  className="w-full h-full object-cover rounded cursor-pointer"
+                  onClick={() => onPhotoClick(photo)}
+                />
                 <button
                   type="button"
                   onClick={() => onDelete(photo.id)}

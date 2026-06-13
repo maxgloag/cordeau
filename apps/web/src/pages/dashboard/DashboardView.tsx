@@ -1,4 +1,12 @@
-import { Plus, Pencil, Archive, MapPin, Maximize2, User } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Archive,
+  MapPin,
+  Maximize2,
+  User,
+  Image as ImageIcon,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
@@ -274,6 +282,16 @@ export function DashboardView({
                         >
                           {c.adresseCodePostal} {c.adresseVille}
                         </p>
+                        {(c.photosCount ?? 0) > 0 && (
+                          <span
+                            className="flex items-center gap-1 text-xs mt-0.5"
+                            style={{ color: "var(--color-muted)" }}
+                            title={`${c.photosCount} photo${(c.photosCount ?? 0) > 1 ? "s" : ""}`}
+                          >
+                            <ImageIcon size={11} />
+                            {c.photosCount}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </td>
