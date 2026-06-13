@@ -238,6 +238,23 @@ final class ChantierApiTest extends WebTestCase
     }
 
     #[Test]
+    public function get_item_porte_le_photos_count(): void
+    {
+        $client = static::createClient();
+        $user = UserFactory::createOne();
+        $client->loginUser($user->_real());
+        $entite = ChantierFactory::createOne(['proprietaire' => $user]);
+        PhotoFactory::createMany(2, ['chantierId' => $entite->id, 'proprietaire' => $user]);
+
+        $client->request('GET', '/api/chantiers/' . $entite->id->toRfc4122(), server: ['HTTP_ACCEPT' => 'application/json']);
+
+        self::assertResponseStatusCodeSame(200);
+        $response = $client->getResponse()->getContent();
+        \assert($response !== false);
+        self::assertSame(2, self::decodeJson($response)['photosCount']);
+    }
+
+    #[Test]
     public function get_item_retourne_404_si_id_inconnu(): void
     {
         $client = static::createClient();
