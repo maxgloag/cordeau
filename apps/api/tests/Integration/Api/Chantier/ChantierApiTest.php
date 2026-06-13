@@ -6,6 +6,7 @@ namespace App\Tests\Integration\Api\Chantier;
 
 use App\Domain\Chantier\Enum\StatutChantier;
 use App\Tests\Factory\ChantierFactory;
+use App\Tests\Factory\PhotoFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
 use PHPUnit\Framework\Attributes\Test;
@@ -61,6 +62,36 @@ final class ChantierApiTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/api/chantiers', server: ['HTTP_ACCEPT' => 'application/json']);
         self::assertResponseStatusCodeSame(401);
+    }
+
+    #[Test]
+    public function get_collection_porte_le_photos_count_par_chantier(): void
+    {
+        $client = static::createClient();
+        $user = UserFactory::createOne();
+        $client->loginUser($user->_real());
+
+        $avecPhotos = ChantierFactory::createOne(['proprietaire' => $user]);
+        $sansPhoto = ChantierFactory::createOne(['proprietaire' => $user]);
+        PhotoFactory::createMany(3, ['chantierId' => $avecPhotos->id, 'proprietaire' => $user]);
+
+        $client->request('GET', '/api/chantiers', server: ['HTTP_ACCEPT' => 'application/json']);
+
+        self::assertResponseStatusCodeSame(200);
+        $response = $client->getResponse()->getContent();
+        \assert($response !== false);
+        $items = self::decodeJson($response);
+
+        $countParId = [];
+        foreach ($items as $item) {
+            \assert(\is_array($item));
+            $id = $item['id'];
+            \assert(\is_string($id));
+            $countParId[$id] = $item['photosCount'];
+        }
+
+        self::assertSame(3, $countParId[$avecPhotos->id->toRfc4122()]);
+        self::assertSame(0, $countParId[$sansPhoto->id->toRfc4122()]);
     }
 
     #[Test]

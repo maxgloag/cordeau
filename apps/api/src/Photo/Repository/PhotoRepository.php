@@ -32,6 +32,36 @@ final class PhotoRepository extends ServiceEntityRepository
         );
     }
 
+    /**
+     * Compte les photos par chantier en une seule requête groupée (pas de N+1).
+     *
+     * @param list<Uuid> $chantierIds
+     *
+     * @return array<string, int> map chantierId (rfc4122) => nombre de photos
+     */
+    public function countByChantierIds(array $chantierIds): array
+    {
+        if ($chantierIds === []) {
+            return [];
+        }
+
+        /** @var list<array{chantierId: Uuid, cnt: int}> $rows */
+        $rows = $this->createQueryBuilder('p')
+            ->select('p.chantierId AS chantierId, COUNT(p.id) AS cnt')
+            ->where('p.chantierId IN (:ids)')
+            ->setParameter('ids', $chantierIds)
+            ->groupBy('p.chantierId')
+            ->getQuery()
+            ->getResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[$row['chantierId']->toRfc4122()] = (int) $row['cnt'];
+        }
+
+        return $counts;
+    }
+
     public function save(Photo $photo): void
     {
         $this->getEntityManager()->persist($photo);
