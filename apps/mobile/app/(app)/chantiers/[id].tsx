@@ -167,9 +167,7 @@ export default function ChantierDetailScreen() {
     operation: "delete",
     buildLocal: (photoId) => {
       deleteLocalPhoto(photoId);
-      queryClient.setQueryData(["photos", id], (old: PhotoRow[] | undefined) =>
-        (old ?? []).filter((p) => p.id !== photoId),
-      );
+      removePhotoFromCache(photoId);
     },
   });
 
