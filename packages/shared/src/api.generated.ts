@@ -165,7 +165,11 @@ export interface paths {
         delete: operations["api_photos_id_delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Updates the Photo resource.
+         * @description Updates the Photo resource.
+         */
+        patch: operations["api_photos_id_patch"];
         trace?: never;
     };
     "/api/photos/prepare": {
@@ -204,6 +208,7 @@ export interface components {
             modifieLe?: string;
             clientId?: string | null;
             clientNom?: string | null;
+            photosCount?: number;
         };
         "Chantier.CreerChantierPayload": {
             adresseRue: string;
@@ -237,6 +242,7 @@ export interface components {
             modifieLe?: string;
             clientId?: string | null;
             clientNom?: string | null;
+            photosCount?: number;
         };
         Client: {
             id?: string;
@@ -427,11 +433,15 @@ export interface components {
             photoUrl?: string;
             thumbnailUrl?: string | null;
             creeLe?: string;
+            legende?: string | null;
         };
         "Photo.ConfirmUploadPayload": {
             remoteKey: string;
             /** Format: uuid */
             chantierId: string;
+        };
+        "Photo.ModifierLegendePayload.jsonMergePatch": {
+            legende?: string | null;
         };
         "Photo.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             id?: string;
@@ -442,6 +452,7 @@ export interface components {
             photoUrl?: string;
             thumbnailUrl?: string | null;
             creeLe?: string;
+            legende?: string | null;
         };
         PrepareUploadResource: {
             uploadUrl?: string;
@@ -980,6 +991,68 @@ export interface operations {
                     "application/ld+json": components["schemas"]["Error.jsonld"];
                     "application/problem+json": components["schemas"]["Error"];
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_photos_id_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Photo identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated Photo resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["Photo.ModifierLegendePayload.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description Photo resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Photo"];
+                    "application/ld+json": components["schemas"]["Photo.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
                 };
             };
         };

@@ -972,6 +972,120 @@
                         "explode": false
                     }
                 ]
+            },
+            "patch": {
+                "operationId": "api_photos_id_patch",
+                "tags": [
+                    "Photo"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Photo resource updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Photo"
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Photo.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Updates the Photo resource.",
+                "description": "Updates the Photo resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Photo identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The updated Photo resource",
+                    "content": {
+                        "application/merge-patch+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Photo.ModifierLegendePayload.jsonMergePatch"
+                            }
+                        }
+                    },
+                    "required": true
+                }
             }
         },
         "/api/photos/prepare": {
@@ -1108,6 +1222,9 @@
                             "string",
                             "null"
                         ]
+                    },
+                    "photosCount": {
+                        "type": "integer"
                     }
                 }
             },
@@ -1269,6 +1386,9 @@
                                     "string",
                                     "null"
                                 ]
+                            },
+                            "photosCount": {
+                                "type": "integer"
                             }
                         }
                     }
@@ -1921,6 +2041,12 @@
                     },
                     "creeLe": {
                         "type": "string"
+                    },
+                    "legende": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -1941,6 +2067,18 @@
                             "url": "https://schema.org/identifier"
                         },
                         "type": "string"
+                    }
+                }
+            },
+            "Photo.ModifierLegendePayload.jsonMergePatch": {
+                "type": "object",
+                "properties": {
+                    "legende": {
+                        "maxLength": 280,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -1984,6 +2122,12 @@
                             },
                             "creeLe": {
                                 "type": "string"
+                            },
+                            "legende": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             }
                         }
                     }
