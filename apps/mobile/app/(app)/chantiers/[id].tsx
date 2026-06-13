@@ -32,6 +32,8 @@ import {
   upsertChantiers,
   getPhotosForChantier,
 } from "@/db/queries";
+import { refreshPhotos } from "@/lib/sync";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useOfflineMutation } from "@/hooks/useOfflineMutation";
 import { usePhotoCapture } from "@/hooks/usePhotoCapture";
 
@@ -49,6 +51,7 @@ export default function ChantierDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isConnected = useNetworkStatus();
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: chantier } = useQuery({
@@ -66,8 +69,11 @@ export default function ChantierDetailScreen() {
 
   const { data: photosList = [] } = useQuery({
     queryKey: ["photos", id],
-    queryFn: () => getPhotosForChantier(id ?? ""),
-    staleTime: Infinity,
+    queryFn: () => {
+      const local = getPhotosForChantier(id ?? "");
+      if (isConnected && id) void refreshPhotos(queryClient, id);
+      return local;
+    },
   });
 
   const { captureFromCamera, captureFromGallery } = usePhotoCapture(id ?? "");

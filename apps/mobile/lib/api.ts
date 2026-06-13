@@ -236,6 +236,7 @@ export type PhotoApiResponse = {
   photoUrl: string;
   thumbnailUrl: string | null;
   creeLe: string;
+  legende: string | null;
 };
 
 export async function prepareUpload(
