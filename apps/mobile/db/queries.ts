@@ -1,6 +1,6 @@
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "./index";
-import { chantiers, clients, photos } from "./schema";
+import { chantiers, clients, outboxPhotos, photos } from "./schema";
 import { planPhotoDeletions } from "./photoSync";
 import type { Chantier, Client, PhotoApiResponse } from "@/lib/api";
 
@@ -75,13 +75,47 @@ export function deleteClientLocal(id: string) {
   db.delete(clients).where(eq(clients.id, id)).run();
 }
 
+/**
+ * Supprime une photo encore locale (jamais confirmée par le serveur) : la ligne
+ * photo ET son entrée d'outbox, pour ne pas laisser un upload fantôme retenter une
+ * photo qui n'existe plus. N'effectue AUCUN appel réseau.
+ */
+export function deleteLocalPhoto(photoId: string): void {
+  db.delete(photos).where(eq(photos.id, photoId)).run();
+  db.delete(outboxPhotos).where(eq(outboxPhotos.photoId, photoId)).run();
+}
+
 export function getPhotosForChantier(chantierId: string) {
   return db
-    .select()
+    .select({
+      id: photos.id,
+      chantierId: photos.chantierId,
+      lotId: photos.lotId,
+      tacheId: photos.tacheId,
+      remoteKey: photos.remoteKey,
+      localUri: photos.localUri,
+      photoUrl: photos.photoUrl,
+      thumbnailUrl: photos.thumbnailUrl,
+      legende: photos.legende,
+      status: photos.status,
+      createdAt: photos.createdAt,
+      syncedAt: photos.syncedAt,
+      // statut + id de l'entrée d'outbox d'upload (pour badge ⚠️ + retry)
+      outboxId: outboxPhotos.id,
+      outboxStatus: outboxPhotos.status,
+    })
     .from(photos)
+    .leftJoin(outboxPhotos, eq(outboxPhotos.photoId, photos.id))
     .where(eq(photos.chantierId, chantierId))
     .orderBy(photos.createdAt)
     .all();
+}
+
+export function setPhotoLegendeLocal(
+  photoId: string,
+  legende: string | null,
+): void {
+  db.update(photos).set({ legende }).where(eq(photos.id, photoId)).run();
 }
 
 /**

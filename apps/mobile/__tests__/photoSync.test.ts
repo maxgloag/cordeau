@@ -1,4 +1,14 @@
-import { planPhotoDeletions } from "../db/photoSync";
+import { planPhotoDeletions, requiresRemoteDeletion } from "../db/photoSync";
+
+describe("requiresRemoteDeletion — routage suppression locale vs serveur", () => {
+  it("une photo confirmed doit être supprimée côté serveur", () => {
+    expect(requiresRemoteDeletion("confirmed")).toBe(true);
+  });
+
+  it("une photo local (jamais uploadée) ne doit PAS appeler l'API", () => {
+    expect(requiresRemoteDeletion("local")).toBe(false);
+  });
+});
 
 describe("planPhotoDeletions — réconciliation locale ↔ serveur", () => {
   it("supprime une photo confirmed absente de la liste distante", () => {

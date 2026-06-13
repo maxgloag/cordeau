@@ -264,3 +264,18 @@ export async function fetchPhotos(
 ): Promise<PhotoApiResponse[]> {
   return apiFetch<PhotoApiResponse[]>(`/api/chantiers/${chantierId}/photos`);
 }
+
+export async function patchPhotoLegende(
+  id: string,
+  legende: string | null,
+): Promise<PhotoApiResponse> {
+  return apiFetch<PhotoApiResponse>(`/api/photos/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/merge-patch+json" },
+    body: JSON.stringify({ legende }),
+  });
+}
+
+export async function deletePhoto(id: string): Promise<void> {
+  return apiFetch<void>(`/api/photos/${id}`, { method: "DELETE" });
+}

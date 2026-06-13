@@ -5,6 +5,8 @@ import {
   fetchChantier,
   creerChantier,
   archiverChantier,
+  patchPhotoLegende,
+  deletePhoto,
 } from "../lib/api";
 
 jest.mock("expo-secure-store", () => ({
@@ -159,6 +161,42 @@ describe("chantiers API", () => {
       status: 404,
       message: "Chantier introuvable",
     });
+  });
+});
+
+describe("photos API", () => {
+  beforeEach(() => {
+    mockSecureStore.getItemAsync.mockResolvedValue("my-token");
+  });
+
+  it("patchPhotoLegende envoie un PATCH merge-patch avec la légende", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse(200, { id: "p1", legende: "Mur nord" }),
+    );
+
+    await patchPhotoLegende("p1", "Mur nord");
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:8000/api/photos/p1",
+      expect.objectContaining({
+        method: "PATCH",
+        headers: expect.objectContaining({
+          "Content-Type": "application/merge-patch+json",
+        }),
+        body: JSON.stringify({ legende: "Mur nord" }),
+      }),
+    );
+  });
+
+  it("deletePhoto envoie DELETE sur la photo", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, status: 204, json: jest.fn() });
+
+    await deletePhoto("p1");
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:8000/api/photos/p1",
+      expect.objectContaining({ method: "DELETE" }),
+    );
   });
 });
 

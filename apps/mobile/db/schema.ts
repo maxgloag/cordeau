@@ -1,6 +1,6 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-export type OutboxEntityType = "chantier" | "client";
+export type OutboxEntityType = "chantier" | "client" | "photo";
 export type OutboxOperation = "create" | "update" | "delete";
 export type OutboxStatus =
   | "pending"

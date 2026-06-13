@@ -29,6 +29,21 @@ export function pushToPhotoOutbox(entry: {
     .run();
 }
 
+/**
+ * Relance manuelle d'une entrée d'upload en échec : repasse en "pending" et remet
+ * le compteur de tentatives à 0 pour que `processPhotoOutbox` la retente sans backoff.
+ */
+export function retryFailedEntry(entryId: string): void {
+  db.update(outboxPhotos)
+    .set({
+      status: "pending" as OutboxPhotoStatus,
+      retryCount: 0,
+      lastAttemptAt: null,
+    })
+    .where(eq(outboxPhotos.id, entryId))
+    .run();
+}
+
 let isSyncing = false;
 
 export async function processPhotoOutbox(): Promise<void> {
