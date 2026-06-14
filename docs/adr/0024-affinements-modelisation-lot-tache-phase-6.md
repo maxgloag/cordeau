@@ -17,11 +17,13 @@ Ces décisions conditionnent le code de la Phase 6 et méritent d'être tracées
 
 ## Decision
 
-### 1. `Tâche` = CRUD léger
+### 1. `Tâche` = léger, mais dans le domaine (séparation imposée par Deptrac)
 
-`Tâche` suit le pattern CRUD léger de l'[ADR 0010](0010-crud-leger-pattern-reference.md) : entité Doctrine mutable, pas d'immutabilité `final readonly`, pas de VO. Les transitions `cocher()` / `decocher()` (toggle `faite` + `faiteLe`) et `renommer()` restent des méthodes nommées sur l'entité, mais sans la cérémonie hexagonale. Cohérent avec `apps/api/CLAUDE.md`.
+Le pattern CRUD léger « single-class » de l'[ADR 0010](0010-crud-leger-pattern-reference.md) (entité = entité Doctrine, pas de port) ne vaut que pour les **contextes autonomes hors périmètre Deptrac** (Auth, Client). `Tâche` est imbriquée dans le bounded context **Chantier**, qui est rigoureux, layer-first et sous Deptrac (Doctrine interdit dans `src/Domain/`). Le single-class n'y rentre donc pas.
 
-`Lot` reste **hexagonal strict** (entité domaine `final readonly`, factory + transitions, entité Doctrine séparée, port dédié) : il porte le mode de facturation, l'estimation/réel et leurs invariants.
+`Tâche` est donc placée comme les autres entités du BC : **entité de domaine `final readonly` dans `Domain/Chantier/Entity/`, entité Doctrine séparée (`TacheDoctrineEntity`), port `TacheRepository`**. Le caractère « léger » s'exprime par l'**absence de couche Application dédiée** (pilotée directement par les processors en 6.2) et l'**absence de VO** : `libelle` est un `string`, les transitions `cocher()` / `decocher()` (toggle `faite` + `faiteLe`) et `renommer()` sont des méthodes simples. L'immuabilité est conservée par cohérence avec le reste du BC et pour respecter « pas de propriété publique mutable » (`apps/api/CLAUDE.md`).
+
+`Lot` reste **hexagonal strict** (entité domaine `final readonly`, factory + transitions, entité Doctrine séparée, port dédié, **plus** une couche Application en 6.2) : il porte le mode de facturation, l'estimation/réel et leurs invariants.
 
 ### 2. `Estimation` / `Reel` : VO `valeur`, unité dérivée du mode
 
@@ -62,4 +64,4 @@ final readonly class Imprevu {
 
 ### Risques résiduels
 
-- Changement de `mode` d'un Lot après saisie d'une estimation : la valeur reste mais son unité « change » de sens. Mitigation : la transition `changerMode()` doit expliciter le comportement (conserver la valeur en l'avertissant côté UI, ou réinitialiser estimation/réel). À trancher à l'implémentation 6.1.
+- Changement de `mode` d'un Lot après saisie d'une estimation : la valeur conserverait une unité qui « change » de sens. **Tranché (6.1)** : `changerMode()` **réinitialise** `estimation` et `reel` à `null` dès que le mode change réellement (no-op si mode identique), pour éviter une valeur silencieusement fausse. Charge à l'UI (6.3/6.4) de prévenir l'artisan que changer le mode efface l'estimation/réel saisis.

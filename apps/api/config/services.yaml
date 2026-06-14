@@ -24,6 +24,12 @@ services:
     App\Domain\Chantier\Repository\ChantierRepository:
         class: App\Infrastructure\Persistence\Doctrine\Chantier\Repository\DoctrineChantierRepository
 
+    App\Domain\Chantier\Repository\LotRepository:
+        class: App\Infrastructure\Persistence\Doctrine\Chantier\Repository\DoctrineLotRepository
+
+    App\Domain\Chantier\Repository\TacheRepository:
+        class: App\Infrastructure\Persistence\Doctrine\Chantier\Repository\DoctrineTacheRepository
+
     App\Auth\Port\OAuthAccountStore:
         alias: App\Auth\Repository\OAuthAccountRepository
 
