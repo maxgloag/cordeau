@@ -459,12 +459,11 @@ export default function ChantierDetailScreen() {
         imageIndex={viewerIndex ?? 0}
         visible={viewerIndex !== null}
         onRequestClose={() => setViewerIndex(null)}
-        // react-native-image-viewing appelle onImageIndexChange(0) au montage (même
-        // visible=false). On ignore donc tout changement tant que la visionneuse est
-        // fermée, sinon elle s'ouvrirait toute seule à l'ouverture du chantier.
-        onImageIndexChange={(i) =>
-          setViewerIndex((current) => (current === null ? null : i))
-        }
+        // Pas de onImageIndexChange : react-native-image-viewing keye son composant
+        // sur `imageIndex` (cf EnhancedImageViewing), donc remonter cet état à chaque
+        // swipe ferait changer la key → remontage = la visionneuse se ferme/rouvre.
+        // viewerIndex ne sert qu'à l'ouverture (index initial) ; le footer suit la
+        // photo courante via la render-prop interne `imageIndex` ci-dessous.
         FooterComponent={({ imageIndex }) => (
           <LightboxFooter
             photo={photosList[imageIndex]}
