@@ -60,3 +60,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0019](0019-durcissement-ci-cd.md)                  | Durcissement de la chaîne CI/CD                                            | Accepted |
 | [0021](0021-acces-restreint-beta.md)                | Accès restreint en bêta privée (kill-switch d'inscription réversible)      | Accepted |
 | [0022](0022-monorepo-pnpm-hoisting-metro.md)        | Hoisting pnpm pour le toolchain Metro (monorepo)                           | Accepted |
+| [0023](0023-traitement-image-imagick-heic.md)       | Traitement d'images serveur via Imagick (HEIC) pour les vignettes          | Accepted |

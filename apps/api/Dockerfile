@@ -3,13 +3,22 @@
 FROM dunglas/frankenphp:1-php8.5-alpine AS base
 
 # Extensions PHP nécessaires : pdo_pgsql (Doctrine PostgreSQL), redis (cache/messenger),
-# intl (Symfony i18n + validation), opcache (perf prod), apcu (cache local)
+# intl (Symfony i18n + validation), opcache (perf prod), apcu (cache local),
+# imagick (génération de vignettes, décodage HEIC via libheif — cf ADR 0023)
 RUN install-php-extensions \
     pdo_pgsql \
     redis \
     intl \
     opcache \
-    apcu
+    apcu \
+    imagick
+
+# Durcissement ImageMagick (cf ADR 0023) : policy.xml restrictif — coders limités au
+# raster attendu (JPEG/PNG/WebP/HEIC), delegates dangereux désactivés, limites de
+# ressources (anti decompression bomb). MAGICK_CONFIGURE_PATH pointe ImageMagick vers
+# notre policy, indépendamment du chemin compilé par défaut.
+ENV MAGICK_CONFIGURE_PATH=/etc/ImageMagick
+COPY docker/imagemagick-policy.xml /etc/ImageMagick/policy.xml
 
 # Composer (copié depuis l'image officielle, plus léger que d'installer via package manager)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
