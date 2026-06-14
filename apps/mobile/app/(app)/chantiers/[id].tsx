@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
   ActivityIndicator,
   Alert,
@@ -493,6 +494,28 @@ function LightboxFooter({
 }): ReactElement | null {
   const [draft, setDraft] = useState(photo?.legende ?? "");
   const [shownPhotoId, setShownPhotoId] = useState(photo?.id);
+  // Le footer est rendu en position absolue (bottom: 0) par react-native-image-viewing,
+  // dans sa propre Modal : rien ne le pousse au-dessus du clavier, qui masque alors le
+  // champ légende. KeyboardAvoidingView / react-native-keyboard-controller ne s'appliquent
+  // pas ici (leur contexte ne traverse pas la Modal tierce), donc on suit la hauteur du
+  // clavier via les events RN globaux et on translate le footer juste au-dessus.
+  // L'adoption de keyboard-controller pour les écrans de formulaire est suivie en #95.
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showSub = Keyboard.addListener(showEvent, (e) =>
+      setKeyboardHeight(e.endCoordinates.height),
+    );
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   if (photo && photo.id !== shownPhotoId) {
     setShownPhotoId(photo.id);
@@ -510,7 +533,10 @@ function LightboxFooter({
   }
 
   return (
-    <View className="px-5 pb-8 pt-3 bg-black/60">
+    <View
+      className="px-5 pb-8 pt-3 bg-black/60"
+      style={{ transform: [{ translateY: -keyboardHeight }] }}
+    >
       <TextInput
         value={draft}
         onChangeText={setDraft}
