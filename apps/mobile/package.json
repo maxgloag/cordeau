@@ -81,9 +81,11 @@
     "react-hook-form": "^7.77.0",
     "react-native": "0.85.3",
     "react-native-image-viewing": "^0.2.2",
+    "react-native-reanimated": "4.3.1",
     "react-native-safe-area-context": "~5.8.0",
     "react-native-screens": "~4.25.2",
     "react-native-svg": "~15.15.5",
+    "react-native-worklets": "0.8.3",
     "tailwindcss": "^3.4.19",
     "zod": "^4.4.3"
   },
