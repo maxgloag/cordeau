@@ -1,6 +1,7 @@
 # Fichiers générés — ne pas formater
 packages/shared/src/api.generated.ts
 packages/shared/openapi.json
+apps/web/src/routeTree.gen.ts
 pnpm-lock.yaml
 
 # Config Symfony — syntaxe YAML spécifique (ancres, when@env) que Prettier casse
