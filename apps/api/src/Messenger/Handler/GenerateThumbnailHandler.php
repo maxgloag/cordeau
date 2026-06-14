@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Messenger\Handler;
 
+use App\Infrastructure\Image\ThumbnailGenerator;
 use App\Infrastructure\Storage\StorageAdapterInterface;
 use App\Messenger\Message\GenerateThumbnailMessage;
 use App\Photo\Repository\PhotoRepository;
@@ -18,6 +19,7 @@ final class GenerateThumbnailHandler
     public function __construct(
         private readonly StorageAdapterInterface $storage,
         private readonly PhotoRepository $repository,
+        private readonly ThumbnailGenerator $thumbnailGenerator,
     ) {
     }
 
@@ -28,38 +30,17 @@ final class GenerateThumbnailHandler
             return;
         }
 
-        $originalUrl = $photo->photoUrl;
-        $data = file_get_contents($originalUrl);
+        $data = file_get_contents($photo->photoUrl);
         if ($data === false) {
             return;
         }
 
-        $source = imagecreatefromstring($data);
-        if ($source === false) {
-            return;
-        }
-
-        $srcW = imagesx($source);
-        $srcH = imagesy($source);
-        $size = min($srcW, $srcH);
-        $srcX = (int)(($srcW - $size) / 2);
-        $srcY = (int)(($srcH - $size) / 2);
-
-        $thumb = imagecreatetruecolor(self::THUMB_SIZE, self::THUMB_SIZE);
-        \assert($thumb !== false);
-        imagecopyresampled($thumb, $source, 0, 0, $srcX, $srcY, self::THUMB_SIZE, self::THUMB_SIZE, $size, $size);
-        imagedestroy($source);
-
-        ob_start();
-        imagejpeg($thumb, null, 85);
-        $thumbData = (string) ob_get_clean();
-        imagedestroy($thumb);
+        $thumbData = $this->thumbnailGenerator->generateSquareJpeg($data, self::THUMB_SIZE);
 
         $thumbKey = 'thumbs/' . $message->remoteKey;
         $this->storage->uploadBinary($thumbKey, $thumbData, 'image/jpeg');
 
-        $thumbUrl = $this->storage->getPublicUrl($thumbKey);
-        $photo->thumbnailUrl = $thumbUrl;
+        $photo->thumbnailUrl = $this->storage->getPublicUrl($thumbKey);
         $this->repository->save($photo);
     }
 }
