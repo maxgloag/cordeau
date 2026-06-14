@@ -45,6 +45,10 @@ src/Chantier/
 
 Migration additive Phase 6/7 : nouvelles tables `lot`, `tache`, `materiau`, `mesure`, `pointage`, FK vers `chantier` ou `lot`. **Pas de modif destructive** sur `chantier` (Phases 1-2 préservées).
 
+### Photos (Phase 5) — upload direct + thumbnails async
+
+`Photo` = CRUD léger. Flux **upload direct** : l'API génère une URL R2 pré-signée, le client `PUT` le binaire directement sur Cloudflare R2 (jamais de transit backend) — cf [ADR 0004](../../docs/adr/0004-cloudflare-r2-stockage.md). Adapter `Infrastructure/Storage/` (port `StorageAdapterInterface`, impl S3/R2). Vignettes générées en **asynchrone** via Symfony Messenger (`GenerateThumbnailHandler`) qui délègue à `Infrastructure/Image/ThumbnailGenerator` (**Imagick + libheif**, décode HEIC ; durci par `policy.xml` — cf [ADR 0023](../../docs/adr/0023-traitement-image-imagick-heic.md)). CORS R2 requis pour les uploads **web** uniquement (mobile = upload natif hors CORS) : [runbook](../../docs/runbooks/r2-cors.md).
+
 ## Web (apps/web) — Pattern container / view
 
 Voir [ADR 0007](../../docs/adr/0007-pattern-container-view.md).
@@ -58,7 +62,7 @@ Routing : TanStack Router (typé). Auth : cookie de session côté firewall web.
 
 ## Mobile (apps/mobile)
 
-- Expo SDK 54 + expo-router (file-based routing)
+- Expo SDK 56 (RN 0.85) + expo-router (file-based routing) — migration SDK 54→56 cf [ADR 0022](../../docs/adr/0022-monorepo-pnpm-hoisting-metro.md). Build natif iOS : config plugin folly committé (`apps/mobile/plugins/withFollyNoCoroutines.js`, Xcode 26.5) ; reanimated/worklets alignés sur `bundledNativeModules.json`
 - NativeWind pour le styling (Tailwind compilé en RN)
 - expo-secure-store pour les tokens (tokens opaques, pas JWT — cf [ADR 0003](../../docs/adr/0003-tokens-opaques-mobile.md))
 - expo-sqlite + Drizzle + outbox pattern (cf [ADR 0005](../../docs/adr/0005-offline-first-sqlite-drizzle.md) et [ADR 0012](../../docs/adr/0012-offline-first-query-pattern.md))
