@@ -24,7 +24,10 @@ No 'Access-Control-Allow-Origin' header is present on the requested resource.
 ```json
 [
   {
-    "AllowedOrigins": ["http://localhost:5173", "https://<domaine-web-prod>"],
+    "AllowedOrigins": [
+      "http://localhost:5173",
+      "https://cordeau-web.pages.dev"
+    ],
     "AllowedMethods": ["PUT", "GET"],
     "AllowedHeaders": ["content-type"],
     "MaxAgeSeconds": 3600
@@ -32,7 +35,11 @@ No 'Access-Control-Allow-Origin' header is present on the requested resource.
 ]
 ```
 
-- `AllowedOrigins` : l'origine du **front web** (pas l'API). `http://localhost:5173` pour le dev Vite ; ajouter le domaine de prod (Cloudflare Pages) au déploiement. Ne pas utiliser `*` (le `PUT` permettrait à n'importe quel site d'uploader sur le bucket via une URL pré-signée fuitée).
+- `AllowedOrigins` : l'origine du **front web** (pas l'API). Chaque origine doit être **exacte** (`scheme://host[:port]`) — R2 **ne supporte pas** les wildcards de sous-domaine (`https://*.exemple.com`), seulement des origines exactes ou le `*` global.
+  - `http://localhost:5173` — dev Vite.
+  - `https://cordeau-web.pages.dev` — prod (Cloudflare Pages, cf [deploiement-prod.md](deploiement-prod.md)).
+  - Ne pas utiliser `*` tout court (le `PUT` permettrait à n'importe quel site d'uploader sur le bucket via une URL pré-signée fuitée). Le jour où on passe à un domaine custom (`cordeau-pro.fr`), ajouter cette origine exacte ici.
+  - **Preview deploys** (`https://<hash>.cordeau-web.pages.dev`) : non couverts, car R2 n'accepte pas le wildcard de sous-domaine et les hashes changent à chaque déploiement. Tester les uploads photo en dev local ou sur la prod, pas sur une preview (ou ajouter ponctuellement l'origine exacte d'une preview au besoin).
 - `AllowedMethods` : `PUT` (upload) + `GET` (lecture si on sert l'objet via l'endpoint S3 ; l'affichage passe normalement par `R2_PUBLIC_URL` = `pub-….r2.dev`, public, hors CORS).
 - `AllowedHeaders` : `content-type` — seul en-tête custom envoyé par le `PUT` (le `Content-Type` doit correspondre exactement à celui signé dans l'URL pré-signée, cf [PR #77](https://github.com/maxgloag/cordeau/pull/77)).
 
@@ -52,7 +59,10 @@ Avec un token admin temporaire, via le SDK S3 (mêmes paramètres que `apps/api/
 $s3->putBucketCors([
     'Bucket' => 'cordeau-photos',
     'CORSConfiguration' => ['CORSRules' => [[
-        'AllowedOrigins' => ['http://localhost:5173', 'https://<domaine-web-prod>'],
+        'AllowedOrigins' => [
+            'http://localhost:5173',
+            'https://cordeau-web.pages.dev',
+        ],
         'AllowedMethods' => ['PUT', 'GET'],
         'AllowedHeaders' => ['content-type'],
         'MaxAgeSeconds' => 3600,

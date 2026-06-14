@@ -184,6 +184,14 @@ Une fois le build terminé (~2 min) :
 - Ouvrir `https://cordeau-web.pages.dev`
 - La page doit afficher le statut santé en vert (consommé depuis l'API Fly)
 
+### CORS R2 (uploads photo) — à ne pas oublier
+
+Les uploads photo depuis le **web** font un `PUT` direct cross-origin vers R2 : le bucket `cordeau-photos` doit autoriser l'origine Pages via CORS, sinon les uploads web échouent en prod (le mobile, en upload natif, n'est pas concerné).
+
+➡️ Appliquer la politique CORS du bucket en suivant **[r2-cors.md](r2-cors.md)** — origine prod `https://cordeau-web.pages.dev` (R2 n'accepte pas les wildcards de sous-domaine : les preview deploys ne sont pas couverts). À faire **une fois** après le premier déploiement Pages, puis à chaque nouvelle origine web (domaine custom).
+
+Vérification : sur `https://cordeau-web.pages.dev`, ouvrir un chantier → ajouter une photo → dans l'onglet Network, le `PUT` vers `…r2.cloudflarestorage.com` doit répondre **200** (et non une erreur CORS).
+
 ### Preview deploys
 
 Chaque PR sur `main` déclenche un preview deploy à `https://<hash>.cordeau-web.pages.dev` — utile pour reviewer un changement UI sans merger.
