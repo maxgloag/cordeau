@@ -1,3 +1,4 @@
+import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { randomUUID } from "expo-crypto";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,6 +10,14 @@ export function usePhotoCapture(chantierId: string) {
   const queryClient = useQueryClient();
 
   async function captureFromCamera(): Promise<void> {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        "Accès à l'appareil photo refusé",
+        "Autorisez l'accès à l'appareil photo dans les Réglages pour photographier vos chantiers.",
+      );
+      return;
+    }
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: "images",
       quality: 0.8,
@@ -23,6 +32,14 @@ export function usePhotoCapture(chantierId: string) {
   }
 
   async function captureFromGallery(): Promise<void> {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        "Accès aux photos refusé",
+        "Autorisez l'accès à vos photos dans les Réglages pour les rattacher à vos chantiers.",
+      );
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       quality: 0.8,
