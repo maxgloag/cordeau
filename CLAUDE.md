@@ -105,7 +105,7 @@ Voir [docs/adr/0002-architecture-hexagonale.md](docs/adr/0002-architecture-hexag
 
 ## Roadmap
 
-Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 5 (Photos + R2) à démarrer, pivot vers Phase 6 Lots/Tâches ensuite. V1 ciblée septembre 2026 (bêta payante).
+Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 5 (Photos + R2) ✅ terminée (juin 2026, iOS on-device inclus) ; prochaine étape Phase 6 Lots/Tâches. Suivi résiduel : #87 (job CI build natif iOS). V1 ciblée septembre 2026 (bêta payante).
 
 ## Surveillance CI automatique
 

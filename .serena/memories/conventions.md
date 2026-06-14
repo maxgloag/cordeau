@@ -49,7 +49,8 @@ Toute décision structurante → ADR dans `docs/adr/NNNN-titre-court.md` **avant
 ## Workflow
 
 - Issues GitHub : 1 par story produit, milestones par phase
-- CI : `gh run watch <RUN_ID> --exit-status` lancé en `run_in_background` après chaque push (le hook ci-watch.sh ne se déclenche pas dans Claude Code actuel)
+- **Fermeture d'issue** : utiliser le mot-clé **anglais** `Closes #N` (ou `Fixes`/`Resolves`) dans le corps de la PR — le « Ferme #N » français **n'auto-ferme pas**. Sinon fermer à la main + vérifier (`gh issue list --milestone ... --state open`)
+- CI : `gh run watch <RUN_ID> --exit-status` lancé en `run_in_background` après chaque push (le hook ci-watch.sh ne se déclenche pas dans Claude Code actuel). Validation finale = **`gh pr checks <pr>`**, jamais le seul exit code d'un `gh run watch` (un run-id ne couvre pas tous les workflows)
 - Démo perso vendredi : lancer l'app comme un user
 
 ## Trajectoire V1 manuelle → V1.2+ magie ([ADR 0017](../../docs/adr/0017-differer-ia-validation-manuelle.md))
@@ -71,6 +72,8 @@ Si quelque chose ne marche pas, **consulter Context7 MCP** avant de coder un wor
 ## Dépendances workspace pnpm
 
 Unifier les versions sur la plus récente (React, etc.) plutôt que patcher localement. Toujours relancer `pnpm install` et commiter `pnpm-lock.yaml` après tout changement de specifier.
+
+**Montée de SDK Expo** : les peer deps natives transitives (reanimated, worklets, screens...) ne se bumpent pas seules → après chaque SDK bump, les comparer à `node_modules/expo/bundledNativeModules.json` et `npx expo install <lib>` celles qui divergent, sinon résidu de l'ancien SDK = **build natif cassé** (invisible en `expo export`). Cas vécu : reanimated 3.17.5 (résidu SDK 54) a cassé le build iOS Phase 5.
 
 ## Bug-fix : protocole double-fix
 

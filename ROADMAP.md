@@ -6,14 +6,14 @@
 
 ## Statut actuel
 
-**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** ✅ terminée (mai 2026, issues #22 → #26, PRs #27 → #31). **Phase 4 — OAuth Google** ✅ terminée (16 mai 2026, issues #35 → #37, PRs #38 → #42, ADR 0013). Apple Sign-In différé. **Phase 5 — Photos + R2** livrée fonctionnellement (PR #77 upload + galerie, PR #79 UX de consultation) mais **NON validée** : la phase reste ouverte tant que la chaîne n'est pas testable sur les 3 plateformes dans tous les environnements — bloquée par #81 (HEIC), #83 (CORS R2 prod) et #84 (build natif iOS cassé SDK 56). **Repositionnement V1 acté mai 2026** ([ADR 0015](docs/adr/0015-modele-chantier-lots-taches-mesures.md), [ADR 0016](docs/adr/0016-positionnement-v1-outil-de-suivi.md), [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)) : wedge V1 = capture terrain manuelle ; AR et PDP différés V2 ; IA différée V1.2+ sur critère de validation bêta.
+**Phase 1 — Verticale Chantiers** ✅ terminée (mai 2026, issues #1 → #5). **Phase 2 — Verticale Clients** ✅ terminée (mai 2026, issues #11 → #15, vélocité ×5 vs Phase 1). **Phase 3 — Offline-first** ✅ terminée (mai 2026, issues #22 → #26, PRs #27 → #31). **Phase 4 — OAuth Google** ✅ terminée (16 mai 2026, issues #35 → #37, PRs #38 → #42, ADR 0013). Apple Sign-In différé. **Phase 5 — Photos + R2** ✅ terminée (juin 2026) : livrée par PR #77 (upload) + #79 (UX), puis les 3 bloquants milestone résolus — #84 build natif iOS (PR #88, root cause = reanimated résiduel SDK 54), #83 CORS R2 prod (PR #97 + dashboard), #81 vignettes HEIC (PR #98, [ADR 0023](docs/adr/0023-traitement-image-imagick-heic.md)). Chaîne photo validée sur web + Android + **iOS on-device** (dev + prod). Suivi restant : #87 (job CI de build natif iOS). **Repositionnement V1 acté mai 2026** ([ADR 0015](docs/adr/0015-modele-chantier-lots-taches-mesures.md), [ADR 0016](docs/adr/0016-positionnement-v1-outil-de-suivi.md), [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)) : wedge V1 = capture terrain manuelle ; AR et PDP différés V2 ; IA différée V1.2+ sur critère de validation bêta.
 
 ## Rétroplanning indicatif
 
 | Période           | Phases          | Cible                                                               |
 | ----------------- | --------------- | ------------------------------------------------------------------- |
 | Mai 2026          | Phases 0 → 4 ✅ | Fondations + Chantiers + Clients + Offline + OAuth                  |
-| Mai-juin 2026     | Phase 5         | Photos + R2                                                         |
+| Mai-juin 2026     | Phase 5 ✅      | Photos + R2                                                         |
 | Juin-juillet 2026 | Phases 6 + 7    | Verticale Lots/Tâches + Capture terrain & Métré manuel              |
 | Juillet-août 2026 | Phase 8         | Devis + Facture brouillon (édition manuelle)                        |
 | Septembre 2026    | Phase 9         | Bêta payante V1 — validation critère manuel                         |
@@ -108,19 +108,23 @@ KnpUOAuth2ClientBundle + league/oauth2-google. Table `oauth_account` séparée (
 
 ---
 
-## Phase 5 — Photos + R2 (~1 semaine) — 🚧 ouverte (livrée, non validée)
+## Phase 5 — Photos + R2 (~1 semaine) ✅
 
 Bucket Cloudflare R2, endpoints Symfony pour pre-signed URLs, upload direct depuis mobile (pas de transit backend), drag-and-drop web, worker Messenger pour thumbnails, liaison photos ↔ chantiers, suppression cascade.
 
-**Livré** : PR #77 (upload offline-first + galerie web + R2), PR #79 (UX de consultation : légende, visionneuse mobile, lightbox web, `photosCount`, réconciliation, infra de test vrai-SQLite). Validé en réel sur web + Android.
+**Livré** : PR #77 (upload offline-first + galerie web + R2), PR #79 (UX de consultation : légende, visionneuse mobile, lightbox web, `photosCount`, réconciliation, infra de test vrai-SQLite).
 
-**Critère de sortie** : 20 photos prises sur un chantier en mobile (même hors-ligne) s'uploadent en arrière-plan quand la connexion revient, consultables depuis le web — **sur les 3 plateformes dans tous les environnements (dev + prod)**.
+**Critère de sortie validé** (juin 2026) : photos prises sur un chantier en mobile (même hors-ligne) s'uploadent en arrière-plan au retour de connexion, consultables depuis le web — testé sur web + Android + **iOS on-device** (dev + prod).
 
-**Bloquants restants avant de marquer ✅** (milestone Phase 5) :
+**Bloquants résolus** (milestone Phase 5, fermés le 2026-06-14) :
 
-- **#84** — build natif iOS cassé (Expo SDK 56 / Xcode 26.5 : folly coroutines + hermes inspector). Empêche tout test/déploiement iOS on-device. _Le plus gros._
-- **#83** — CORS R2 pour les uploads web en **prod** (dev débloqué, cf [runbook](docs/runbooks/r2-cors.md)).
-- **#81** — conversion HEIC serveur pour les vignettes (actuellement fallback sur l'original).
+- **#84** ✅ → PR #88 — build natif iOS (SDK 56 / Xcode 26.5). Root cause = `react-native-reanimated@3.17.5` résiduel du lockfile SDK 54 (peer transitif jamais bumpé) → aligné sur 4.3.1 ; + config plugin folly committé (`FOLLY_CFG_NO_COROUTINES`) + ATS.
+- **#83** ✅ → PR #97 + CORS appliqué en prod sur le bucket `cordeau-photos` ([runbook](docs/runbooks/r2-cors.md)).
+- **#81** ✅ → PR #98 + [ADR 0023](docs/adr/0023-traitement-image-imagick-heic.md) — bascule GD → Imagick (libheif) pour les vignettes HEIC + durcissement ImageMagick.
+
+**Bugs UX lightbox corrigés en test on-device iOS** : permissions caméra/galerie (#89/#90), visionneuse remount au swipe (#91/#92), clavier masquant la légende (#94/#96).
+
+**Suivis ouverts** (hors critère de sortie) : **#87** (job CI de build natif iOS — la CI ne compile que le JS via `expo export`, d'où la casse #84 non détectée) ; **#95** (adopter `react-native-keyboard-controller` comme standard des formulaires, Phase 6).
 
 ---
 
