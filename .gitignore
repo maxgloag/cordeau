@@ -74,3 +74,6 @@ apps/web/src/test/__screenshots__/
 *.tsbuildinfo
 
 docs/superpowers/
+
+# Claude Code : réglages locaux personnels
+.claude/settings.local.json
