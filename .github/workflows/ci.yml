@@ -127,6 +127,17 @@ jobs:
       - name: Audit Composer dependencies
         run: composer audit
 
+      # Le projet est sur Symfony 7.4 (extra.symfony.require). Dependabot ignore Flex :
+      # aucun composant Symfony 8 ne doit entrer dans le lock sans ADR de migration.
+      - name: Check Symfony major version
+        run: |
+          v8=$(jq -r '.packages[], ."packages-dev"[] | select(.name | test("^symfony/(?!.*(contracts|polyfill))")) | select(.version | test("^v?([89]|[1-9][0-9])\\.")) | "\(.name) \(.version)"' composer.lock)
+          if [ -n "$v8" ]; then
+            echo "::error::Composants Symfony hors 7.4 dans composer.lock (migration Symfony 8 = ADR requis) :"
+            echo "$v8"
+            exit 1
+          fi
+
       - name: Run PHPStan
         run: ./vendor/bin/phpstan analyse --no-progress --error-format=github
         env:
@@ -134,6 +145,18 @@ jobs:
 
       - name: Run Deptrac (architecture hexagonale)
         run: ./vendor/bin/deptrac analyse --no-progress --formatter=github-actions
+
+      # Le contrat OpenAPI committé (packages/shared) doit refléter l'API réelle :
+      # une montée de version d'API Platform peut le modifier sans casser aucun test PHP.
+      # Les options d'export doivent rester identiques au script `generate` de packages/shared/package.json.
+      - name: Check OpenAPI contract drift
+        run: |
+          php bin/console api:openapi:export --spec-version=3.0.0 -o "$RUNNER_TEMP/openapi.json"
+          diff -u ../../packages/shared/openapi.json "$RUNNER_TEMP/openapi.json" \
+            || { echo "::error::packages/shared/openapi.json est obsolète : lancer 'pnpm --filter @cordeau/shared generate' et committer."; exit 1; }
+        env:
+          APP_ENV: dev
+          APP_SECRET: ci_secret_for_tests
 
       - name: Run PHPUnit
         run: php bin/phpunit
@@ -170,6 +193,13 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # Les types TS partagés doivent correspondre au contrat openapi.json committé.
+      - name: Check shared types drift
+        run: |
+          pnpm --filter @cordeau/shared generate:types
+          git diff --exit-code -- packages/shared/src/api.generated.ts \
+            || { echo "::error::packages/shared/src/api.generated.ts est obsolète : lancer 'pnpm --filter @cordeau/shared generate' et committer."; exit 1; }
 
       # Chrome for Testing depuis le CDN Google (évite cdn.playwright.dev instable)
       - name: Setup Chrome for Testing
