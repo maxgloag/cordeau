@@ -59,7 +59,9 @@ Exemples : `feat(chantier): add archivage use case`, `fix(api): handle null adre
 - `fix/<issue-number>-<slug>`
 - `chore/<slug>` (sans issue si purement local)
 
-Squash merge sur `main`. `main` est protégée : PR obligatoire, CI verte requise.
+Squash merge sur `main`. `main` est protégée : PR obligatoire, CI verte requise, 1 approbation requise.
+
+**Merge automatisé** ([ADR 0025](docs/adr/0025-reviewer-claude-auto-merge.md)) : le workflow `PR Review` relit chaque PR interne avec Claude, l'approuve si le verdict est `approve` et active l'auto-merge ; GitHub fusionne dès que la CI est verte. **Claude ne fusionne jamais lui-même** : il crée la PR, surveille la CI et la revue, et corrige si besoin. Une PR labellisée `needs-human` attend la décision du fondateur.
 
 ### ADRs
 
@@ -144,8 +146,7 @@ Si un signal de vélocité ou d'archi se dégrade (cf critère de sortie de chaq
 Skills à invoquer automatiquement selon le contexte (sans qu'on ait à le demander) :
 
 - **Avant chaque `gh pr create`** → lancer `/simplify` sur les changements de la branche, puis intégrer les corrections suggérées avant d'ouvrir la PR
-- **Avant de merger une PR qui coche au moins une case "Impact sécurité / RGPD"** du template story (auth/sessions, permissions/RBAC, secrets, données personnelles, stockage de fichiers, données financières, dépendance externe) → lancer `/security-review` et résoudre les findings critiques avant merge. Inclut explicitement les PR qui touchent des données personnelles (clients, adresses, téléphones, photos identifiables) au titre RGPD, pas seulement auth/facture/photo
-- **Avant chaque merge** → lancer `/review` pour un second avis sur la PR
+- **Revue avant merge** → faite par le workflow `PR Review` (ADR 0025) : second avis en contexte frais sur chaque PR, plus revue sécurité si la PR touche auth/sessions, permissions/RBAC, secrets, données personnelles (clients, adresses, téléphones, photos identifiables, au titre RGPD), stockage de fichiers, données financières, dépendance externe ou workflows CI. Un finding sécurité high/critical → label `needs-human`, pas d'auto-merge. Après un verdict `request_changes`, Claude corrige et pousse : la revue repart automatiquement
 - **Pour toute question DB / Neon / queries / connexion / migration prod** → utiliser le skill `neon-postgres` au lieu de répondre depuis la mémoire
 - **Phase 1.4 et 1.5 (UI web et mobile)** → utiliser le skill `frontend-design` quand on génère des écrans nouveaux pour éviter le rendu "AI générique"
 - **Phase 6 (Devis) et au-delà, queries SQL complexes** → consulter `supabase-postgres-best-practices` (best practices Postgres génériques)

@@ -62,3 +62,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0022](0022-monorepo-pnpm-hoisting-metro.md)               | Hoisting pnpm pour le toolchain Metro (monorepo)                           | Accepted |
 | [0023](0023-traitement-image-imagick-heic.md)              | Traitement d'images serveur via Imagick (HEIC) pour les vignettes          | Accepted |
 | [0024](0024-affinements-modelisation-lot-tache-phase-6.md) | Affinements de modélisation Lot / Tâche (Phase 6)                          | Accepted |
+| [0025](0025-reviewer-claude-auto-merge.md)                 | Reviewer Claude automatisé et auto-merge des PR                            | Accepted |
