@@ -61,7 +61,7 @@ Exemples : `feat(chantier): add archivage use case`, `fix(api): handle null adre
 
 Squash merge sur `main`. `main` est protégée : PR obligatoire, CI verte requise, 1 approbation requise.
 
-**Merge automatisé** ([ADR 0025](docs/adr/0025-reviewer-claude-auto-merge.md)) : le workflow `PR Review` relit chaque PR interne avec Claude, l'approuve si le verdict est `approve` et active l'auto-merge ; GitHub fusionne dès que la CI est verte. **Claude ne fusionne jamais lui-même** : il crée la PR, surveille la CI et la revue, et corrige si besoin. Une PR labellisée `needs-human` attend la décision du fondateur.
+**Merge automatisé** ([ADR 0025](docs/adr/0025-reviewer-claude-auto-merge.md)) : le workflow `PR Review` relit chaque PR interne avec Claude, l'approuve si le verdict est `approve` et active l'auto-merge ; GitHub fusionne dès que la CI est verte. **Claude ne fusionne jamais lui-même** : il crée la PR, surveille la CI et la revue, et corrige si besoin. Une PR labellisée `needs-human` attend la décision du fondateur, qui la fusionne s'il l'accepte (`gh pr merge <n> --admin --squash`). Les PR qui touchent la racine de confiance du reviewer (`pr-review.yml`, `CODEOWNERS`, `.claude/`) sont toujours `needs-human`. Le workflow ne doit jamais exécuter le code de la PR (`pull_request_target`, cf ADR).
 
 ### ADRs
 

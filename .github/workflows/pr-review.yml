@@ -2,10 +2,15 @@
 # Claude rend un verdict structuré ; l'approbation et l'auto-merge sont faits par
 # des étapes shell séparées, jamais par le modèle. GitHub fusionne quand la CI
 # (`ci / pass`) et l'approbation requise sur `main` sont réunies.
+#
+# pull_request_target : le workflow ET la config Claude (.claude/, CLAUDE.md racine)
+# viennent toujours de `main`. Une PR ne peut donc ni réécrire son propre reviewer, ni
+# injecter des hooks Claude exécutés avec les secrets. Le code de la PR est checkouté
+# à part dans `pr/`, lu mais jamais exécuté.
 name: PR Review
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
 
@@ -32,9 +37,14 @@ jobs:
       issues: write # labels sur la PR
 
     steps:
+      # Racine : `main` (config de confiance). Code de la PR : `pr/`, sans credentials persistés.
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr
+          persist-credentials: false
 
       - name: Review with Claude
         id: review
@@ -42,14 +52,14 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          show_full_output: true # TEMP diagnostic, à retirer
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Tu es le reviewer indépendant de cette PR. La branche est checkoutée dans le répertoire courant.
-            Lis le diff (`gh pr diff`), la description (`gh pr view`), puis le code concerné et les
-            conventions du dépôt (CLAUDE.md racine et de l'app touchée, ADR cités).
+            Tu es le reviewer indépendant de cette PR. Le répertoire courant est la branche `main`
+            (conventions de référence) ; le code de la PR est checkouté dans `pr/`.
+            Lis le diff (`gh pr diff`), la description (`gh pr view`), puis le code concerné dans `pr/`
+            et les conventions du dépôt (CLAUDE.md racine et de l'app touchée, ADR cités).
 
             1. Revue de correction : bugs, régressions, tests manquants sur le domaine, écarts aux
                conventions du CLAUDE.md. Ne remonte que des problèmes réels et vérifiés, pas de style.
@@ -78,6 +88,12 @@ jobs:
           OUTPUT: ${{ steps.review.outputs.structured_output }}
         run: |
           verdict=$(jq -r '.verdict' <<<"$OUTPUT")
+          # Garde déterministe : la racine de confiance du reviewer ne s'auto-approuve jamais.
+          trust_root=$(gh pr diff "$PR" --name-only | grep -E '^(\.github/workflows/pr-review\.yml|\.github/CODEOWNERS|\.claude/)' || true)
+          if [ -n "$trust_root" ] && [ "$verdict" = approve ]; then
+            verdict=needs_human
+            OUTPUT=$(jq --arg f "$trust_root" '.verdict = "needs_human" | .summary += "\n\nGarde déterministe : la PR modifie la racine de confiance du reviewer (\($f | gsub("\n"; ", "))). Décision du fondateur requise."' <<<"$OUTPUT")
+          fi
           body=$(jq -r '"**Revue automatisée : \(.verdict)**" + (if .security_sensitive then " (revue sécurité incluse)" else "" end)
             + "\n\n\(.summary)\n"
             + (if (.findings | length) > 0
