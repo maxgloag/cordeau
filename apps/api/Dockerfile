@@ -4,6 +4,7 @@ FROM dunglas/frankenphp:1-php8.5-alpine AS base
 
 # Extensions PHP nécessaires : pdo_pgsql (Doctrine PostgreSQL), redis (cache/messenger),
 # intl (Symfony i18n + validation), opcache (perf prod), apcu (cache local),
+# bcmath (calculs monétaires décimaux exacts du devis — BcMath\Number),
 # imagick (génération de vignettes, décodage HEIC via libheif — cf ADR 0023)
 RUN install-php-extensions \
     pdo_pgsql \
@@ -11,6 +12,7 @@ RUN install-php-extensions \
     intl \
     opcache \
     apcu \
+    bcmath \
     imagick
 
 # Durcissement ImageMagick (cf ADR 0023) : policy.xml restrictif — coders limités au
