@@ -1,5 +1,5 @@
 {
-    "openapi": "3.1.0",
+    "openapi": "3.0.0",
     "info": {
         "title": "Cordeau API",
         "description": "",
@@ -1197,10 +1197,8 @@
                         "type": "string"
                     },
                     "surfaceM2": {
-                        "type": [
-                            "number",
-                            "null"
-                        ]
+                        "type": "number",
+                        "nullable": true
                     },
                     "statut": {
                         "type": "string"
@@ -1212,16 +1210,12 @@
                         "type": "string"
                     },
                     "clientId": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "clientNom": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "photosCount": {
                         "type": "integer"
@@ -1256,31 +1250,25 @@
                     },
                     "surfaceM2": {
                         "minimum": 0,
-                        "exclusiveMinimum": 0,
-                        "type": [
-                            "number",
-                            "null"
-                        ]
+                        "exclusiveMinimum": true,
+                        "type": "number",
+                        "nullable": true
                     },
                     "clientId": {
                         "format": "uuid",
                         "externalDocs": {
                             "url": "https://schema.org/identifier"
                         },
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "uuid": {
                         "format": "uuid",
                         "externalDocs": {
                             "url": "https://schema.org/identifier"
                         },
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     }
                 }
             },
@@ -1289,51 +1277,39 @@
                 "properties": {
                     "adresseRue": {
                         "maxLength": 255,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adresseCodePostal": {
                         "maxLength": 20,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adresseVille": {
                         "maxLength": 255,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adressePays": {
                         "minLength": 2,
                         "maxLength": 2,
                         "pattern": "^([A-Z]{2})$",
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "surfaceM2": {
                         "minimum": 0,
-                        "exclusiveMinimum": 0,
-                        "type": [
-                            "number",
-                            "null"
-                        ]
+                        "exclusiveMinimum": true,
+                        "type": "number",
+                        "nullable": true
                     },
                     "clientId": {
                         "format": "uuid",
                         "externalDocs": {
                             "url": "https://schema.org/identifier"
                         },
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     }
                 }
             },
@@ -1361,10 +1337,8 @@
                                 "type": "string"
                             },
                             "surfaceM2": {
-                                "type": [
-                                    "number",
-                                    "null"
-                                ]
+                                "type": "number",
+                                "nullable": true
                             },
                             "statut": {
                                 "type": "string"
@@ -1376,16 +1350,12 @@
                                 "type": "string"
                             },
                             "clientId": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "clientNom": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "photosCount": {
                                 "type": "integer"
@@ -1404,16 +1374,12 @@
                         "type": "string"
                     },
                     "email": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "telephone": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adresseRue": {
                         "type": "string"
@@ -1428,10 +1394,8 @@
                         "type": "string"
                     },
                     "notes": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "creeLe": {
                         "type": "string"
@@ -1460,16 +1424,12 @@
                         "externalDocs": {
                             "url": "https://schema.org/email"
                         },
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "telephone": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adresseRue": {
                         "maxLength": 255,
@@ -1490,20 +1450,16 @@
                         "type": "string"
                     },
                     "notes": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "uuid": {
                         "format": "uuid",
                         "externalDocs": {
                             "url": "https://schema.org/identifier"
                         },
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     }
                 }
             },
@@ -1512,10 +1468,8 @@
                 "properties": {
                     "nom": {
                         "maxLength": 255,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "email": {
                         "format": "email",
@@ -1523,52 +1477,38 @@
                         "externalDocs": {
                             "url": "https://schema.org/email"
                         },
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "telephone": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adresseRue": {
                         "maxLength": 255,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adresseCodePostal": {
                         "maxLength": 20,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adresseVille": {
                         "maxLength": 255,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "adressePays": {
                         "minLength": 2,
                         "maxLength": 2,
                         "pattern": "^([A-Z]{2})$",
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "notes": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     }
                 }
             },
@@ -1587,16 +1527,12 @@
                                 "type": "string"
                             },
                             "email": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "telephone": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "adresseRue": {
                                 "type": "string"
@@ -1611,10 +1547,8 @@
                                 "type": "string"
                             },
                             "notes": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "creeLe": {
                                 "type": "string"
@@ -1671,23 +1605,39 @@
                         "readOnly": true,
                         "type": "string"
                     },
+                    "id": {
+                        "readOnly": true,
+                        "type": "string"
+                    },
+                    "description": {
+                        "readOnly": true,
+                        "type": "string"
+                    },
                     "type": {
                         "readOnly": true,
                         "type": "string"
                     },
                     "title": {
                         "readOnly": true,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "instance": {
                         "readOnly": true,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "statusCode": {
+                        "readOnly": true,
+                        "type": "integer"
+                    },
+                    "headers": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "nullable": true
+                        }
                     }
                 }
             },
@@ -1740,6 +1690,10 @@
                                 "readOnly": true,
                                 "type": "string"
                             },
+                            "id": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
                             "description": {
                                 "readOnly": true,
                                 "type": "string"
@@ -1750,17 +1704,25 @@
                             },
                             "title": {
                                 "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "instance": {
                                 "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "statusCode": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "headers": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "nullable": true
+                                }
                             }
                         }
                     }
@@ -1771,44 +1733,71 @@
                 "type": "object",
                 "description": "A representation of common errors.",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "nullable": true
+                    },
                     "title": {
                         "readOnly": true,
                         "description": "A short, human-readable summary of the problem.",
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "detail": {
                         "readOnly": true,
                         "description": "A human-readable explanation specific to this occurrence of the problem.",
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "status": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ],
-                        "examples": [
+                        "type": "integer",
+                        "default": 400,
+                        "nullable": true,
+                        "example": [
                             404
-                        ],
-                        "default": 400
+                        ]
                     },
                     "instance": {
                         "readOnly": true,
                         "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced.",
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "type": {
                         "readOnly": true,
                         "description": "A URI reference that identifies the problem type",
                         "type": "string"
+                    },
+                    "meta": {
+                        "type": "object"
+                    },
+                    "source": {
+                        "type": "object",
+                        "properties": {
+                            "pointer": {
+                                "type": "string"
+                            },
+                            "parameter": {
+                                "type": "string"
+                            },
+                            "header": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "description": {
+                        "readOnly": true,
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "trace": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "nullable": true
+                        },
+                        "nullable": true
                     }
                 }
             },
@@ -1820,51 +1809,71 @@
                     {
                         "type": "object",
                         "properties": {
+                            "id": {
+                                "type": "string",
+                                "nullable": true
+                            },
                             "title": {
                                 "readOnly": true,
                                 "description": "A short, human-readable summary of the problem.",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "detail": {
                                 "readOnly": true,
                                 "description": "A human-readable explanation specific to this occurrence of the problem.",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "status": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ],
-                                "examples": [
+                                "type": "integer",
+                                "default": 400,
+                                "nullable": true,
+                                "example": [
                                     404
-                                ],
-                                "default": 400
+                                ]
                             },
                             "instance": {
                                 "readOnly": true,
                                 "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced.",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "type": {
                                 "readOnly": true,
                                 "description": "A URI reference that identifies the problem type",
                                 "type": "string"
                             },
+                            "meta": {
+                                "type": "object"
+                            },
+                            "source": {
+                                "type": "object",
+                                "properties": {
+                                    "pointer": {
+                                        "type": "string"
+                                    },
+                                    "parameter": {
+                                        "type": "string"
+                                    },
+                                    "header": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
                             "description": {
                                 "readOnly": true,
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "trace": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "nullable": true
+                                },
+                                "nullable": true
                             }
                         }
                     }
@@ -1891,19 +1900,23 @@
                                     },
                                     "first": {
                                         "type": "string",
-                                        "format": "iri-reference"
+                                        "format": "iri-reference",
+                                        "nullable": true
                                     },
                                     "last": {
                                         "type": "string",
-                                        "format": "iri-reference"
+                                        "format": "iri-reference",
+                                        "nullable": true
                                     },
                                     "previous": {
                                         "type": "string",
-                                        "format": "iri-reference"
+                                        "format": "iri-reference",
+                                        "nullable": true
                                     },
                                     "next": {
                                         "type": "string",
-                                        "format": "iri-reference"
+                                        "format": "iri-reference",
+                                        "nullable": true
                                     }
                                 },
                                 "example": {
@@ -1950,10 +1963,8 @@
                                             "type": "string"
                                         },
                                         "property": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ]
+                                            "type": "string",
+                                            "nullable": true
                                         },
                                         "required": {
                                             "type": "boolean"
@@ -2016,16 +2027,12 @@
                         "type": "string"
                     },
                     "lotId": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "tacheId": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "remoteKey": {
                         "type": "string"
@@ -2034,19 +2041,15 @@
                         "type": "string"
                     },
                     "thumbnailUrl": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     },
                     "creeLe": {
                         "type": "string"
                     },
                     "legende": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     }
                 }
             },
@@ -2075,10 +2078,8 @@
                 "properties": {
                     "legende": {
                         "maxLength": 280,
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                        "type": "string",
+                        "nullable": true
                     }
                 }
             },
@@ -2097,16 +2098,12 @@
                                 "type": "string"
                             },
                             "lotId": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "tacheId": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "remoteKey": {
                                 "type": "string"
@@ -2115,19 +2112,15 @@
                                 "type": "string"
                             },
                             "thumbnailUrl": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             },
                             "creeLe": {
                                 "type": "string"
                             },
                             "legende": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string",
+                                "nullable": true
                             }
                         }
                     }
