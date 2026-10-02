@@ -23,7 +23,7 @@ Les deux autres écarts relevés par les sondes ne sont pas des défauts des imp
 - **Trim de `\x1c`** : seule la référence Python le supprime (particularité de `str.strip()`). PHP et Rust s'accordent.
 - **Surrogate UTF-16 isolé** : PHP et Rust le rejettent, Python l'accepte. La RFC 8259 laisse le comportement indéfini.
 
-**Lecture.** Avec un modèle de 2026 et une spec précise, **les deux agents atteignent zéro défaut détectable** sur un domaine de calcul exigeant : arrondis au centime, ventilation au prorata, validation exhaustive. Le seuil Q-A (« Rust ≤ 50 % des défauts de PHP ») ne peut pas être franchi : 0 contre 0.
+**Lecture.** Avec un modèle de 2026 et une spec précise, **les deux agents atteignent zéro défaut détectable** sur un domaine de calcul exigeant : arrondis au centime, ventilation au prorata, validation exhaustive. Le seuil Q-A (« Rust ≤ 50 % des défauts de PHP ») est **non évaluable** : 0 contre 0, n = 1.
 
 ## 2. Comment chaque agent y est arrivé : la vraie différence
 
@@ -68,7 +68,7 @@ Les deux autres écarts relevés par les sondes ne sont pas des défauts des imp
 | Tests différentiels écrits par l'agent | 6 000 demandes aléatoires + 1 demande de 5 000 lignes contre sa propre référence Python                                | 400 000 cas aléatoires (exploration d'un invariant)                                                                                                                                            |
 | Faiblesse relevée par l'agent lui-même | —                                                                                                                      | Le proptest d'invariants passait **sur un stub qui renvoyait tout à zéro** : seuls les exemples calculés à la main vérifiaient réellement les valeurs                                          |
 
-> Les scores de mutation ne sont pas comparables d'un outil à l'autre (revue croisée §2.5). La donnée intéressante côté Rust : **19 % des mutants ne compilent même pas**, le système de types élimine une partie de l'espace d'erreurs avant les tests.
+> Les scores de mutation ne sont pas comparables d'un outil à l'autre (revue croisée §2.5). Côté Rust, 29 mutants sur 152 (19 %) ne compilent pas. C'est un artefact fréquent de cargo-mutants, dont les remplacements sont souvent mal typés : **il ne faut pas l'interpréter comme un gain de sûreté**. Seuls comptent les 122 mutants viables tués sur 123.
 
 ## 5. Taille et dépendances
 
