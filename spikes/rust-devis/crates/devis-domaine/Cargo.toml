@@ -1,0 +1,19 @@
+[package]
+name = "devis-domaine"
+version = "0.1.0"
+description = "Domaine pur : validation d'une demande de devis et calcul de ses totaux (aucune I/O)."
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+num-bigint.workspace = true
+num-integer.workspace = true
+num-traits.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+
+[lints]
+workspace = true

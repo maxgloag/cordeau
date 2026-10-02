@@ -1,0 +1,39 @@
+[workspace]
+resolver = "3"
+members = ["crates/devis-domaine", "crates/devis-cli"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.99"
+publish = false
+license = "UNLICENSED"
+
+[workspace.dependencies]
+devis-domaine = { path = "crates/devis-domaine" }
+num-bigint = "0.4"
+num-integer = "0.1"
+num-traits = "0.2"
+serde = { version = "1", features = ["derive"] }
+# `arbitrary_precision` : tout nombre JSON syntaxiquement valide (ex. `1e400`)
+# est accepté par le parseur ; sans lui, serde_json rejetterait le document
+# entier (JSON_INVALIDE) au lieu de signaler le seul champ fautif.
+serde_json = { version = "1", features = ["arbitrary_precision"] }
+proptest = "1"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Restrictions demandées pour le code non-test (les exemptions de test sont
+# dans clippy.toml : allow-*-in-tests).
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+indexing_slicing = "warn"
+arithmetic_side_effects = "warn"
+
+[profile.release]
+codegen-units = 1
+lto = "thin"

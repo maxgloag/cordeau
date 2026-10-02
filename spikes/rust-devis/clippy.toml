@@ -1,0 +1,10 @@
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true
+
+# Entiers à précision arbitraire : `+`, `-`, `*` ne peuvent pas déborder.
+# Seules `/` et `%` peuvent paniquer (division par zéro) : elles ne sont
+# utilisées que dans `arrondi.rs`, derrière le type `DenominateurPositif`
+# qui rend le diviseur nul irreprésentable (vérifié par revue + grep).
+arithmetic-side-effects-allowed = ["num_bigint::BigInt", "num_bigint::BigUint"]
