@@ -453,7 +453,7 @@ Leçon d'usage : 13 agents Opus en parallèle ont épuisé la fenêtre d'usage e
 - **Benchmarks datés et peu fiables.** Ceux qui sont ventilés par langage datent de modèles 2025, et plusieurs ont de petits échantillons (22 à 43 tâches par langage).
 - **Sources orientées.** Les deux plus gros succès « IA + Rust » de 2026 viennent de l'éditeur du modèle (Bun appartient à Anthropic, compilateur C d'Anthropic). Le troisième vient de GitHub, qui vend Copilot.
 - **Option non instruite.** Le backend TypeScript (O4) n'a pas été étudié en détail : frameworks, ORM, auth, jobs.
-- **Environnement de l'expérience.** Docker était indisponible (socket OrbStack rattaché à un autre compte macOS), et l'expérience A (portage de la PR #105 avec Postgres) n'a pas pu être menée à terme dans la fenêtre d'usage. La friction SQLx/Postgres reste donc documentaire [03 Q2].
+- **Environnement de l'expérience.** Docker était indisponible au moment de l'étude (socket OrbStack rattaché à un autre compte macOS ; réparé le 2026-10-02, cf. #143), et l'expérience A (portage de la PR #105 avec Postgres) n'a pas pu être menée à terme dans la fenêtre d'usage. La friction SQLx/Postgres reste donc documentaire [03 Q2].
 - **Interruptions.** L'exécution a été coupée deux fois par la limite d'usage de la session. Les notes ont été reprises ou relancées sans perte, mais certaines vérifications complémentaires ont été écourtées.
 - **Ce que l'étude ne mesure pas** : la maintenance par un humain seul (expérience D) et l'évolution du code sous changement de spec (expérience C). Ce sont pourtant les deux dimensions les plus proches de « solide à long terme ».
 
