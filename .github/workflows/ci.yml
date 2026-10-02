@@ -127,6 +127,17 @@ jobs:
       - name: Audit Composer dependencies
         run: composer audit
 
+      # Le projet est sur Symfony 7.4 (extra.symfony.require). Dependabot ignore Flex :
+      # aucun composant Symfony 8 ne doit entrer dans le lock sans ADR de migration.
+      - name: Check Symfony major version
+        run: |
+          v8=$(jq -r '.packages[], ."packages-dev"[] | select(.name | test("^symfony/(?!.*(contracts|polyfill))")) | select(.version | test("^v?([89]|[1-9][0-9])\\.")) | "\(.name) \(.version)"' composer.lock)
+          if [ -n "$v8" ]; then
+            echo "::error::Composants Symfony hors 7.4 dans composer.lock (migration Symfony 8 = ADR requis) :"
+            echo "$v8"
+            exit 1
+          fi
+
       - name: Run PHPStan
         run: ./vendor/bin/phpstan analyse --no-progress --error-format=github
         env:
