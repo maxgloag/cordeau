@@ -58,7 +58,10 @@ mod tests {
     #[test]
     fn lit_les_formats_valides_de_la_spec() {
         for texte in ["0", "12.5", "0.125", "007", "1.500", "100", "0.0"] {
-            assert!(DecimalNonSigne::lire(texte).is_some(), "{texte:?} doit être valide");
+            assert!(
+                DecimalNonSigne::lire(texte).is_some(),
+                "{texte:?} doit être valide"
+            );
         }
     }
 
@@ -68,7 +71,10 @@ mod tests {
             "", ".5", "5.", "-1", "+1", "1e3", "1E3", "1,5", " 1", "1 ", "1.2.3", "1_000", ".",
             "1.5\n", "\u{0661}", "\u{ff11}", "0x10", "NaN", "inf", "1..5",
         ] {
-            assert!(DecimalNonSigne::lire(texte).is_none(), "{texte:?} doit être invalide");
+            assert!(
+                DecimalNonSigne::lire(texte).is_none(),
+                "{texte:?} doit être invalide"
+            );
         }
     }
 

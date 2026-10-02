@@ -6,7 +6,9 @@ use num_bigint::BigInt;
 
 use crate::arrondi::{DenominateurPositif, arrondir};
 use crate::montant::Montant;
-use crate::valeurs::{Designation, Pourcentage, PrixUnitaireHt, Quantite, RegimeTva, TauxTva, Unite};
+use crate::valeurs::{
+    Designation, Pourcentage, PrixUnitaireHt, Quantite, RegimeTva, TauxTva, Unite,
+};
 
 /// Saisie brute d'un champ scalaire, telle que transmise par un adaptateur.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -238,7 +240,8 @@ impl LigneDevis {
         let unite = lire_requis(&champs.unite, Unite::lire).ok_or(ErreurLigne::UniteInvalide);
         let prix_unitaire_ht = lire_requis(&champs.prix_unitaire_ht, PrixUnitaireHt::lire)
             .ok_or(ErreurLigne::PrixInvalide);
-        let taux_tva = lire_requis(&champs.taux_tva, TauxTva::lire).ok_or(ErreurLigne::TauxInvalide);
+        let taux_tva =
+            lire_requis(&champs.taux_tva, TauxTva::lire).ok_or(ErreurLigne::TauxInvalide);
         let remise = lire_optionnel(&champs.remise_pct, Pourcentage::lire, Pourcentage::ZERO)
             .ok_or(ErreurLigne::RemiseLigneInvalide);
         let franchise = match (regime, taux_tva) {
@@ -247,17 +250,31 @@ impl LigneDevis {
             }
             _ => Ok(()),
         };
-        match (designation, quantite, unite, prix_unitaire_ht, taux_tva, remise, franchise) {
-            (Ok(designation), Ok(quantite), Ok(unite), Ok(prix_unitaire_ht), Ok(taux_tva), Ok(remise), Ok(())) => {
-                Ok(Self {
-                    designation,
-                    quantite,
-                    unite,
-                    prix_unitaire_ht,
-                    taux_tva,
-                    remise,
-                })
-            }
+        match (
+            designation,
+            quantite,
+            unite,
+            prix_unitaire_ht,
+            taux_tva,
+            remise,
+            franchise,
+        ) {
+            (
+                Ok(designation),
+                Ok(quantite),
+                Ok(unite),
+                Ok(prix_unitaire_ht),
+                Ok(taux_tva),
+                Ok(remise),
+                Ok(()),
+            ) => Ok(Self {
+                designation,
+                quantite,
+                unite,
+                prix_unitaire_ht,
+                taux_tva,
+                remise,
+            }),
             (designation, quantite, unite, prix_unitaire_ht, taux_tva, remise, franchise) => Err([
                 designation.err(),
                 quantite.err(),
@@ -301,7 +318,7 @@ impl DemandeDevis {
     /// # Errors
     ///
     /// Liste non vide des erreurs de validation (sans doublon).
-    pub fn valider(brute: DemandeDevisBrute) -> Result<Self, Vec<ErreurValidation>> {
+    pub fn valider(brute: &DemandeDevisBrute) -> Result<Self, Vec<ErreurValidation>> {
         let regime = lire_requis(&brute.regime_tva, RegimeTva::lire)
             .ok_or(ErreurValidation::Demande(ErreurDemande::RegimeInvalide));
         let lignes = valider_lignes(brute.lignes.as_deref(), regime.ok());
@@ -312,7 +329,9 @@ impl DemandeDevis {
                 (Some(RemiseGlobale::Montant(montant)), Ok(lignes))
                     if *montant > total_ht_brut(lignes) =>
                 {
-                    Err(ErreurValidation::Demande(ErreurDemande::RemiseSuperieureAuTotal))
+                    Err(ErreurValidation::Demande(
+                        ErreurDemande::RemiseSuperieureAuTotal,
+                    ))
                 }
                 _ => Ok(remise),
             }
@@ -376,7 +395,11 @@ fn lire_requis<T>(saisie: &Saisie, lire: impl FnOnce(&str) -> Option<T>) -> Opti
 }
 
 /// Champ optionnel : absent → `defaut` ; non texte → `None`.
-fn lire_optionnel<T>(saisie: &Saisie, lire: impl FnOnce(&str) -> Option<T>, defaut: T) -> Option<T> {
+fn lire_optionnel<T>(
+    saisie: &Saisie,
+    lire: impl FnOnce(&str) -> Option<T>,
+    defaut: T,
+) -> Option<T> {
     match saisie {
         Saisie::Absente => Some(defaut),
         Saisie::Texte(texte) => lire(texte),
@@ -405,14 +428,19 @@ fn valider_lignes(
             ),
         }
     }
-    if erreurs.is_empty() { Ok(valides) } else { Err(erreurs) }
+    if erreurs.is_empty() {
+        Ok(valides)
+    } else {
+        Err(erreurs)
+    }
 }
 
 /// Valide la forme de la remise globale (sans le contrôle croisé au total).
-fn valider_remise_globale(brute: &RemiseGlobaleBrute) -> Result<Option<RemiseGlobale>, ErreurValidation> {
+fn valider_remise_globale(
+    brute: &RemiseGlobaleBrute,
+) -> Result<Option<RemiseGlobale>, ErreurValidation> {
     let remise = match brute {
         RemiseGlobaleBrute::Absente => return Ok(None),
-        RemiseGlobaleBrute::NonObjet => None,
         RemiseGlobaleBrute::Objet {
             type_remise: Saisie::Texte(type_remise),
             valeur: Saisie::Texte(valeur),
@@ -421,11 +449,12 @@ fn valider_remise_globale(brute: &RemiseGlobaleBrute) -> Result<Option<RemiseGlo
             "MONTANT" => Montant::lire(valeur).map(RemiseGlobale::Montant),
             _ => None,
         },
-        RemiseGlobaleBrute::Objet { .. } => None,
+        // Non-objet, ou type / valeur absent ou non texte.
+        RemiseGlobaleBrute::NonObjet | RemiseGlobaleBrute::Objet { .. } => None,
     };
-    remise
-        .map(Some)
-        .ok_or(ErreurValidation::Demande(ErreurDemande::RemiseGlobaleInvalide))
+    remise.map(Some).ok_or(ErreurValidation::Demande(
+        ErreurDemande::RemiseGlobaleInvalide,
+    ))
 }
 
 #[cfg(test)]
@@ -478,7 +507,7 @@ mod tests {
     }
 
     /// Erreurs sous forme ensembliste `(code, ligne)`, comme la spec les compare.
-    fn erreurs(brute: DemandeDevisBrute) -> BTreeSet<(&'static str, Option<usize>)> {
+    fn erreurs(brute: &DemandeDevisBrute) -> BTreeSet<(&'static str, Option<usize>)> {
         let erreurs = DemandeDevis::valider(brute).expect_err("la demande aurait dû être refusée");
         let ensemble: BTreeSet<_> = erreurs.iter().map(|e| (e.code(), e.ligne())).collect();
         assert_eq!(ensemble.len(), erreurs.len(), "doublons : {erreurs:?}");
@@ -506,11 +535,17 @@ mod tests {
         assert_eq!(ErreurLigne::UniteInvalide.code(), "UNITE_INVALIDE");
         assert_eq!(ErreurLigne::PrixInvalide.code(), "PRIX_INVALIDE");
         assert_eq!(ErreurLigne::TauxInvalide.code(), "TAUX_INVALIDE");
-        assert_eq!(ErreurLigne::RemiseLigneInvalide.code(), "REMISE_LIGNE_INVALIDE");
+        assert_eq!(
+            ErreurLigne::RemiseLigneInvalide.code(),
+            "REMISE_LIGNE_INVALIDE"
+        );
         assert_eq!(ErreurLigne::FranchiseAvecTva.code(), "FRANCHISE_AVEC_TVA");
         assert_eq!(ErreurDemande::RegimeInvalide.code(), "REGIME_INVALIDE");
         assert_eq!(ErreurDemande::LignesVides.code(), "LIGNES_VIDES");
-        assert_eq!(ErreurDemande::RemiseGlobaleInvalide.code(), "REMISE_GLOBALE_INVALIDE");
+        assert_eq!(
+            ErreurDemande::RemiseGlobaleInvalide.code(),
+            "REMISE_GLOBALE_INVALIDE"
+        );
         assert_eq!(
             ErreurDemande::RemiseSuperieureAuTotal.code(),
             "REMISE_SUPERIEURE_AU_TOTAL"
@@ -520,12 +555,15 @@ mod tests {
 
     #[test]
     fn accepte_la_demande_de_l_exemple() {
-        let valide = DemandeDevis::valider(demande_valide()).expect("demande valide");
+        let valide = DemandeDevis::valider(&demande_valide()).expect("demande valide");
         assert_eq!(valide.regime(), RegimeTva::Normal);
         assert_eq!(valide.lignes().len(), 1);
         assert_eq!(valide.lignes()[0].taux_tva(), TauxTva::Dix);
         assert_eq!(valide.lignes()[0].unite(), Unite::M2);
-        assert_eq!(valide.lignes()[0].designation().texte(), "Pose carrelage sol");
+        assert_eq!(
+            valide.lignes()[0].designation().texte(),
+            "Pose carrelage sol"
+        );
         assert_eq!(
             valide.remise_globale(),
             Some(&RemiseGlobale::Pourcentage(Pourcentage::lire("3").unwrap()))
@@ -535,7 +573,7 @@ mod tests {
 
     #[test]
     fn champs_optionnels_absents_valent_zero() {
-        let valide = DemandeDevis::valider(demande(|d| {
+        let valide = DemandeDevis::valider(&demande(|d| {
             d.remise_globale = RemiseGlobaleBrute::Absente;
             d.acompte_pct = Saisie::Absente;
             d.lignes = Some(vec![ligne(|l| l.remise_pct = Saisie::Absente)]);
@@ -544,14 +582,22 @@ mod tests {
         assert_eq!(valide.remise_globale(), None);
         assert_eq!(valide.acompte(), Pourcentage::ZERO);
         // 12,5 × 45,90 = 573,75 sans remise de ligne.
-        assert_eq!(valide.lignes()[0].montant_ht(), Montant::depuis_centimes(57_375));
+        assert_eq!(
+            valide.lignes()[0].montant_ht(),
+            Montant::depuis_centimes(57_375)
+        );
     }
 
     #[test]
     fn regime_absent_non_texte_ou_inconnu() {
-        for saisie in [Saisie::Absente, Saisie::NonTexte, texte("normal"), texte("")] {
+        for saisie in [
+            Saisie::Absente,
+            Saisie::NonTexte,
+            texte("normal"),
+            texte(""),
+        ] {
             assert_eq!(
-                erreurs(demande(|d| d.regime_tva = saisie.clone())),
+                erreurs(&demande(|d| d.regime_tva = saisie.clone())),
                 ensemble([globale("REGIME_INVALIDE")]),
                 "{saisie:?}"
             );
@@ -562,7 +608,7 @@ mod tests {
     fn lignes_absentes_ou_vides() {
         for lignes in [None, Some(vec![])] {
             assert_eq!(
-                erreurs(demande(|d| d.lignes = lignes.clone())),
+                erreurs(&demande(|d| d.lignes = lignes.clone())),
                 ensemble([globale("LIGNES_VIDES")])
             );
         }
@@ -571,7 +617,9 @@ mod tests {
     #[test]
     fn ligne_non_objet_produit_cinq_erreurs() {
         assert_eq!(
-            erreurs(demande(|d| d.lignes = Some(vec![ligne(|_| {}), LigneBrute::NonObjet]))),
+            erreurs(&demande(
+                |d| d.lignes = Some(vec![ligne(|_| {}), LigneBrute::NonObjet])
+            )),
             ensemble([
                 de_ligne("DESIGNATION_VIDE", 1),
                 de_ligne("QUANTITE_INVALIDE", 1),
@@ -585,7 +633,9 @@ mod tests {
     #[test]
     fn ligne_aux_champs_tous_absents() {
         assert_eq!(
-            erreurs(demande(|d| d.lignes = Some(vec![LigneBrute::Objet(ChampsLigneBruts::default())]))),
+            erreurs(&demande(
+                |d| d.lignes = Some(vec![LigneBrute::Objet(ChampsLigneBruts::default())])
+            )),
             ensemble([
                 de_ligne("DESIGNATION_VIDE", 0),
                 de_ligne("QUANTITE_INVALIDE", 0),
@@ -607,7 +657,10 @@ mod tests {
             (|l| l.quantite = Saisie::NonTexte, "QUANTITE_INVALIDE"),
             (|l| l.unite = texte("KG"), "UNITE_INVALIDE"),
             (|l| l.prix_unitaire_ht = texte("1.234"), "PRIX_INVALIDE"),
-            (|l| l.prix_unitaire_ht = texte("10000000.01"), "PRIX_INVALIDE"),
+            (
+                |l| l.prix_unitaire_ht = texte("10000000.01"),
+                "PRIX_INVALIDE",
+            ),
             (|l| l.taux_tva = texte("5.50"), "TAUX_INVALIDE"),
             (|l| l.taux_tva = Saisie::NonTexte, "TAUX_INVALIDE"),
             (|l| l.remise_pct = texte("100.01"), "REMISE_LIGNE_INVALIDE"),
@@ -615,7 +668,9 @@ mod tests {
         ];
         for (modifier, code) in cas {
             assert_eq!(
-                erreurs(demande(|d| d.lignes = Some(vec![ligne(|_| {}), ligne(modifier)]))),
+                erreurs(&demande(
+                    |d| d.lignes = Some(vec![ligne(|_| {}), ligne(modifier)])
+                )),
                 ensemble([de_ligne(code, 1)]),
                 "{code}"
             );
@@ -631,27 +686,33 @@ mod tests {
             })
         };
         let a_zero = || ligne(|l| l.taux_tva = texte("0"));
-        assert!(DemandeDevis::valider(franchise(vec![a_zero(), a_zero()])).is_ok());
+        assert!(DemandeDevis::valider(&franchise(vec![a_zero(), a_zero()])).is_ok());
         assert_eq!(
-            erreurs(franchise(vec![a_zero(), ligne(|l| l.taux_tva = texte("20"))])),
+            erreurs(&franchise(vec![
+                a_zero(),
+                ligne(|l| l.taux_tva = texte("20"))
+            ])),
             ensemble([de_ligne("FRANCHISE_AVEC_TVA", 1)])
         );
         // Taux invalide : pas de FRANCHISE_AVEC_TVA en plus.
         assert_eq!(
-            erreurs(franchise(vec![ligne(|l| l.taux_tva = texte("7"))])),
+            erreurs(&franchise(vec![ligne(|l| l.taux_tva = texte("7"))])),
             ensemble([de_ligne("TAUX_INVALIDE", 0)])
         );
         // Taux valide non nul + autre erreur sur la même ligne : les deux.
         assert_eq!(
-            erreurs(franchise(vec![ligne(|l| l.unite = Saisie::Absente)])),
-            ensemble([de_ligne("UNITE_INVALIDE", 0), de_ligne("FRANCHISE_AVEC_TVA", 0)])
+            erreurs(&franchise(vec![ligne(|l| l.unite = Saisie::Absente)])),
+            ensemble([
+                de_ligne("UNITE_INVALIDE", 0),
+                de_ligne("FRANCHISE_AVEC_TVA", 0)
+            ])
         );
     }
 
     #[test]
     fn regime_invalide_ne_declenche_pas_le_controle_de_franchise() {
         assert_eq!(
-            erreurs(demande(|d| d.regime_tva = texte("FRANCHISE"))),
+            erreurs(&demande(|d| d.regime_tva = texte("FRANCHISE"))),
             ensemble([globale("REGIME_INVALIDE")])
         );
     }
@@ -666,7 +727,7 @@ mod tests {
             remise("MONTANT", "545.06"),
         ] {
             assert!(
-                DemandeDevis::valider(demande(|d| d.remise_globale = brute.clone())).is_ok(),
+                DemandeDevis::valider(&demande(|d| d.remise_globale = brute.clone())).is_ok(),
                 "{brute:?}"
             );
         }
@@ -701,7 +762,7 @@ mod tests {
             remise("MONTANT", "1e3"),
         ] {
             assert_eq!(
-                erreurs(demande(|d| d.remise_globale = brute.clone())),
+                erreurs(&demande(|d| d.remise_globale = brute.clone())),
                 ensemble([globale("REMISE_GLOBALE_INVALIDE")]),
                 "{brute:?}"
             );
@@ -710,10 +771,16 @@ mod tests {
 
     #[test]
     fn acompte_optionnel_entre_0_et_100() {
-        assert!(DemandeDevis::valider(demande(|d| d.acompte_pct = texte("100"))).is_ok());
-        for saisie in [Saisie::NonTexte, texte("100.5"), texte("1.234"), texte("-1"), texte("")] {
+        assert!(DemandeDevis::valider(&demande(|d| d.acompte_pct = texte("100"))).is_ok());
+        for saisie in [
+            Saisie::NonTexte,
+            texte("100.5"),
+            texte("1.234"),
+            texte("-1"),
+            texte(""),
+        ] {
             assert_eq!(
-                erreurs(demande(|d| d.acompte_pct = saisie.clone())),
+                erreurs(&demande(|d| d.acompte_pct = saisie.clone())),
                 ensemble([globale("ACOMPTE_INVALIDE")]),
                 "{saisie:?}"
             );
@@ -723,13 +790,16 @@ mod tests {
     #[test]
     fn remise_montant_superieure_au_total_brut() {
         // Total HT brut de l'exemple : 545,06.
-        assert!(DemandeDevis::valider(demande(|d| d.remise_globale = remise("MONTANT", "545.06"))).is_ok());
+        assert!(
+            DemandeDevis::valider(&demande(|d| d.remise_globale = remise("MONTANT", "545.06")))
+                .is_ok()
+        );
         assert_eq!(
-            erreurs(demande(|d| d.remise_globale = remise("MONTANT", "545.07"))),
+            erreurs(&demande(|d| d.remise_globale = remise("MONTANT", "545.07"))),
             ensemble([globale("REMISE_SUPERIEURE_AU_TOTAL")])
         );
         assert_eq!(
-            erreurs(demande(|d| {
+            erreurs(&demande(|d| {
                 d.remise_globale = remise("MONTANT", "100000000000000000000000000000000000000000");
             })),
             ensemble([globale("REMISE_SUPERIEURE_AU_TOTAL")])
@@ -739,7 +809,7 @@ mod tests {
     #[test]
     fn remise_superieure_au_total_independante_du_regime_et_de_l_acompte() {
         assert_eq!(
-            erreurs(demande(|d| {
+            erreurs(&demande(|d| {
                 d.remise_globale = remise("MONTANT", "1000");
                 d.regime_tva = Saisie::Absente;
                 d.acompte_pct = texte("101");
@@ -755,21 +825,21 @@ mod tests {
     #[test]
     fn remise_superieure_au_total_non_verifiee_si_erreur_de_ligne() {
         assert_eq!(
-            erreurs(demande(|d| {
+            erreurs(&demande(|d| {
                 d.remise_globale = remise("MONTANT", "1000");
                 d.lignes = Some(vec![ligne(|_| {}), ligne(|l| l.quantite = texte("-1"))]);
             })),
             ensemble([de_ligne("QUANTITE_INVALIDE", 1)])
         );
         assert_eq!(
-            erreurs(demande(|d| {
+            erreurs(&demande(|d| {
                 d.remise_globale = remise("MONTANT", "1000");
                 d.regime_tva = texte("FRANCHISE_EN_BASE");
             })),
             ensemble([de_ligne("FRANCHISE_AVEC_TVA", 0)])
         );
         assert_eq!(
-            erreurs(demande(|d| {
+            erreurs(&demande(|d| {
                 d.remise_globale = remise("MONTANT", "1000");
                 d.lignes = Some(vec![]);
             })),
@@ -779,13 +849,16 @@ mod tests {
 
     #[test]
     fn remise_en_pourcentage_jamais_superieure_au_total() {
-        assert!(DemandeDevis::valider(demande(|d| d.remise_globale = remise("POURCENTAGE", "100"))).is_ok());
+        assert!(
+            DemandeDevis::valider(&demande(|d| d.remise_globale = remise("POURCENTAGE", "100")))
+                .is_ok()
+        );
     }
 
     #[test]
     fn toutes_les_erreurs_sont_rapportees_ensemble() {
         assert_eq!(
-            erreurs(DemandeDevisBrute {
+            erreurs(&DemandeDevisBrute {
                 regime_tva: texte("AUTRE"),
                 lignes: Some(vec![
                     ligne(|l| l.quantite = texte("0")),
@@ -817,8 +890,9 @@ mod tests {
     #[test]
     fn montant_ht_de_ligne_arrondi_au_centime() {
         let montant = |modifier: fn(&mut ChampsLigneBruts)| {
-            let valide = DemandeDevis::valider(demande(|d| d.lignes = Some(vec![ligne(modifier)])))
-                .expect("demande valide");
+            let valide =
+                DemandeDevis::valider(&demande(|d| d.lignes = Some(vec![ligne(modifier)])))
+                    .expect("demande valide");
             valide.lignes()[0].montant_ht()
         };
         // Exemple de la spec : 12,5 × 45,90 × 0,95 = 545,0625 → 545,06.

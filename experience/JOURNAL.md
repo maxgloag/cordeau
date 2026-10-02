@@ -9,6 +9,8 @@ Toolchain : rustc/cargo 1.99.0, clippy 0.1.99. Les commandes cargo sont lancées
 - 05:32 lecture spec + protocole + ADR 0002 / 0014.
 - 05:35 friction : le garde-fou d'isolation worktree refuse `git …` (réécrit en `rtk git …` par le hook) → contourné par `/usr/bin/git`.
 - 05:35–05:42 conception (cf. Décisions). Pas de plan story-level écrit dans `~/.claude/plans/` : la conception tient dans ce journal, budget 90 min.
+- 07:44–07:53 (heure locale) : TDD décimal → arrondi → value objects → validation → calcul ; domaine vert (63 tests).
+- **INTERRUPTION** : coupure de session (limite d'usage, indépendante de l'agent) vers **07:55 CEST**, reprise à **12:53:38 CEST** (10:53:38Z). Durée exclue du temps mesuré : ~4 h 58 min 38 s. Aucun travail perdu (worktree intact, commit fait à la reprise).
 
 ## Boucles de vérification
 
@@ -24,6 +26,11 @@ Heures locales (UTC+2). « rouge TDD » = échec attendu d'un test écrit avant 
 | 6   | 07:46:27 | `cargo test -p devis-domaine`           | 1         | rouge TDD (value objects)        | 10         | test (attendu)                                             | implémentation des `lire` (script Python refusé par le garde-fou → relance à blanc) |
 | 7   | 07:46:50 | `cargo test -p devis-domaine`           | 1         | rouge (relance sans modif)       | 10         | — (l'édition n'avait pas eu lieu)                          | script écrit dans le scratchpad puis exécuté                                        |
 | 8   | 07:47:08 | `cargo test -p devis-domaine`           | 1         | vert (27 tests)                  | 0          | —                                                          | commit `3efaa76`                                                                    |
+| 9   | 07:50:10 | `cargo test -p devis-domaine`           | 1         | rouge TDD (validation)           | 19         | test (attendu) — le module de 600 lignes compile du premier coup | implémentation de `DemandeDevis::valider` (validation applicative, cf. Décisions) |
+| 10  | 07:51:02 | `cargo test -p devis-domaine`           | 1         | échec de compilation             | 1          | trait bound (E0277 : `Sum<Montant>` absent, seul `Sum<&Montant>` existait) | ajout de `impl Sum for Montant`                                  |
+| 11  | 07:51:11 | `cargo test -p devis-domaine`           | 1         | vert (46 tests)                  | 0          | —                                                          | —                                                                                   |
+| 12  | 07:53:02 | `cargo test -p devis-domaine`           | 2         | rouge TDD (calcul)               | 16         | test (attendu)                                             | implémentation de `calculer_totaux` ; NB : le proptest d'invariants **passe sur le stub tout-à-zéro** |
+| 13  | 07:53:29 | `cargo test -p devis-domaine`           | 1         | vert (63 tests)                  | 0          | —                                                          | commit (domaine complet)                                                            |
 
 ## Défauts attrapés par le compilateur/clippy qui auraient été des bugs à l'exécution
 

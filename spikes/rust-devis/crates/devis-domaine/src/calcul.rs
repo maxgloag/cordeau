@@ -185,7 +185,9 @@ mod tests {
     use proptest::prelude::*;
 
     use super::*;
-    use crate::demande::{ChampsLigneBruts, DemandeDevisBrute, LigneBrute, RemiseGlobaleBrute, Saisie};
+    use crate::demande::{
+        ChampsLigneBruts, DemandeDevisBrute, LigneBrute, RemiseGlobaleBrute, Saisie,
+    };
 
     fn texte(valeur: &str) -> Saisie {
         Saisie::Texte(valeur.to_owned())
@@ -220,7 +222,7 @@ mod tests {
         remise_globale: RemiseGlobaleBrute,
         acompte: Option<&str>,
     ) -> TotauxDevis {
-        DemandeDevis::valider(DemandeDevisBrute {
+        DemandeDevis::valider(&DemandeDevisBrute {
             regime_tva: texte(regime),
             lignes: Some(lignes),
             remise_globale,
@@ -235,7 +237,13 @@ mod tests {
         totaux
             .ventilation_tva
             .iter()
-            .map(|l| (l.taux.libelle(), l.base_ht.to_string(), l.montant_tva.to_string()))
+            .map(|l| {
+                (
+                    l.taux.libelle(),
+                    l.base_ht.to_string(),
+                    l.montant_tva.to_string(),
+                )
+            })
             .collect()
     }
 
@@ -319,7 +327,12 @@ mod tests {
     #[test]
     fn tva_a_5_5_arrondie_demi_superieur() {
         // 10,00 × 5,5 % = 0,55 ; 0,10 × 5,5 % = 0,0055 → 0,01.
-        let t = totaux("NORMAL", vec![ligne("1", "0.10", "5.5")], RemiseGlobaleBrute::Absente, None);
+        let t = totaux(
+            "NORMAL",
+            vec![ligne("1", "0.10", "5.5")],
+            RemiseGlobaleBrute::Absente,
+            None,
+        );
         assert_eq!(ventilation(&t), [v("5.5", "0.10", "0.01")]);
     }
 
@@ -334,14 +347,22 @@ mod tests {
         );
         assert_eq!(s(&t.remise_globale), "0.02");
         assert_eq!(s(&t.total_ht_net), "0.98");
-        assert_eq!(ventilation(&t), [v("10", "0.49", "0.05"), v("20", "0.49", "0.10")]);
+        assert_eq!(
+            ventilation(&t),
+            [v("10", "0.49", "0.05"), v("20", "0.49", "0.10")]
+        );
         assert_eq!(s(&t.total_tva), "0.15");
         assert_eq!(s(&t.total_ttc), "1.13");
     }
 
     #[test]
     fn remise_pourcentage_de_100() {
-        let t = totaux("NORMAL", vec![ligne("3", "7.77", "20")], remise("POURCENTAGE", "100"), Some("30"));
+        let t = totaux(
+            "NORMAL",
+            vec![ligne("3", "7.77", "20")],
+            remise("POURCENTAGE", "100"),
+            Some("30"),
+        );
         assert_eq!(s(&t.remise_globale), "23.31");
         assert_eq!(s(&t.total_ht_net), "0.00");
         assert_eq!(ventilation(&t), [v("20", "0.00", "0.00")]);
@@ -356,7 +377,11 @@ mod tests {
         // Σ = 1,01 → écart −0,01 sur la base 10 % (la plus élevée) → 0,66.
         let t = totaux(
             "NORMAL",
-            vec![ligne("1", "50", "5.5"), ligne("1", "200", "10"), ligne("1", "50", "20")],
+            vec![
+                ligne("1", "50", "5.5"),
+                ligne("1", "200", "10"),
+                ligne("1", "50", "20"),
+            ],
             remise("MONTANT", "1"),
             None,
         );
@@ -377,7 +402,11 @@ mod tests {
         // 3 × arrondi(10/3) = 9,99 → écart +0,01 sur la base à 20 %.
         let t = totaux(
             "NORMAL",
-            vec![ligne("1", "100", "5.5"), ligne("1", "100", "10"), ligne("1", "100", "20")],
+            vec![
+                ligne("1", "100", "5.5"),
+                ligne("1", "100", "10"),
+                ligne("1", "100", "20"),
+            ],
             remise("MONTANT", "10"),
             None,
         );
@@ -432,7 +461,10 @@ mod tests {
         );
         assert_eq!(s(&t.total_ht_brut), "0.00");
         assert_eq!(s(&t.remise_globale), "0.00");
-        assert_eq!(ventilation(&t), [v("10", "0.00", "0.00"), v("20", "0.00", "0.00")]);
+        assert_eq!(
+            ventilation(&t),
+            [v("10", "0.00", "0.00"), v("20", "0.00", "0.00")]
+        );
         assert_eq!(s(&t.total_ttc), "0.00");
         assert_eq!(s(&t.solde), "0.00");
     }
@@ -445,7 +477,10 @@ mod tests {
             remise("MONTANT", "10"),
             None,
         );
-        assert_eq!(ventilation(&t), [v("5.5", "0.00", "0.00"), v("20", "90.00", "18.00")]);
+        assert_eq!(
+            ventilation(&t),
+            [v("5.5", "0.00", "0.00"), v("20", "90.00", "18.00")]
+        );
     }
 
     #[test]
@@ -457,7 +492,10 @@ mod tests {
             None,
         );
         assert_eq!(s(&t.total_ht_net), "0.00");
-        assert_eq!(ventilation(&t), [v("10", "0.00", "0.00"), v("20", "0.00", "0.00")]);
+        assert_eq!(
+            ventilation(&t),
+            [v("10", "0.00", "0.00"), v("20", "0.00", "0.00")]
+        );
         assert_eq!(s(&t.total_ttc), "0.00");
     }
 
@@ -472,7 +510,7 @@ mod tests {
         assert_eq!(s(&t.total_ht_brut), "250.01");
         assert_eq!(s(&t.remise_globale), "25.00");
         assert_eq!(s(&t.total_ht_net), "225.01");
-        assert!(t.ventilation_tva.is_empty());
+        assert_eq!(t.ventilation_tva, Vec::new());
         assert_eq!(s(&t.total_tva), "0.00");
         assert_eq!(s(&t.total_ttc), "225.01");
         // 225,01 × 50 % = 112,505 → 112,51.
@@ -484,7 +522,12 @@ mod tests {
 
     #[test]
     fn regime_normal_avec_taux_zero() {
-        let t = totaux("NORMAL", vec![ligne("1", "1000", "0")], RemiseGlobaleBrute::Absente, None);
+        let t = totaux(
+            "NORMAL",
+            vec![ligne("1", "1000", "0")],
+            RemiseGlobaleBrute::Absente,
+            None,
+        );
         assert_eq!(ventilation(&t), [v("0", "1000.00", "0.00")]);
         assert_eq!(t.mention_tva, None);
         assert_eq!(s(&t.total_ttc), "1000.00");
@@ -493,13 +536,28 @@ mod tests {
     #[test]
     fn acompte_arrondi_demi_superieur() {
         // TTC 0,10 ; 5 % = 0,005 → 0,01.
-        let t = totaux("NORMAL", vec![ligne("1", "0.10", "0")], RemiseGlobaleBrute::Absente, Some("5"));
+        let t = totaux(
+            "NORMAL",
+            vec![ligne("1", "0.10", "0")],
+            RemiseGlobaleBrute::Absente,
+            Some("5"),
+        );
         assert_eq!(s(&t.acompte), "0.01");
         assert_eq!(s(&t.solde), "0.09");
-        let t = totaux("NORMAL", vec![ligne("1", "0.10", "0")], RemiseGlobaleBrute::Absente, Some("100"));
+        let t = totaux(
+            "NORMAL",
+            vec![ligne("1", "0.10", "0")],
+            RemiseGlobaleBrute::Absente,
+            Some("100"),
+        );
         assert_eq!(s(&t.acompte), "0.10");
         assert_eq!(s(&t.solde), "0.00");
-        let t = totaux("NORMAL", vec![ligne("1", "0.10", "0")], RemiseGlobaleBrute::Absente, Some("4.99"));
+        let t = totaux(
+            "NORMAL",
+            vec![ligne("1", "0.10", "0")],
+            RemiseGlobaleBrute::Absente,
+            Some("4.99"),
+        );
         assert_eq!(s(&t.acompte), "0.00");
     }
 
@@ -509,7 +567,12 @@ mod tests {
             .into_iter()
             .map(|taux| ligne("1000000", "10000000", taux))
             .collect();
-        let t = totaux("NORMAL", lignes, remise("MONTANT", "39999999999999.99"), Some("100"));
+        let t = totaux(
+            "NORMAL",
+            lignes,
+            remise("MONTANT", "39999999999999.99"),
+            Some("100"),
+        );
         assert_eq!(s(&t.total_ht_brut), "40000000000000.00");
         assert_eq!(s(&t.total_ht_net), "0.01");
         assert_eq!(s(&t.solde), "0.00");
@@ -526,13 +589,17 @@ mod tests {
     }
 
     fn ligne_quelconque() -> impl Strategy<Value = LigneBrute> {
-        (1_u64..=5_000_000, montant_texte(10_000_000), taux_quelconque(), 0_u64..=10_000).prop_map(
-            |(milliemes, prix, taux, remise)| {
+        (
+            1_u64..=5_000_000,
+            montant_texte(10_000_000),
+            taux_quelconque(),
+            0_u64..=10_000,
+        )
+            .prop_map(|(milliemes, prix, taux, remise)| {
                 let quantite = format!("{}.{:03}", milliemes / 1000, milliemes % 1000);
                 let remise = format!("{}.{:02}", remise / 100, remise % 100);
                 ligne_remisee(&quantite, &prix, taux, Some(&remise))
-            },
-        )
+            })
     }
 
     fn somme<'a>(montants: impl Iterator<Item = &'a Montant>) -> Montant {

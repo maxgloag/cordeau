@@ -95,12 +95,12 @@ mod tests {
             numerateur in -1_000_000_000_i64..1_000_000_000,
             denominateur in 1_i64..100_000,
         ) {
-            let r = i128::from(arr(numerateur, denominateur));
-            let (n, d) = (i128::from(numerateur), i128::from(denominateur));
-            let ecart_double = (n - r * d).abs() * 2;
+            let r = BigInt::from(arr(numerateur, denominateur));
+            let (n, d) = (BigInt::from(numerateur), BigInt::from(denominateur));
+            let ecart_double = (&n - &r * &d).abs() * 2;
             prop_assert!(ecart_double <= d, "pas au plus proche : {n}/{d} -> {r}");
             if ecart_double == d {
-                prop_assert!((r * d).abs() > n.abs(), "moitié non éloignée de zéro : {n}/{d} -> {r}");
+                prop_assert!((&r * &d).abs() > n.abs(), "moitié non éloignée de zéro : {n}/{d} -> {r}");
             }
         }
     }

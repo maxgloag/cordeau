@@ -122,6 +122,9 @@ mod tests {
         assert_eq!(m(52_871).plus(&m(5_287)), m(58_158));
         assert_eq!(m(1).moins(&m(3)), m(-2));
         assert_eq!([m(1), m(2), m(3)].iter().sum::<Montant>(), m(6));
-        assert_eq!(std::iter::empty::<&Montant>().sum::<Montant>(), Montant::zero());
+        assert_eq!(
+            std::iter::empty::<&Montant>().sum::<Montant>(),
+            Montant::zero()
+        );
     }
 }

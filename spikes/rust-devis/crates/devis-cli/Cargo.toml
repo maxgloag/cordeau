@@ -7,6 +7,9 @@ rust-version.workspace = true
 publish.workspace = true
 license.workspace = true
 
+[lib]
+path = "src/lib.rs"
+
 [[bin]]
 name = "totaux-devis"
 path = "src/main.rs"

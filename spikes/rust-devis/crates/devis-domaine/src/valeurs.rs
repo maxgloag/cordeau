@@ -15,7 +15,9 @@ impl Quantite {
     /// Lit une chaîne décimale ; `None` si hors règles.
     #[must_use]
     pub fn lire(texte: &str) -> Option<Self> {
-        lire_borne(texte, 3, 1_000_000_000).and_then(NonZeroU32::new).map(Self)
+        lire_borne(texte, 3, 1_000_000_000)
+            .and_then(NonZeroU32::new)
+            .map(Self)
     }
 
     /// Quantité en millièmes d'unité.
@@ -196,7 +198,9 @@ impl Designation {
 /// `maximum` (inclus) ; `None` si mal formée, trop de décimales ou trop grande.
 fn lire_borne(texte: &str, echelle: usize, maximum: u32) -> Option<u32> {
     let unites = DecimalNonSigne::lire(texte)?.en_unites(echelle)?;
-    u32::try_from(&unites).ok().filter(|valeur| *valeur <= maximum)
+    u32::try_from(&unites)
+        .ok()
+        .filter(|valeur| *valeur <= maximum)
 }
 
 #[cfg(test)]
@@ -298,7 +302,9 @@ mod tests {
         assert_eq!(TauxTva::lire("5.5"), Some(TauxTva::CinqVirguleCinq));
         assert_eq!(TauxTva::lire("10"), Some(TauxTva::Dix));
         assert_eq!(TauxTva::lire("20"), Some(TauxTva::Vingt));
-        for texte in ["5.50", "20.0", "05.5", "020", "00", "0.0", "10 ", "", "19.6", "7"] {
+        for texte in [
+            "5.50", "20.0", "05.5", "020", "00", "0.0", "10 ", "", "19.6", "7",
+        ] {
             assert_eq!(TauxTva::lire(texte), None, "{texte:?}");
         }
     }

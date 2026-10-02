@@ -11,8 +11,8 @@ mod valeurs;
 
 pub use calcul::{LigneVentilation, MENTION_FRANCHISE, TotauxDevis};
 pub use demande::{
-    ChampsLigneBruts, DemandeDevis, DemandeDevisBrute, ErreurDemande, ErreurLigne, ErreurValidation,
-    LigneBrute, LigneDevis, RemiseGlobale, RemiseGlobaleBrute, Saisie,
+    ChampsLigneBruts, DemandeDevis, DemandeDevisBrute, ErreurDemande, ErreurLigne,
+    ErreurValidation, LigneBrute, LigneDevis, RemiseGlobale, RemiseGlobaleBrute, Saisie,
 };
 pub use montant::Montant;
 pub use valeurs::{Designation, Pourcentage, PrixUnitaireHt, Quantite, RegimeTva, TauxTva, Unite};
