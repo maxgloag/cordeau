@@ -60,6 +60,12 @@ impl<'a> std::iter::Sum<&'a Montant> for Montant {
     }
 }
 
+impl std::iter::Sum for Montant {
+    fn sum<I: Iterator<Item = Montant>>(montants: I) -> Self {
+        montants.fold(Self::zero(), |total, montant| total.plus(&montant))
+    }
+}
+
 impl fmt::Display for Montant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let signe = if self.0.is_negative() { "-" } else { "" };
