@@ -7,6 +7,7 @@ namespace App\Tests\Integration\Console;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -74,16 +75,25 @@ final class CalculerTotauxDevisCommandTest extends KernelTestCase
         self::assertSame('{"erreurs":[{"code":"JSON_INVALIDE","ligne":null}]}', trim($sortie));
     }
 
+    #[Test]
+    public function le_resultat_json_est_ecrit_meme_en_mode_silencieux(): void
+    {
+        [$codeSortie, $sortie] = $this->executer(self::EXEMPLE_SPEC, OutputInterface::VERBOSITY_QUIET);
+
+        self::assertSame(0, $codeSortie);
+        self::assertStringStartsWith('{"ok":{"lignes":[{"montant_ht":"545.06"}]', $sortie);
+    }
+
     /**
      * @return array{int, string}
      */
-    private function executer(string $entree): array
+    private function executer(string $entree, int $verbosite = OutputInterface::VERBOSITY_NORMAL): array
     {
         $application = new Application(self::bootKernel());
         $tester = new CommandTester($application->find('app:experience:totaux-devis'));
         $tester->setInputs([$entree]);
 
-        $codeSortie = $tester->execute([], ['interactive' => false]);
+        $codeSortie = $tester->execute([], ['interactive' => false, 'verbosity' => $verbosite]);
 
         return [$codeSortie, $tester->getDisplay()];
     }

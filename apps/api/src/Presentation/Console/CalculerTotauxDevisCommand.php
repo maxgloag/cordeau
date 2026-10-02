@@ -59,7 +59,8 @@ final class CalculerTotauxDevisCommand extends Command
             }
 
             // OUTPUT_RAW : pas d'interprétation des balises de style de la console.
-            $output->writeln(json_encode($resultat, self::OPTIONS_JSON), OutputInterface::OUTPUT_RAW);
+            // VERBOSITY_QUIET : le JSON est LA sortie de la commande, écrite même avec -q.
+            $output->writeln(json_encode($resultat, self::OPTIONS_JSON), OutputInterface::OUTPUT_RAW | OutputInterface::VERBOSITY_QUIET);
 
             return $codeSortie;
         } catch (\Throwable $e) {

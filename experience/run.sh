@@ -7,4 +7,9 @@ set -euo pipefail
 
 racine="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+if [[ ! -f "${racine}/apps/api/vendor/autoload.php" ]]; then
+    echo "Dépendances absentes : lancer 'composer install --ignore-platform-req=ext-imagick' dans apps/api." >&2
+    exit 2
+fi
+
 exec php "${racine}/apps/api/bin/console" app:experience:totaux-devis --no-interaction
