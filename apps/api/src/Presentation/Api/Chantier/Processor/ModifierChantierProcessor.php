@@ -41,7 +41,7 @@ final class ModifierChantierProcessor implements ProcessorInterface
         $client = $data->clientId !== null ? $this->clientRefResolver->resoudre($data->clientId, $user->id) : null;
 
         $id = $this->extractUuid($uriVariables);
-        $chantier = $this->useCase->execute($id, $data->toAdresse($existant), $data->toSurface(), $client);
+        $chantier = $this->useCase->execute($id, $user->id, $data->toAdresse($existant), $data->toSurface(), $client);
 
         return ChantierResource::fromDomain($chantier);
     }

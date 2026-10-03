@@ -14,8 +14,14 @@ final class ObtenirChantierUseCase
     {
     }
 
-    public function execute(Uuid $id): ?Chantier
+    /**
+     * Un chantier qui n'appartient pas à `$proprietaireId` est traité comme introuvable :
+     * on ne révèle pas son existence.
+     */
+    public function execute(Uuid $id, Uuid $proprietaireId): ?Chantier
     {
-        return $this->repository->findById($id);
+        $chantier = $this->repository->findById($id);
+
+        return $chantier !== null && $chantier->appartientA($proprietaireId) ? $chantier : null;
     }
 }

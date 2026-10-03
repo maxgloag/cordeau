@@ -47,6 +47,11 @@ final readonly class Chantier
         );
     }
 
+    public function appartientA(Uuid $proprietaireId): bool
+    {
+        return $this->proprietaireId->equals($proprietaireId);
+    }
+
     public function lierClient(ClientRef $ref, ?\DateTimeImmutable $maintenant = null): self
     {
         $maintenant ??= new \DateTimeImmutable();
