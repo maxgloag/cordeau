@@ -50,6 +50,10 @@ services:
         arguments:
             $selfServiceEnabled: '%env(bool:REGISTRATION_SELF_SERVICE_ENABLED)%'
 
+    App\Infrastructure\Observability\SentryBeforeSend:
+        arguments:
+            $exceptionToStatus: '%api_platform.exception_to_status%'
+
     Aws\S3\S3Client:
         arguments:
             -   version: 'latest'
