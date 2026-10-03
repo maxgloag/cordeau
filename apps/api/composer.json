@@ -17,6 +17,7 @@
         "league/oauth2-google": "^5.0",
         "nelmio/cors-bundle": "^2.6",
         "predis/predis": "^3.4",
+        "sentry/sentry-symfony": "^5.13",
         "symfony/asset": "7.4.*",
         "symfony/cache": "7.4.*",
         "symfony/console": "7.4.*",

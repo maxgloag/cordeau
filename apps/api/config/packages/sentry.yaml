@@ -1,0 +1,16 @@
+# Remontée des erreurs 5xx de l'API vers Sentry (cf ADR 0028).
+# Inerte tant que SENTRY_DSN est vide : dev et test n'envoient rien, seule la prod le définit (secret Fly).
+sentry:
+    dsn: '%env(default::SENTRY_DSN)%'
+    tracing:
+        enabled: false
+    options:
+        environment: '%env(default:kernel.environment:SENTRY_ENVIRONMENT)%'
+        # Erreurs seulement, aucune donnée personnelle par défaut.
+        send_default_pii: false
+        max_request_body_size: 'none'
+        max_breadcrumbs: 0
+        traces_sample_rate: 0.0
+        # Liste blanche d'en-têtes, retrait de l'IP, des cookies, de la query string, et des
+        # erreurs client (4xx) : cf App\Infrastructure\Observability\SentryBeforeSend.
+        before_send: App\Infrastructure\Observability\SentryBeforeSend
