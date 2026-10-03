@@ -58,7 +58,7 @@ Voir [ADR 0007](../../docs/adr/0007-pattern-container-view.md).
 
 Tests UI avec Vitest Browser Mode + Playwright (cf [ADR 0006](../../docs/adr/0006-vitest-browser-mode.md)).
 
-Routing : TanStack Router (typé). Auth : cookie de session côté firewall web.
+Routing : TanStack Router (typé). Auth : token opaque Bearer (aucune session par cookie), stocké en `localStorage` avec un refresh token (`apps/web/src/lib/api.ts`) ; exposition XSS et CSP : [ADR 0026](../../docs/adr/0026-tokens-web-xss-csp.md).
 
 ## Mobile (apps/mobile)
 

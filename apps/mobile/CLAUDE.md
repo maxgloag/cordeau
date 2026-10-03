@@ -21,7 +21,7 @@ Node 24 · Expo SDK 56 · React Native 0.85 · TypeScript strict · Jest 29 + je
 - **Source de vérité locale** : SQLite via Drizzle (`db/schema.ts`, `db/queries.ts`)
 - **Pattern d'écriture** : `useOfflineMutation` — optimistic update SQLite + queryClient cache, push outbox, `processOutbox` fire-and-forget
 - **Pattern de lecture** : queryFn hybride — lit SQLite synchrone, déclenche refresh API en background via `setQueryData` (jamais `invalidateQueries` dans un queryFn)
-- **Sync worker** : `useSyncWorker` monté dans `_layout.tsx`, déclenche sur reconnect + AppState foreground (pas de polling)
+- **Sync worker** : `useSyncWorker` monté dans `_layout.tsx`, déclenche sur reconnect, AppState foreground **et par polling toutes les 5 s** (`POLL_INTERVAL_MS`, `hooks/useSyncWorker.ts`)
 - **Détails** : cf [ADR 0012](../../docs/adr/0012-offline-first-query-pattern.md)
 
 ## Commandes

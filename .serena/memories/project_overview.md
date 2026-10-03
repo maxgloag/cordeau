@@ -8,13 +8,13 @@ SaaS mobile-first de gestion d'activité pour artisans du bâtiment indépendant
 
 ```
 apps/
-  api/        Symfony 7.4 + API Platform 4 + PHP 8.5 + PostgreSQL 18 + Redis 8
+  api/        Symfony 7.4 + API Platform 4 + PHP 8.5 + PostgreSQL 18 (+ Redis 8 prévu, #170)
   web/        Vite 8 + React 19 + TanStack Router/Query + Tailwind v4 + shadcn/ui
   mobile/     Expo SDK 56 (RN 0.85) + expo-router + NativeWind + expo-sqlite/Drizzle
 packages/
   shared/     Types TypeScript partagés (générés via openapi-typescript)
 docs/
-  adr/        Architecture Decision Records (0001 à 0023)
+  adr/        Architecture Decision Records (0001 à 0028)
 scripts/      Outils dev (ci-watch.sh, etc.)
 .serena/      Config Serena (project.yml + memories versionnées)
 .claude/      Hooks et settings Claude Code
