@@ -64,6 +64,21 @@ final class AdresseTest extends TestCase
     }
 
     #[Test]
+    public function elle_refuse_un_code_postal_francais_suivi_d_un_retour_a_la_ligne(): void
+    {
+        // `$` en PCRE accepte un "\n" final : seul `\z` ancre vraiment la fin de chaîne.
+        self::expectException(AdresseInvalideException::class);
+        new Adresse(rue: '1 rue', codePostal: "75001\n", ville: 'Paris', pays: 'FR');
+    }
+
+    #[Test]
+    public function elle_refuse_un_code_pays_suivi_d_un_retour_a_la_ligne(): void
+    {
+        self::expectException(AdresseInvalideException::class);
+        new Adresse(rue: '1 rue', codePostal: '75001', ville: 'Paris', pays: "FR\n");
+    }
+
+    #[Test]
     public function elle_accepte_un_code_postal_alphanumerique_hors_FR(): void
     {
         $adresse = new Adresse(
