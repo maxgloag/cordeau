@@ -15,5 +15,9 @@ framework:
         #app: cache.adapter.apcu
 
         # Namespaced pools use the above "app" backend by default
-        #pools:
-            #my.dedicated.cache: null
+        pools:
+            # Compteurs du rate limiter de login (cf rate_limiter.yaml, ADR 0027).
+            # Fichiers : par machine et perdus au redéploiement tant que Redis n'est pas branché.
+            # (Pas d'adapter array en test : ArrayAdapter est vidé par le resetter de services entre
+            # deux requêtes ; les tests vident le pool dans setUp, cf LoginThrottlingTest.)
+            cache.rate_limiter: null
