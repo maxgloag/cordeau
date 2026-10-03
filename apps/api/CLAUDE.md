@@ -72,6 +72,15 @@ Si une entité légère acquiert des règles métier → bascule planifiée vers
 - Identifiants métier en français, primitives de framework en anglais — partage par couche fixé par l'[ADR 0014](../../docs/adr/0014-naming-conventions-fr-en.md). Exemples : `Chantier`, `Client`, `Lot`, `Tache`, `Mesure`, `Materiau`, `Pointage`, `Devis`, `Facture`, `Avenant`, `lierClient()`, `StatutChantier::EN_PREPARATION`, `ModeFacturation::SURFACE`, `EtatMateriau::UTILISE` ; mais `ChantierRepository`, `CreerChantierProcessor`, `execute()`
 - Pas d'accents dans les identifiers (classes, méthodes, champs, énums, fichiers, routes, tables, colonnes). `Metre`, pas `Mètre`. `cloturer`, pas `clôturer`. Détail des règles dans l'[ADR 0014](../../docs/adr/0014-naming-conventions-fr-en.md)
 
+### Pièges de la stdlib PHP invisibles pour PHPStan
+
+PHPStan niveau 9 ne les voit pas : ils se couvrent par des **tests de cas limites** (issue #137, issue de l'expérience B de l'étude Rust).
+
+- **Regex ancrées en `\z`, pas `$`** : le `$` PCRE accepte un `\n` final (`"75001\n"` passe `/^\d{5}$/`). Déjà corrigé dans `Adresse` et `Telephone` (#168). Tester avec une entrée terminée par `"\n"`.
+- **`json_decode` en objet** quand objet et tableau doivent se distinguer (`{}` et `[]` donnent tous deux `[]` en mode tableau). En mode tableau, vérifier `is_array()` avant d'accéder aux clés d'un corps de requête.
+- **bcmath** : valider l'entrée par une regex stricte avant `new BcMath\Number` ; toujours passer une **échelle explicite** à la division (sinon la précision par défaut tronque silencieusement).
+- **Console** : les commandes à contrat de sortie (consommées par un script) écrivent en `OutputInterface::OUTPUT_RAW` ; sinon l'option `-q` vide leur sortie.
+
 ## Tests
 
 - Tests unitaires dans `tests/Unit/` — aucun framework, aucune DB
