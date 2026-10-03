@@ -87,6 +87,7 @@ PHPStan niveau 9 ne les voit pas : ils se couvrent par des **tests de cas limite
 - Tests d'intégration dans `tests/Integration/` — DB réelle, WebTestCase
 - Tout bounded context complexe = tests unitaires sur le domaine
 - Fixtures via Zenstruck Foundry (`tests/Factory/`)
+- **Isolation entre artisans** : toute ressource exposée sous `/api` (lecture, modification, suppression, liste) porte ses tests « un autre artisan n'y accède pas, et la réponse ne fuit rien » dans `tests/Integration/Api/IsolationEntreArtisansTest.php`. Un élément hors du périmètre de l'utilisateur répond **404** (il ne révèle pas son existence ; les ressources Client répondent 403, historique). Les cas d'usage reçoivent le propriétaire courant, ils ne se contentent pas d'un identifiant. Une nouvelle ressource (Lot, Tâche, Mesure…) n'est pas terminée sans ces tests (faille #172 : les chantiers n'étaient pas isolés)
 
 ## API Platform 4
 

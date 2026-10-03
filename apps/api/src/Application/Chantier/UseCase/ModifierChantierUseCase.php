@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Chantier\UseCase;
 
 use App\Domain\Chantier\Entity\Chantier;
+use App\Domain\Chantier\Exception\ChantierIntrouvableException;
 use App\Domain\Chantier\Repository\ChantierRepository;
 use App\Domain\Chantier\ValueObject\ClientRef;
 use App\Shared\ValueObject\Adresse;
@@ -19,11 +20,15 @@ final class ModifierChantierUseCase
 
     public function execute(
         Uuid $id,
+        Uuid $proprietaireId,
         ?Adresse $nouvelleAdresse = null,
         ?Surface $nouvelleSurface = null,
         ?ClientRef $nouveauClient = null,
     ): Chantier {
         $chantier = $this->repository->getById($id);
+        if (!$chantier->appartientA($proprietaireId)) {
+            throw ChantierIntrouvableException::avecId($id);
+        }
 
         if ($nouvelleAdresse !== null) {
             $chantier = $chantier->modifierAdresse($nouvelleAdresse);
