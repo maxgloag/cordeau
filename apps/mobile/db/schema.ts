@@ -3,11 +3,7 @@ import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export type OutboxEntityType = "chantier" | "client" | "photo";
 export type OutboxOperation = "create" | "update" | "delete";
 export type OutboxStatus =
-  | "pending"
-  | "syncing"
-  | "synced"
-  | "error"
-  | "abandoned";
+  "pending" | "syncing" | "synced" | "error" | "abandoned";
 
 export const chantiers = sqliteTable("chantiers", {
   id: text("id").primaryKey(),
@@ -51,11 +47,7 @@ export const outbox = sqliteTable("outbox", {
 
 export type PhotoStatus = "local" | "confirmed";
 export type OutboxPhotoStatus =
-  | "pending"
-  | "uploading"
-  | "confirming"
-  | "confirmed"
-  | "failed";
+  "pending" | "uploading" | "confirming" | "confirmed" | "failed";
 
 export const photos = sqliteTable("photos", {
   id: text("id").primaryKey(),

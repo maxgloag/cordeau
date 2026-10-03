@@ -32,12 +32,12 @@
     }
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.0.2",
-    "@commitlint/config-conventional": "^21.0.2",
-    "@types/node": "^25.6.0",
-    "lefthook": "^2.1.9",
-    "prettier": "^3.8.3",
-    "turbo": "^2.9.14",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@types/node": "^25.9.9",
+    "lefthook": "^2.1.16",
+    "prettier": "^3.9.9",
+    "turbo": "^2.11.7",
     "typescript": "^6.0.3"
   }
 }
