@@ -12,11 +12,12 @@
 Deux constats rendent cette piste inopérante :
 
 1. **Le login n'est pas un authentificateur du firewall.** `/auth/login` est `PUBLIC_ACCESS` et traité par `LoginController` (contrôleur maison) ; le firewall ne contient que `TokenAuthenticator`, qui lit un token déjà émis. `login_throttling` s'accroche aux authentificateurs de login (`json_login`, `form_login`, `http_basic`) : activé ici, il ne limiterait rien.
-2. **L'IP cliente n'est pas fiable en production.** `framework.trusted_proxies` lit `SYMFONY_TRUSTED_PROXIES`, qui n'est défini ni dans `.env` ni dans `fly.toml`. Derrière le proxy Fly, `Request::getClientIp()` renvoie probablement l'adresse du proxy, identique pour tous les utilisateurs. Une clé contenant l'IP regrouperait tout le monde dans un seul compteur.
+2. **Le blocage par email seul est un choix de prudence, pas une contrainte technique.** `framework.trusted_proxies` lit `SYMFONY_TRUSTED_PROXIES` ; absent de `.env` et de `fly.toml`, il est **défini comme secret Fly** en production (`REMOTE_ADDR`, avec `X-Forwarded-For` parmi les en-têtes de confiance, vérifié le 2026-10-03). L'IP cliente y est donc exploitable. Elle n'a pas été utilisée dans cette première version : ni testée en production, ni couverte par un test (le test d'intégration ne simule pas de proxy).
+   _Correction du 2026-10-03 : la rédaction initiale affirmait à tort que l'IP n'était pas fiable._
 
 ## Decision
 
-**Utiliser directement le composant `symfony/rate-limiter` dans `LoginController`**, avec un limiteur `login` (`sliding_window`, **5 tentatives par 15 minutes**) dont la clé est le **hash SHA-256 de l'email normalisé** (trim + minuscules), sans l'IP.
+**Utiliser directement le composant `symfony/rate-limiter` dans `LoginController`**, avec un limiteur `login` (`sliding_window`, **5 tentatives par 15 minutes**) dont la clé est le **hash SHA-256 de l'email normalisé** (trim + minuscules). Pas de composante IP dans cette première version (cf Context, point 2).
 
 - Le contrôle a lieu **avant** la vérification du mot de passe : un compte verrouillé répond `429` avec un en-tête `Retry-After`, sans hachage bcrypt (économie de CPU) et sans jamais authentifier, même avec le bon mot de passe.
 - Un **login réussi remet le compteur à zéro**.
@@ -32,14 +33,14 @@ Deux constats rendent cette piste inopérante :
 
 ### Suites (hors de cette PR)
 
-- Configurer `SYMFONY_TRUSTED_PROXIES` pour Fly, puis ajouter un limiteur **par IP** en complément (#170).
+- Ajouter un limiteur **par IP** en complément (l'IP cliente est exploitable en production, cf Context) après l'avoir vérifié sur l'application déployée, avec un test qui simule le proxy (#170).
 - Brancher Redis (déjà dans la stack) comme adaptateur du pool `cache.rate_limiter` pour partager les compteurs entre machines (#170).
 - Prévoir un limiteur dédié sur `POST /auth/register` à la réouverture de l'inscription self-service (ADR 0021).
 
 ### Choix écartés
 
 - **`login_throttling` du firewall** : sans effet ici (cf Context).
-- **Clé `IP + email`** (comportement par défaut de Symfony) : l'IP vue par l'application est celle du proxy, donc équivalente à un seul compteur global pour tous.
+- **Clé `IP + email`** (comportement par défaut de Symfony) : atténuerait le verrouillage par un tiers, mais l'IP n'avait pas été vérifiée de bout en bout au moment de la décision. À reconsidérer avec le limiteur par IP (#170).
 - **Passer le login par `json_login`** pour réutiliser `login_throttling` : refonte de l'authentification disproportionnée par rapport au besoin.
 
 ## Implications sécurité
