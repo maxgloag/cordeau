@@ -180,3 +180,20 @@ Si une de ces règles s'applique mais que tu juges qu'elle ne sert à rien dans 
 - **Pas de PR drive-by** : si une amélioration adjacente vaut le coup, ouvrir une issue séparée plutôt que de l'embarquer dans la PR en cours
 - **Dispatch parallèle vs séquentiel** : explorations indépendantes sans état partagé → `superpowers:dispatching-parallel-agents`. Étapes dépendantes (chaque action utilise l'output de la précédente) → séquentiel, pas de dispatch
 - **Trajectoire V1 manuelle → V1.2+ magie** : avant toute proposition de feature « IA / vocale / structuration automatique / chrono auto / détection risques », vérifier la trajectoire dans [ROADMAP.md](ROADMAP.md). V1 est manuelle, V1.1 fluidifie l'UX, V1.2 ajoute la magie LLM **conditionnée au critère de validation bêta** ([ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)). Ne pas court-circuiter — c'est un garde-fou explicite
+
+## Évolution du workflow (retours d'expérience)
+
+Le workflow n'est pas figé : quand une friction ou une erreur révèle un défaut de process, **la règle correspondante est ajoutée ici dans la même PR** (ou, si elle demande une décision, une issue + un ADR). Pas de leçon qui reste seulement dans une conversation. Entrées datées, les plus récentes en bas.
+
+**2026-10-03 — nuit d'autonomie (#123, #153, #155, #156, #78)**
+
+- **Claude ne fusionne pas ses propres PR** : le classifieur du mode auto bloque ce merge, même après revue locale. Le circuit voulu est PR → CI + revue `PR Review` → auto-merge ([ADR 0025](docs/adr/0025-reviewer-claude-auto-merge.md)). Ne jamais contourner un refus du classifieur par un autre outil ; le signaler et continuer le reste.
+- **Premier maillon d'une chaîne de confiance** (workflow du reviewer, `CODEOWNERS`, `.claude/`) : toujours `needs-human`, et fusionné par le fondateur. Une PR ne doit jamais pouvoir réécrire son propre contrôle.
+- **PR Dependabot** : le reviewer ne les relit pas (pas de secrets Dependabot). Pratique : reprendre leur contenu dans une PR du propriétaire (qui passe par le reviewer), puis fermer les PR Dependabot avec un lien. Ne pas fermer avant que la PR de reprise soit fusionnée.
+- **Mise à jour de dépendances** : `pnpm update -r` réécrit les manifestes de façon non voulue (épingle `react` à la valeur d'un override, sort des plages Expo). Relire le diff des `package.json`, lancer `expo install --check` côté mobile et comparer au résultat de `main`, vérifier `pnpm audit`, `type-check`, `lint`, les tests et `expo export`. Une nouvelle version de Prettier peut reformater des fichiers existants : les reformater dans la même PR.
+- **Montée de version d'un outil de contrat** (API Platform, openapi-typescript) : le contrat OpenAPI committé et les types partagés sont contrôlés par la CI (#154). Regénérer avec `pnpm --filter @cordeau/shared generate`, jamais à la main.
+- **Contrainte de framework hors du repo** : une restriction posée par un plugin local (Symfony Flex) n'existe pas pour Dependabot. Toute contrainte qui compte doit vivre dans le manifeste (`conflict`) **et** avoir un garde CI (#158).
+- **Commits** : ne jamais masquer la sortie des hooks (`> /dev/null`) : un échec de commitlint ou de Prettier est passé inaperçu. Types autorisés par commitlint : `feat, fix, chore, docs, refactor, test, perf, ci, build, revert` (pas `style`).
+- **`/simplify` avant `gh pr create`** : peut être omis quand le diff ne contient que de la configuration, des lockfiles, de la documentation ou du code généré. Le dire explicitement dans la description de la PR.
+- **Protection `strict` de `main`** : plusieurs PR prêtes en même temps obligent à les mettre à jour une par une, et chaque mise à jour relance une revue (quota Pro). Suivi : #163.
+- **Sessions autonomes** : tester une commande Bash triviale en premier. Si tout Bash est bloqué, ne pas boucler : écrire le plan de reprise dans `~/.claude/plans/` et le signaler.
