@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/MaximeG/Developer/cordeau/scripts/ci-watch.sh",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/scripts/ci-watch.sh",
             "if": "Bash(git push *)",
             "asyncRewake": true,
             "statusMessage": "Surveillance CI GitHub Actions…",
