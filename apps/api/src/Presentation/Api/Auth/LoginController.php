@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 
@@ -24,6 +25,7 @@ final class LoginController
         private readonly DoctrineAuthTokenRepository $authTokenRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly TokenGenerator $tokenGenerator,
+        private readonly RateLimiterFactory $loginLimiter,
     ) {
     }
 
@@ -38,11 +40,27 @@ final class LoginController
         $email = isset($body['email']) && \is_string($body['email']) ? trim($body['email']) : '';
         $motDePasse = isset($body['motDePasse']) && \is_string($body['motDePasse']) ? $body['motDePasse'] : '';
 
+        // Clé = email normalisé et haché (pas d'email en clair dans le cache). Contrôle AVANT le
+        // mot de passe : un compte verrouillé ne déclenche plus de hachage bcrypt.
+        $limiter = $this->loginLimiter->create(hash('sha256', mb_strtolower($email)));
+        $limit = $limiter->consume();
+        if (!$limit->isAccepted()) {
+            $attente = max(1, $limit->getRetryAfter()->getTimestamp() - time());
+
+            return new JsonResponse(
+                ['message' => 'Trop de tentatives. Réessayez plus tard.'],
+                Response::HTTP_TOO_MANY_REQUESTS,
+                ['Retry-After' => (string) $attente],
+            );
+        }
+
         $user = $this->userRepository->findByEmail($email);
 
         if ($user === null || !$this->passwordHasher->isPasswordValid($user, $motDePasse)) {
             return new JsonResponse(['message' => 'Identifiants incorrects.'], Response::HTTP_UNAUTHORIZED);
         }
+
+        $limiter->reset();
 
         return $this->creerReponseToken($user, $request->headers->get('X-Device-Info'));
     }

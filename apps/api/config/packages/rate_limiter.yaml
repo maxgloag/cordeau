@@ -1,0 +1,10 @@
+framework:
+    rate_limiter:
+        # Login : 5 échecs par compte (email) sur 15 min, cf ADR 0027.
+        # Clé = email seul : l'IP cliente n'est pas fiable derrière le proxy Fly
+        # tant que SYMFONY_TRUSTED_PROXIES n'est pas configuré.
+        login:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'
+            cache_pool: cache.rate_limiter

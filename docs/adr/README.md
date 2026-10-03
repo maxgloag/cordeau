@@ -64,3 +64,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0024](0024-affinements-modelisation-lot-tache-phase-6.md) | Affinements de modélisation Lot / Tâche (Phase 6)                           | Accepted |
 | [0025](0025-reviewer-claude-auto-merge.md)                 | Reviewer Claude automatisé et auto-merge des PR                             | Accepted |
 | [0026](0026-tokens-web-xss-csp.md)                         | Exposition XSS des tokens web : CSP d'abord, cookie HttpOnly sous condition | Proposed |
+| [0027](0027-rate-limiting-login.md)                        | Rate limiting du login : limiteur par compte, appelé depuis le contrôleur   | Accepted |
