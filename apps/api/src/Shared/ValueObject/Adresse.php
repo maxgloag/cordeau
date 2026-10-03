@@ -22,11 +22,11 @@ final readonly class Adresse
             throw AdresseInvalideException::villeVide();
         }
 
-        if (preg_match('/^[A-Z]{2}$/', $this->pays) !== 1) {
+        if (preg_match('/^[A-Z]{2}\z/', $this->pays) !== 1) {
             throw AdresseInvalideException::paysInvalide($this->pays);
         }
 
-        if ($this->pays === 'FR' && preg_match('/^\d{5}$/', $this->codePostal) !== 1) {
+        if ($this->pays === 'FR' && preg_match('/^\d{5}\z/', $this->codePostal) !== 1) {
             throw AdresseInvalideException::codePostalInvalide($this->codePostal, $this->pays);
         }
 

@@ -20,13 +20,13 @@ final readonly class Telephone
     {
         $nettoye = preg_replace('/[\s.\-]/', '', $valeur) ?? '';
 
-        if (preg_match('/^0([1-9]\d{8})$/', $nettoye, $matches) === 1) {
+        if (preg_match('/^0([1-9]\d{8})\z/', $nettoye, $matches) === 1) {
             $this->valeur = '+33' . $matches[1];
 
             return;
         }
 
-        if (preg_match('/^\+33([1-9]\d{8})$/', $nettoye) === 1) {
+        if (preg_match('/^\+33([1-9]\d{8})\z/', $nettoye) === 1) {
             $this->valeur = $nettoye;
 
             return;
