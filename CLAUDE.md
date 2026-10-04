@@ -111,7 +111,7 @@ Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 
 
 ## Surveillance CI automatique
 
-Après chaque `git push`, lancer `gh run watch <RUN_ID> --exit-status` en `run_in_background: true` : le harness notifie à la fin (~0 token tant qu'il tourne). Si la CI est rouge, récupérer les logs filtrés et proposer un fix. Le hook `asyncRewake` de `.claude/settings.json` ne se déclenche pas ; cas des worktrees : [docs/workflow-agentique.md](docs/workflow-agentique.md#surveillance-ci--détails).
+Après chaque `git push`, lancer `gh run watch <RUN_ID> --exit-status` en `run_in_background: true` : le harness notifie à la fin (~0 token tant qu'il tourne). Si la CI est rouge, récupérer les logs filtrés et proposer un fix. Le hook `asyncRewake` de `.claude/settings.json` ([scripts/ci-watch.sh](scripts/ci-watch.sh)) rapporte la CI du commit poussé après un `git push` (premier déclenchement observé le 2026-10-04, après la correction de son chemin, #181). La CI ne démarrant qu'à l'ouverture de la PR, le premier push d'une branche ne donne rien : suivre alors le run à la main. Cas des worktrees : [docs/workflow-agentique.md](docs/workflow-agentique.md#surveillance-ci--détails).
 
 RUN_ID après le push (**toujours `--workflow CI`** : sans filtre, le dernier run de la branche peut être `PR Review` ou `CodeQL`, et son succès ne dit rien de la CI) :
 
