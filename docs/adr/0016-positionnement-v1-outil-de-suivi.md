@@ -1,6 +1,6 @@
 # 0016 — Positionnement V1 « outil de suivi », AR et PDP différés V2
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-04)
 - **Date** : 2026-05-24
 - **Deciders** : Maxime
 - **Lié à** : [ADR 0015](0015-modele-chantier-lots-taches-mesures.md), [ADR 0017](0017-differer-ia-validation-manuelle.md)
@@ -9,9 +9,9 @@
 
 Trois éléments de la vision Notion d'avril 2026 doivent être réarbitrés à la lumière du brainstorm de mai 2026 :
 
-1. **L'AR de mesure** était posée comme _wow feature V1_ — différenciant principal vs Tolteck/Obat. À l'examen, sa valeur réelle pour l'artisan est marginale (un mètre ruban marche déjà bien), son coût d'intégration élevé (ARKit + ARCore + edge cases LiDAR), et son report en V2 ne casse pas la promesse produit dès lors que **la fonction métré existe en saisie manuelle** (cf [ADR 0015](0015-modele-chantier-lots-taches-mesures.md) — entité `Mesure` avec `Source: MANUEL | AR`).
+1. **L'AR de mesure** était posée comme _wow feature V1_. À l'examen, son coût d'intégration est élevé (ARKit + ARCore + cas limites LiDAR) et son report en V2 ne casse pas la promesse produit dès lors que **la fonction métré existe en saisie manuelle** (cf [ADR 0015](0015-modele-chantier-lots-taches-mesures.md) — entité `Mesure` avec `Source: MANUEL | AR`).
 
-2. **La facturation électronique conforme PDP** devient obligatoire pour les entreprises au 1er septembre 2026 (réforme française). La vision d'avril prévoyait une Phase 8 « Facturation + conformité » avec audit expert (~2-4 k€). Le brainstorm mai propose de différer cette conformité V2 et de positionner Cordeau V1 comme **outil de suivi** produisant des **pré-documents** (devis et factures exportables non conformes PDP), l'artisan restant maître de sa conformité légale via son outil comptable habituel.
+2. **La facturation électronique conforme PDP** devient obligatoire pour les entreprises au 1er septembre 2026 (réforme française). La vision d'avril prévoyait une Phase 8 « Facturation + conformité » avec audit expert. Le brainstorm mai propose de différer cette conformité V2 et de positionner Cordeau V1 comme **outil de suivi** produisant des **pré-documents** (devis et factures exportables non conformes PDP), l'artisan restant maître de sa conformité légale via son outil comptable habituel.
 
 3. **L'AR comme « catalogue de visualisation »** (projection de matériaux dans la pièce filmée) restait un sujet ouvert. Décision de cohérence : tout ce qui touche à l'AR passe en V2.
 
@@ -93,25 +93,26 @@ Cordeau V1 **n'est pas** une PDP. Communication à l'utilisateur :
 
 ### Bénéfices attendus
 
-- **Scope V1 réduit** : pas d'audit expert (~2-4 k€ économisés), pas d'intégration Chorus Pro, pas d'AR. Lancement bêta accessible (septembre 2026 cible).
+- **Scope V1 réduit** : pas d'audit expert, pas d'intégration Chorus Pro, pas d'AR.
 - **Positionnement clair** : Cordeau ne prétend pas remplacer un logiciel comptable. Évite le pitch ambigu et le risque légal.
 - **Trajectoire ouverte** : la conformité PDP et l'AR restent intégrables en V2 sans refacto du modèle (cf [ADR 0015](0015-modele-chantier-lots-taches-mesures.md) sur `Mesure.source`).
 - **Mentions et numérotation propres** : un artisan peut quand même se servir des pré-documents Cordeau comme base de facturation conforme via son outil comptable.
 
 ### Coûts assumés
 
-- **Risque de perception « pas un vrai logiciel de facturation »** sur le marché. Mitigation : positionnement marketing explicite (le wedge n'est pas la facture, c'est la capture terrain — cf [ADR 0017](0017-differer-ia-validation-manuelle.md)).
-- **Le freinage AR différée** retire un argument marketing visuel fort. Mitigation : la démo terrain (saisie rapide, métré manuel, brouillon facture pré-rempli) doit suffire à convaincre.
-- **Trajectoire PDP V2 non triviale** : intégrer une vraie PDP en V2 demandera ~4-8 semaines + audit. À provisionner dans le budget V2.
+- **Trajectoire PDP V2 non triviale** : intégrer une vraie PDP en V2 demandera un travail d'intégration et un audit, à provisionner en V2.
 
 ### Risques résiduels
 
 - **Évolution réglementaire** : si l'État resserre les obligations (ex : pénalités si un artisan utilise un outil produisant des documents trompeurs sur leur conformité), il faudra réagir vite. Mitigation : message d'onboarding explicite, CGV claires, veille réglementaire.
 - **Confusion utilisateur** : un artisan peut envoyer le pré-document directement au client en pensant qu'il est conforme. Mitigation : mention visible « Document de travail — n'a pas valeur de facture conforme PDP » sur le PDF V1 (à confirmer UX bêta).
-- **Lock-in inverse** : si Cordeau facilite trop l'export vers outils comptables externes, l'artisan peut se demander pourquoi payer Cordeau plutôt que de tout faire dans son outil comptable. La réponse est dans le wedge capture terrain (cf [ADR 0017](0017-differer-ia-validation-manuelle.md)) — à valider en bêta.
 
 ### Trade-offs assumés
 
 - **Pas de signature électronique V1** : l'acceptation d'un devis se fait hors-Cordeau (mail, papier, oral). Statut `accepte` enregistré manuellement par l'artisan. Acceptable pour V1, à reconsidérer V1.2+ si demande forte.
 - **Numérotation par utilisateur, pas par tenant global** : un artisan qui change de structure légale gardera un compteur incohérent. Mitigation : commande Symfony de réinitialisation manuelle si le cas se présente.
 - **Conservation 10 ans pour des pré-documents** : on stocke long sans valeur légale stricte. Coût stockage R2 marginal, accepté.
+
+## Amendements
+
+- 2026-10-04 — Expurgé : concurrents, estimations de coût, risques de positionnement commercial et lien avec le wedge marketing retirés du dépôt public ; ils vivent sur Notion. L'historique Git conserve l'ancien texte.
