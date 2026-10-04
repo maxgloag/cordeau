@@ -66,3 +66,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0026](0026-tokens-web-xss-csp.md)                         | Exposition XSS des tokens web : CSP d'abord, cookie HttpOnly sous condition | Proposed |
 | [0027](0027-rate-limiting-login.md)                        | Rate limiting du login : limiteur par compte, appelé depuis le contrôleur   | Accepted |
 | [0028](0028-sentry-api.md)                                 | Remontée des erreurs de l'API vers Sentry, avec filtrage des données        | Accepted |
+| [0029](0029-worker-messenger-prod.md)                      | Un process worker Fly consomme la file Messenger en production              | Accepted |

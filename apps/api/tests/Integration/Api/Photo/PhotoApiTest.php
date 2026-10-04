@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Api\Photo;
 
 use App\Infrastructure\Storage\StorageAdapterInterface;
+use App\Messenger\Message\GenerateThumbnailMessage;
 use App\Tests\Factory\ChantierFactory;
 use App\Tests\Factory\PhotoFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -151,6 +153,16 @@ final class PhotoApiTest extends WebTestCase
         self::assertSame($remoteKey, $body['remoteKey']);
         self::assertSame('https://photos.example.com/' . $remoteKey, $body['photoUrl']);
         self::assertNull($body['thumbnailUrl']);
+
+        // La vignette n'est générée que si le message part vers la file (#124).
+        $transport = static::getContainer()->get('messenger.transport.async');
+        self::assertInstanceOf(InMemoryTransport::class, $transport);
+        $envelopes = $transport->getSent();
+        self::assertCount(1, $envelopes);
+        $message = $envelopes[0]->getMessage();
+        self::assertInstanceOf(GenerateThumbnailMessage::class, $message);
+        self::assertSame($body['id'], $message->photoId);
+        self::assertSame($remoteKey, $message->remoteKey);
     }
 
     #[Test]
