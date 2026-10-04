@@ -1,6 +1,6 @@
 # ADR 0031 — Les invariants vivent dans des value objects, y compris en mode léger
 
-- **Status** : Proposed (décision du fondateur attendue)
+- **Status** : Rejected (2026-10-04) : retiré avant décision. La correction (`Client` valide son adresse via `Adresse`) s'applique directement, car l'[ADR 0010](0010-crud-leger-pattern-reference.md) la prescrit déjà ; elle ne demandait pas d'ADR. L'analyse ci-dessous est conservée pour mémoire.
 - **Date** : 2026-10-04
 - **Deciders** : Maxime
 - **Lié à** : issue #194, [ADR 0010](0010-crud-leger-pattern-reference.md) (CRUD léger), [ADR 0002](0002-architecture-hexagonale.md), #189

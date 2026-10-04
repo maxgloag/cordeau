@@ -12,6 +12,7 @@ use App\Client\ValueObject\Telephone;
 use App\Presentation\Api\Client\Payload\ModifierClientPayload;
 use App\Presentation\Api\Client\Resource\ClientResource;
 use App\Presentation\Api\Support\UuidUriVariableExtractor;
+use App\Shared\ValueObject\Adresse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -50,20 +51,19 @@ final class ModifierClientProcessor implements ProcessorInterface
             }
         }
 
-        if ($data->adresseRue !== null) {
-            $client->adresseRue = $data->adresseRue;
-        }
-
-        if ($data->adresseCodePostal !== null) {
-            $client->adresseCodePostal = $data->adresseCodePostal;
-        }
-
-        if ($data->adresseVille !== null) {
-            $client->adresseVille = $data->adresseVille;
-        }
-
-        if ($data->adressePays !== null) {
-            $client->adressePays = $data->adressePays;
+        // L'adresse résultante est validée par le value object partagé, et seulement si un de ses champs
+        // change : un client déjà enregistré avec une ancienne adresse reste modifiable (#194).
+        if ($data->adresseRue !== null || $data->adresseCodePostal !== null || $data->adresseVille !== null || $data->adressePays !== null) {
+            $adresse = new Adresse(
+                rue: $data->adresseRue ?? $client->adresseRue,
+                codePostal: $data->adresseCodePostal ?? $client->adresseCodePostal,
+                ville: $data->adresseVille ?? $client->adresseVille,
+                pays: $data->adressePays ?? $client->adressePays,
+            );
+            $client->adresseRue = $adresse->rue;
+            $client->adresseCodePostal = $adresse->codePostal;
+            $client->adresseVille = $adresse->ville;
+            $client->adressePays = $adresse->pays;
         }
 
         if ($data->notes !== null) {
