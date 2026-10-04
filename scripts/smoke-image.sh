@@ -6,8 +6,12 @@
 # Construit l'image, puis rejoue ce que Fly exécutera : les commandes de `fly.toml`
 # (release_command, process app, process worker) sont LUES dans le fichier, pas recopiées.
 #
+# Phase optionnelle (CONTRACT_TEST=1) : Schemathesis contre le process app démarré, en
+# observation (ADR 0030) — elle n'ajoute jamais d'échec au script.
+#
 # Usage : ./scripts/smoke-image.sh            (Docker requis ; ~3 min avec le build)
 #         SKIP_BUILD=1 IMAGE=mon-image ./scripts/smoke-image.sh
+#         CONTRACT_TEST=1 ./scripts/smoke-image.sh   (ajoute Schemathesis ; Python 3 requis)
 
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
@@ -165,6 +169,44 @@ if [ "$CONSUMING" = "yes" ] && [ "$(docker inspect -f '{{.State.Running}}' "$WOR
 else
   fail "process worker ne consomme pas. Logs : $(docker logs "$WORKER" 2>&1 | tail -8)"
 fi
+
+# --- 5. Contrat OpenAPI : Schemathesis, en observation (ADR 0030) ---
+# Ne cible que 127.0.0.1 : le fuzzer écrit et supprime, jamais vers la prod ou un staging.
+contract_test() {
+  local venv out token
+  venv=$(mktemp -d)
+  python3 -m venv "$venv" && "$venv/bin/pip" install --quiet --disable-pip-version-check "schemathesis==4.29.1" || {
+    echo "⚠️  contrat non exécuté : installation de Schemathesis impossible"
+    return 0
+  }
+  docker run --rm --network "$NET" "${ENV_ARGS[@]}" "$IMAGE" \
+    php bin/console app:user:create contrat@example.test --mot-de-passe=Contrat-Test-12345 >/dev/null 2>&1 || {
+    echo "⚠️  contrat non exécuté : création du compte de test impossible"
+    return 0
+  }
+  token=$(curl -s -m 20 -X POST "http://127.0.0.1:$PORT/auth/login" -H 'Content-Type: application/json' \
+    -d '{"email":"contrat@example.test","motDePasse":"Contrat-Test-12345"}' \
+    | python3 -c "import json,sys; print(json.load(sys.stdin)['token'])" 2>/dev/null) || token=""
+  if [ -z "$token" ]; then
+    echo "⚠️  contrat non exécuté : connexion du compte de test impossible"
+    return 0
+  fi
+  out="$venv/schemathesis.txt"
+  # Lancé depuis le dossier temporaire : Schemathesis y écrit son cache, pas dans le dépôt.
+  (cd "$venv" && "$venv/bin/st" run "$OLDPWD/packages/shared/openapi.json" --url "http://127.0.0.1:$PORT" \
+    -H "Authorization: Bearer $token" --max-time "${CONTRACT_MAX_TIME:-90}" --no-color >"$out" 2>&1) || true
+  echo "ℹ️  contrat OpenAPI (Schemathesis, observation) : $(tail -1 "$out")"
+  if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+    {
+      echo "## Contrat OpenAPI (Schemathesis, observation, ADR 0030)"
+      echo '```'
+      grep -A40 '^Failures:' "$out" | head -40
+      echo '```'
+    } >>"$GITHUB_STEP_SUMMARY"
+  fi
+  cp "$out" "${CONTRACT_REPORT:-/dev/null}" 2>/dev/null || true
+}
+[ "${CONTRACT_TEST:-}" = "1" ] && contract_test
 
 if [ "$FAILURES" -gt 0 ]; then
   echo "smoke-image : $FAILURES échec(s)." >&2
