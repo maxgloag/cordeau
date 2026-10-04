@@ -57,6 +57,12 @@ src/
 - Pas de `any` — si incontournable, `unknown` puis assertion typée
 - Identifiants métier en français dans l'UI (`Chantier`, `Client`, `Devis`)
 
+## En-têtes de sécurité et CSP
+
+- `public/_headers` (Cloudflare Pages, copié dans `dist/`) pose des en-têtes de durcissement et une CSP en **Report-Only** ([ADR 0026](../../docs/adr/0026-tokens-web-xss-csp.md)) ; `src/test/en-tetes-securite.test.ts` fige les directives essentielles.
+- Toute nouvelle origine appelée par le web (API, service tiers, polices, images) s'ajoute à la CSP, sinon elle sera bloquée au passage en enforcement.
+- Pas de script inline, pas d'`eval` ni de `new Function` : Zod est réglé en `jitless` (`src/lib/zod-config.ts`) pour cette raison.
+
 ## Tailwind v4
 
 - Import dans CSS : `@import "tailwindcss"` (pas de directives v3)

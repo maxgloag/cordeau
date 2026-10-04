@@ -1,0 +1,9 @@
+# En-têtes servis par Cloudflare Pages (ADR 0026, temps 1). Ce fichier est copié tel quel dans dist/.
+# La CSP est en mode rapport seul (Report-Only) : elle ne bloque rien. Sans clé publique du projet Sentry
+# web, aucun report-uri n'est posé : les violations ne sont visibles que dans la console du navigateur.
+# Passage en enforcement : décision du fondateur, après une période d'observation.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.r2.dev; connect-src 'self' https://cordeau-api.fly.dev https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
