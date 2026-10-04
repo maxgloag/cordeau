@@ -144,6 +144,29 @@ else
   fail "process app : /api/chantiers répond $PROTECTED au lieu de 401"
 fi
 
+# Compte de test et jeton : servent au contrôle de validation ci-dessous et à la phase contrat.
+TOKEN=""
+if docker run --rm --network "$NET" "${ENV_ARGS[@]}" "$IMAGE" \
+  php bin/console app:user:create contrat@example.test --mot-de-passe=Contrat-Test-12345 >/dev/null 2>&1; then
+  TOKEN=$(curl -s -m 20 -X POST "http://127.0.0.1:$PORT/auth/login" -H 'Content-Type: application/json' \
+    -d '{"email":"contrat@example.test","motDePasse":"Contrat-Test-12345"}' \
+    | python3 -c "import json,sys; print(json.load(sys.stdin)['token'])" 2>/dev/null) || TOKEN=""
+fi
+if [ -z "$TOKEN" ]; then
+  fail "compte de test : création ou connexion impossible"
+else
+  # Une erreur de validation doit répondre 422. Le rendu de l'erreur charge des classes qu'une
+  # installation `--no-dev` peut ne pas avoir (#188 : type-resolver, en 500 sur toute validation).
+  VALIDATION=$(curl -s -o /dev/null -w '%{http_code}' -m 20 -X POST "http://127.0.0.1:$PORT/api/chantiers" \
+    -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+    -d '{"adresseRue":"","adresseCodePostal":"","adresseVille":""}' || true)
+  if [ "$VALIDATION" = "422" ]; then
+    ok "process app : une erreur de validation répond 422"
+  else
+    fail "process app : une erreur de validation répond $VALIDATION au lieu de 422. Logs : $(docker logs "$APP" 2>&1 | grep -E 'critical|Uncaught' | grep -v 'Full authentication' | tail -2 | cut -c1-300)"
+  fi
+fi
+
 # --- 4. Messenger : handlers câblés et worker qui consomme la file ---
 HANDLERS=$(docker run --rm --network "$NET" "${ENV_ARGS[@]}" "$IMAGE" php bin/console debug:messenger 2>&1 || true)
 for MESSAGE in GenerateThumbnailMessage DeleteR2ObjectMessage; do
@@ -173,28 +196,20 @@ fi
 # --- 5. Contrat OpenAPI : Schemathesis, en observation (ADR 0030) ---
 # Ne cible que 127.0.0.1 : le fuzzer écrit et supprime, jamais vers la prod ou un staging.
 contract_test() {
-  local venv out token
+  local venv out
+  if [ -z "$TOKEN" ]; then
+    echo "⚠️  contrat non exécuté : pas de jeton de compte de test"
+    return 0
+  fi
   venv=$(mktemp -d)
   python3 -m venv "$venv" && "$venv/bin/pip" install --quiet --disable-pip-version-check "schemathesis==4.29.1" || {
     echo "⚠️  contrat non exécuté : installation de Schemathesis impossible"
     return 0
   }
-  docker run --rm --network "$NET" "${ENV_ARGS[@]}" "$IMAGE" \
-    php bin/console app:user:create contrat@example.test --mot-de-passe=Contrat-Test-12345 >/dev/null 2>&1 || {
-    echo "⚠️  contrat non exécuté : création du compte de test impossible"
-    return 0
-  }
-  token=$(curl -s -m 20 -X POST "http://127.0.0.1:$PORT/auth/login" -H 'Content-Type: application/json' \
-    -d '{"email":"contrat@example.test","motDePasse":"Contrat-Test-12345"}' \
-    | python3 -c "import json,sys; print(json.load(sys.stdin)['token'])" 2>/dev/null) || token=""
-  if [ -z "$token" ]; then
-    echo "⚠️  contrat non exécuté : connexion du compte de test impossible"
-    return 0
-  fi
   out="$venv/schemathesis.txt"
   # Lancé depuis le dossier temporaire : Schemathesis y écrit son cache, pas dans le dépôt.
   (cd "$venv" && "$venv/bin/st" run "$OLDPWD/packages/shared/openapi.json" --url "http://127.0.0.1:$PORT" \
-    -H "Authorization: Bearer $token" --max-time "${CONTRACT_MAX_TIME:-90}" --no-color >"$out" 2>&1) || true
+    -H "Authorization: Bearer $TOKEN" --max-time "${CONTRACT_MAX_TIME:-90}" --no-color >"$out" 2>&1) || true
   echo "ℹ️  contrat OpenAPI (Schemathesis, observation) : $(tail -1 "$out")"
   if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     {
