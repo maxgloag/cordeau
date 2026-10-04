@@ -18,34 +18,24 @@ CMD=$(jq -r '.tool_input.command // ""' 2>/dev/null || echo "")
 # Ne s'exécuter que sur un git push
 echo "$CMD" | grep -q "git push" || exit 0
 
-# Détecter la branche pushée depuis la commande
-BRANCH=$(echo "$CMD" | grep -oE '[a-zA-Z0-9_/.-]+$' | tail -1 || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-if [ -z "$BRANCH" ]; then
-  BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-fi
-# Normaliser : supprimer le remote éventuel (origin/feat/...) → garder feat/...
-BRANCH=$(echo "$BRANCH" | sed 's|^[^/]*/||')
+# Branche courante : un push de ce workflow part toujours de la branche en cours.
+# Ne pas la déduire du texte de la commande : `git push … | tail -1` donnait la « branche » -1.
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+{ [ -z "$BRANCH" ] || [ "$BRANCH" = "HEAD" ]; } && exit 0
 
-# Laisser GitHub enregistrer les runs (délai réseau + trigger)
-sleep 10
-
-# Récupérer les IDs de tous les runs déclenchés sur cette branche
-RUN_IDS=$(gh run list --repo "$REPO" --branch "$BRANCH" --limit 5 --json databaseId,status \
-  -q '[.[] | select(.status != "completed")] | .[].databaseId' 2>/dev/null || echo "")
-
-# Si tous déjà completés, prendre les 5 plus récents de la branche
-if [ -z "$RUN_IDS" ]; then
-  RUN_IDS=$(gh run list --repo "$REPO" --branch "$BRANCH" --limit 5 --json databaseId \
+# Runs du workflow CI pour le commit poussé : la CI ne démarre qu'à l'ouverture de la PR, puis à
+# chaque push de sa branche. Quelques tentatives, le temps que GitHub enregistre le run.
+SHA=$(git rev-parse HEAD 2>/dev/null || echo "")
+RUN_IDS=""
+for _ in 1 2 3 4; do
+  sleep 10
+  RUN_IDS=$(gh run list --repo "$REPO" --workflow CI --commit "$SHA" --limit 5 --json databaseId \
     -q '.[].databaseId' 2>/dev/null || echo "")
-fi
+  [ -n "$RUN_IDS" ] && break
+done
 
 if [ -z "$RUN_IDS" ]; then
-  # Fallback : dernier run global
-  RUN_IDS=$(gh run list --repo "$REPO" --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || echo "")
-fi
-
-if [ -z "$RUN_IDS" ]; then
-  echo "⚠ Aucun run CI trouvé pour $REPO (branche: $BRANCH)" >&2
+  echo "⚠ Aucun run CI pour le commit ${SHA:0:7} (branche: $BRANCH) : la CI démarre à l'ouverture de la PR" >&2
   exit 0
 fi
 

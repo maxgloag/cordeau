@@ -4,7 +4,7 @@
 
 ## Surveillance CI — détails
 
-Le hook `.claude/settings.json` + [scripts/ci-watch.sh](../scripts/ci-watch.sh) avec `asyncRewake` **ne se déclenche pas** dans la version Claude Code actuelle (testé 2026-05-14, aucun log écrit après push ; aucun réveil observé sur une dizaine de pushs le 2026-10-04). Le script reste utile en CLI manuel.
+Le hook `.claude/settings.json` + [scripts/ci-watch.sh](../scripts/ci-watch.sh) avec `asyncRewake` ne se déclenchait pas (testé 2026-05-14, puis sur une dizaine de pushs le 2026-10-04) : son chemin pointait vers l'autre compte macOS (corrigé par #181). Premier déclenchement observé le 2026-10-04, mais il suivait un mauvais run : il déduisait la branche du dernier mot de la commande (`… | tail -1` donnait la branche `-1`) puis retombait sur le dernier run global. Il filtre maintenant sur le workflow `CI` et le commit poussé. Pourquoi il n'a pas réveillé les pushs précédents après #181 n'est pas établi. Le script reste utilisable en CLI manuel.
 
 **Avec worktrees** : quand on travaille dans un worktree (cf `superpowers:using-git-worktrees`), le `gh run list --branch <branch>` doit refléter la branche **du worktree actif**, pas celle du repo principal. Le `gh run watch` lancé en `run_in_background` est local au worktree courant ; la notification de fin remonte dans la session qui l'a lancé.
 
