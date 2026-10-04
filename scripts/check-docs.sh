@@ -51,8 +51,15 @@ for f in docs/architecture.md .serena/memories/architecture.md .serena/memories/
   done
 done
 
+# 6. ADR : statut valide, index == dossier (même statut), fichiers cités par la ligne « Contrôle » existants.
+ADR_ERRORS=$(python3 scripts/check-adr.py)
+if [ -n "$ADR_ERRORS" ]; then
+  echo "$ADR_ERRORS" | sed 's/^/   /' >&2
+  fail "ADR : statut, index ou contrôle incohérent (cf docs/adr/README.md)"
+fi
+
 if [ "$FAILURES" -gt 0 ]; then
   echo "check-docs : $FAILURES écart(s) entre la doc et le code. Corriger la doc (ou le code) dans la même PR." >&2
   exit 1
 fi
-echo "check-docs : 5 règles OK"
+echo "check-docs : 6 règles OK"

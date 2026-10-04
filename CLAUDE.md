@@ -143,7 +143,7 @@ sleep 3 && gh run list --branch <branch> --workflow CI --limit 1 --json database
 6. Créer la milestone et une issue par sous-étape
 7. Une branche par sous-étape, squash merge après PR + CI verte
 8. En cours de phase : refactor dès qu'un pattern devient évident
-9. Fin de phase : `ROADMAP.md` (✅), `CLAUDE.md`, memories Serena, `./scripts/check-docs.sh` ; vérifier le critère de sortie avant la phase suivante
+9. Fin de phase : `ROADMAP.md` (✅), `CLAUDE.md`, memories Serena, `./scripts/check-docs.sh` (doc, ADR) et `./scripts/check-conventions.sh` ; vérifier le critère de sortie avant la phase suivante
 
 Si un signal de vélocité ou d'archi se dégrade, **stop** et rétro avant de continuer.
 
