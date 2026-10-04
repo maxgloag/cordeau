@@ -4,8 +4,12 @@
 # Code 2 + stderr = la fin de tour est bloquée et le rapport est renvoyé à Claude.
 # Code 0 = rien à signaler (ou rien à vérifier, ou outil absent : on n'invente pas d'échec).
 #
-# Portée : fichiers modifiés ou non suivis par rapport à HEAD. Un tour sans
-# modification de code ne coûte que deux commandes git.
+# Portée : fichiers de la branche par rapport à l'ancêtre commun avec origin/main
+# (commités ou non) plus les fichiers non suivis. Un tour qui commite avant de
+# s'arrêter reste donc contrôlé. Sans changement, le coût est de quelques commandes git.
+#
+# Anti-boucle : après un blocage, la correction est revérifiée. Au bout de
+# MAX_BLOCKS blocages consécutifs dans la même session, on laisse conclure.
 # Désactivation ponctuelle : CORDEAU_SKIP_STOP_VERIFY=1.
 #
 # Test manuel : echo '{}' | ./scripts/stop-verify.sh
@@ -14,16 +18,24 @@ set -uo pipefail
 
 [ "${CORDEAU_SKIP_STOP_VERIFY:-}" = "1" ] && exit 0
 
-# Anti-boucle : si Claude vient déjà de corriger suite à un blocage, on le laisse conclure.
 INPUT=$(cat)
-[ "$(printf '%s' "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null)" = "true" ] && exit 0
+SESSION=$(printf '%s' "$INPUT" | jq -r '.session_id // "nosession"' 2>/dev/null || echo nosession)
+COUNTER="${TMPDIR:-/tmp}/cordeau-stop-verify-$SESSION"
+MAX_BLOCKS=3
 
 ROOT=${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null)} || exit 0
 cd "$ROOT" || exit 0
 export PATH="/opt/homebrew/bin:$PATH"
 
-CHANGED=$( { git diff --name-only --diff-filter=d HEAD; git ls-files --others --exclude-standard; } 2>/dev/null | sort -u)
-[ -z "$CHANGED" ] && exit 0
+# Base de comparaison : ancêtre commun avec origin/main, à défaut HEAD.
+BASE_REF=origin/main
+BASE=$(git merge-base HEAD "$BASE_REF" 2>/dev/null) || { BASE=HEAD; BASE_REF=HEAD; }
+
+CHANGED=$( { git diff --name-only --diff-filter=d "$BASE"; git ls-files --others --exclude-standard; } 2>/dev/null | sort -u)
+if [ -z "$CHANGED" ]; then
+  rm -f "$COUNTER"
+  exit 0
+fi
 
 REPORT=""
 # check <libellé> <commande…> : exécute, et consigne les 40 dernières lignes si elle échoue
@@ -61,10 +73,20 @@ ts_pkg() { # $1 = dossier, $2 = filtre pnpm, $3 = type-check, $4 = tests
   # shellcheck disable=SC2086
   check "Tests ($2)" pnpm --filter "$2" exec $4
 }
-ts_pkg apps/web @cordeau/web "tsc -b --noEmit" "vitest run --changed --passWithNoTests --config vitest.config.ts"
-ts_pkg apps/mobile @cordeau/mobile "tsc --noEmit" "jest --onlyChanged --passWithNoTests"
+ts_pkg apps/web @cordeau/web "tsc -b --noEmit" "vitest run --changed $BASE_REF --passWithNoTests --config vitest.config.ts"
+ts_pkg apps/mobile @cordeau/mobile "tsc --noEmit" "jest --changedSince=$BASE_REF --passWithNoTests"
 
-[ -z "$REPORT" ] && exit 0
+if [ -z "$REPORT" ]; then
+  rm -f "$COUNTER"
+  exit 0
+fi
+
+BLOCKS=$(cat "$COUNTER" 2>/dev/null || echo 0)
+if [ "$BLOCKS" -ge "$MAX_BLOCKS" ]; then
+  rm -f "$COUNTER"
+  exit 0
+fi
+echo $((BLOCKS + 1)) >"$COUNTER"
 
 {
   echo "Vérification de fin de tour (scripts/stop-verify.sh) : ÉCHEC. Corrige avant de conclure."
