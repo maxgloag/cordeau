@@ -47,6 +47,9 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: Cohérence doc / code
+        run: ./scripts/check-docs.sh
+
   audit:
     name: ci / audit deps (js)
     runs-on: ubuntu-latest

@@ -4,7 +4,7 @@
 >
 > Convention de diagrammes : [ADR 0018](adr/0018-documentation-architecture-as-code.md). Les diagrammes suivent le [modèle C4](https://c4model.com/) (Context → Container → Component) en Mermaid `flowchart` versionné. Ils se rendent nativement dans GitHub et Notion.
 
-Dernière mise à jour : 2026-05-28 (fin Phase 4, avant Phase 5 Photos/R2).
+Dernière mise à jour : 2026-10-03 (Phase 5 Photos/R2 terminée, avant Phase 6 Lots/Tâches).
 
 ---
 
@@ -55,14 +55,14 @@ flowchart TB
     subgraph cordeau [" Cordeau "]
         direction TB
         web["🖥️ Web back-office<br/>React 19 + Vite + TanStack<br/>Cloudflare Pages"]
-        mobile["📱 Mobile<br/>Expo SDK 54 + NativeWind<br/>offline-first"]
+        mobile["📱 Mobile<br/>Expo SDK 56 + NativeWind<br/>offline-first"]
         api["⚙️ API<br/>Symfony 7 + API Platform 4<br/>Fly.io (cdg)"]
         sqlite[("💾 SQLite locale<br/>expo-sqlite + Drizzle<br/>+ outbox de sync")]
         shared{{"📦 @cordeau/shared<br/>Types OpenAPI générés<br/>(contrat build-time)"}}
     end
 
     pg[("🐘 PostgreSQL 18<br/>Neon")]
-    redis[("🔴 Redis 8<br/>Messenger / cache")]
+    redis[("🔴 Redis 8<br/>prévu (compteurs, #170) :<br/>non utilisé par l'API aujourd'hui")]
     google["Google OAuth"]
     r2["Cloudflare R2"]
 
@@ -79,7 +79,7 @@ flowchart TB
     api -.->|"génère l'OpenAPI<br/>→ openapi-typescript"| shared
 
     api -->|"Doctrine ORM"| pg
-    api -->|"transport / cache"| redis
+    api -.->|"prévu"| redis
     api -->|"échange id_token /<br/>code, validation audience"| google
     mobile -.->|"upload direct<br/>URL pré-signée (Phase 5)"| r2
 
@@ -186,16 +186,16 @@ sequenceDiagram
 
 ---
 
-## Maturité par conteneur (Phase 4)
+## Maturité par conteneur (Phase 5)
 
-| Conteneur  | Statut        | Périmètre actuel                                                                                       |
-| ---------- | ------------- | ------------------------------------------------------------------------------------------------------ |
-| **API**    | MVP           | Auth (email + Google OAuth), Chantier (hexagonal complet), Client (CRUD léger), déployée Fly.io + Neon |
-| **Web**    | MVP           | Login/register, CRUD chantiers + clients, garde de route, Sentry, Cloudflare Pages                     |
-| **Mobile** | MVP + offline | Login/register, CRUD chantiers + clients, SQLite + outbox + sync worker, Google Sign-In, EAS           |
-| **Shared** | Outillage     | Génération OpenAPI → TS opérationnelle                                                                 |
+| Conteneur  | Statut        | Périmètre actuel                                                                                                   |
+| ---------- | ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **API**    | MVP           | Auth (email + Google OAuth), Chantier (hexagonal complet), Client (CRUD léger), Photo (R2), déployée Fly.io + Neon |
+| **Web**    | MVP           | Login/register, CRUD chantiers + clients, garde de route, Sentry, Cloudflare Pages                                 |
+| **Mobile** | MVP + offline | Login/register, CRUD chantiers + clients, SQLite + outbox + sync worker, Google Sign-In, EAS                       |
+| **Shared** | Outillage     | Génération OpenAPI → TS opérationnelle                                                                             |
 
-Prochaines verticales (cf [ROADMAP.md](../ROADMAP.md)) : Phase 5 Photos/R2, Phase 6 Lots/Tâches, Phase 8 Devis/Facture.
+Prochaines verticales (cf [ROADMAP.md](../ROADMAP.md)) : Phase 6 Lots/Tâches, Phase 8 Devis/Facture.
 
 ---
 

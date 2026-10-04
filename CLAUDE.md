@@ -137,7 +137,7 @@ Cf [memory `feedback_ci_watch_pattern`](~/.claude/projects/-Users-MaximeG-Develo
 6. **Créer la milestone GitHub** de la phase + **une issue par sous-étape** (templates existants), liées à la milestone
 7. **Une branche par sous-étape** : `feat/<n>-<slug>`, squash merge sur `main` après PR + CI verte
 8. **En cours de phase** : à chaque sous-étape, surveiller la duplication révélée ; refactor dès qu'un pattern devient évident, pas à la fin
-9. **Fin de phase** : mise à jour de `ROADMAP.md` (✅), `CLAUDE.md` racine, memories Serena (`architecture`, `conventions`), auto-memories pertinentes. Vérifier le critère de sortie de la phase **avant** de basculer sur la suivante
+9. **Fin de phase** : mise à jour de `ROADMAP.md` (✅), `CLAUDE.md` racine, memories Serena (`architecture`, `conventions`), auto-memories pertinentes. Lancer `./scripts/check-docs.sh` (CI : job `format`) et corriger les écarts entre la doc et le code. Vérifier le critère de sortie de la phase **avant** de basculer sur la suivante
 
 Si un signal de vélocité ou d'archi se dégrade (cf critère de sortie de chaque phase), **stop** et rétro avant de continuer.
 
