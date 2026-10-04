@@ -1,8 +1,9 @@
 # ADR 0001 — Stack technique globale
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-04)
 - **Date** : 2026-05-03
 - **Deciders** : Maxime
+- **Contrôle** : non contrôlé
 
 ## Context
 
@@ -47,3 +48,9 @@ Contraintes structurantes :
 
 - Oracle Cloud peut changer ses conditions "Always Free" (low risk, historiquement stable)
 - Expo peut introduire des breaking changes majeurs (mitigé par le verrouillage des versions dans `package.json`)
+
+## Amendements
+
+- 2026-10-04 — L'infra MVP « Oracle Cloud + Coolify » n'a pas été retenue : l'API tourne sur Fly.io et la base sur Neon ([ADR 0008](0008-trajectoire-hebergement.md)).
+- 2026-10-04 — Le mobile est en Expo SDK 56 et non « 54+ » ([ADR 0022](0022-monorepo-pnpm-hoisting-metro.md)).
+- 2026-10-04 — Redis 8 figure dans la stack cible, mais l'API ne l'utilise pas aujourd'hui (aucune configuration Redis active ; branchement prévu en #170).

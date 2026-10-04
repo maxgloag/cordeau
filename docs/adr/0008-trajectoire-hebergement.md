@@ -1,8 +1,9 @@
 # 0008 — Trajectoire d'hébergement (Fly.io + Neon → Scaleway/Clever Cloud)
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-04)
 - **Date** : 2026-05-04
 - **Deciders** : Maxime
+- **Contrôle** : non contrôlé
 - **Supersedes** : choix initial Oracle Cloud Free Tier + Coolify (mentionné dans le plan Phase 0, abandonné car le sign-up Oracle a échoué — voir Context)
 
 ## Context
@@ -77,3 +78,9 @@ Le choix final dépendra des prix en vigueur à la date de migration, du volume 
 - Neon : créer le project en région **EU Central (Frankfurt)** à l'inscription. Non modifiable a posteriori (sinon migration de DB)
 - Anti-suspension Fly : les Machines auto-stop quand pas de trafic. Le web qui consomme `/health` toutes les 10 s suffit largement à les garder vivantes en démo. En prod, c'est aussi OK (les vrais users génèrent du trafic)
 - Une `auto_stop_machines = true` dans `fly.toml` est explicitement souhaitée pour rester en free tier — accepter une **première requête plus lente** (~1-2 s de cold start) après période d'inactivité
+
+## Amendements
+
+- 2026-10-04 — La migration vers un hébergeur français prévue « avant la bêta (septembre 2026) » n'a pas eu lieu : l'API est toujours sur Fly.io et la base sur Neon.
+- 2026-10-04 — L'hypothèse « coût zéro » n'est plus acquise : l'[ADR 0029](0029-worker-messenger-prod.md) ajoute un worker Fly toujours allumé (512 Mo), et ce worker interroge PostgreSQL en continu, ce qui peut empêcher la mise en veille de Neon. Le coût réel n'a pas été mesuré.
+- 2026-10-04 — Les machines `app` s'arrêtent toujours après une période sans trafic (`auto_stop_machines = "stop"`, `apps/api/fly.toml`).

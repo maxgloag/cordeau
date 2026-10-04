@@ -1,8 +1,9 @@
 # ADR 0013 — OAuth Google : table `oauth_account` séparée + auto-link par email vérifié
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-04)
 - **Date** : 2026-05-16
 - **Deciders** : Maxime
+- **Contrôle** : non contrôlé
 - **Lié à** : [ADR 0003](0003-tokens-opaques-mobile.md) (tokens opaques mobile)
 
 ## Context
@@ -84,3 +85,7 @@ L'alternative "refus explicite avec UI" a été rejetée pour la friction qu'ell
 - **Apple Sign-In** : ajouté quand le compte Apple Developer sera pris (automne 2026). L'architecture `oauth_account` accepte déjà `provider='apple'` sans modif. Un nouveau Processor + endpoint suffira.
 - **Unlink** : pas d'endpoint pour délier Google en V1. Si demandé, ajouter `DELETE /auth/oauth/{provider}`.
 - **Microsoft / GitHub / Facebook** : aucun signal d'usage de la cible artisans. Différé sine die.
+
+## Amendements
+
+- 2026-10-04 — Le web n'utilise pas de cookie de session : il stocke un token opaque Bearer et un refresh token dans `localStorage` (`apps/web/src/lib/api.ts`). L'exposition de ce stockage est traitée dans l'[ADR 0026](0026-tokens-web-xss-csp.md).

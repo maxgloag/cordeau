@@ -1,8 +1,9 @@
 # ADR 0019 — Durcissement de la chaîne CI/CD
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-04)
 - **Date** : 2026-05-30
 - **Deciders** : Maxime
+- **Contrôle** : `scripts/check-conventions.sh` (actions épinglées par SHA)
 - **Lié à** : [ADR 0008](0008-trajectoire-hebergement.md) (hébergement Fly.io + Cloudflare), [ADR 0018](0018-documentation-architecture-as-code.md) (enforcement en CI)
 
 ## Context
@@ -86,3 +87,9 @@ Décision touchant secrets, permissions et dépendances externes → section obl
 - **Smoke test post-déploiement + rollback** automatique : à ajouter quand un endpoint `/health` stable sera en place.
 - **Push protection / secret scanning** côté settings du repo : à activer hors-repo (non versionnable), noté comme action manuelle.
 - **Durcissement de `pnpm audit` en bloquant** : une fois le bruit des advisories transitives maîtrisé.
+
+## Amendements
+
+- 2026-10-04 — Le secret scanning et la protection au push, listés comme actions manuelles hors dépôt, ont été activés le 2026-10-04 (réglages du dépôt, hors Git).
+- 2026-10-04 — Un smoke test de l'image de production existe **avant** déploiement (`scripts/smoke-image.sh`, #139) ; un smoke test **après** déploiement avec retour arrière automatique n'existe pas.
+- 2026-10-04 — L'épinglage de toutes les actions par SHA est vérifié par `scripts/check-conventions.sh` (job `ci / format`).

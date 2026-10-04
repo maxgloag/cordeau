@@ -1,8 +1,9 @@
 # ADR 0003 — Tokens opaques (en DB) plutôt que JWT pour l'API mobile
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-04)
 - **Date** : 2026-05-03
 - **Deciders** : Maxime
+- **Contrôle** : non contrôlé
 
 ## Context
 
@@ -40,3 +41,8 @@ Mécanisme :
 
 - JWT sans révocation (trop risqué pour une app mobile avec données client)
 - JWT avec liste de révocation (même complexité que tokens opaques, sans les avantages)
+
+## Amendements
+
+- 2026-10-04 — Le cache Redis de 60 s sur les access tokens n'existe pas : aucune configuration Redis n'est active dans l'API, et aucun cache de tokens n'a été relevé dans la configuration.
+- 2026-10-04 — Forme réelle du token : un `selector` (clair, indexé) et un `verifier` (partie secrète) ; seul le hash bcrypt du `verifier` est stocké (`apps/api/src/Entity/AuthToken.php`).

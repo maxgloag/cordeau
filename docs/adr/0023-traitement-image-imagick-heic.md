@@ -1,8 +1,9 @@
 # ADR 0023 — Traitement d'images serveur via Imagick (HEIC) pour les vignettes
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-04)
 - **Date** : 2026-06-14
 - **Deciders** : Maxime
+- **Contrôle** : `apps/api/docker/imagemagick-policy.xml`, `apps/api/tests/Integration/Messenger/GenerateThumbnailHandlerTest.php`
 - **Lié à** : [#81](https://github.com/maxgloag/cordeau/issues/81), [ADR 0010](0010-crud-leger-pattern-reference.md) (Photo = CRUD léger), [ADR 0019](0019-durcissement-ci-cd.md) (la CI doit attraper la régression)
 
 ## Context
@@ -60,3 +61,8 @@ Alternatives écartées :
 - Traitement **asynchrone** dans un worker Messenger isolé (pas dans le cycle requête), sur des objets déjà validés à l'upload (mime/taille). Aucun nouveau secret manipulé.
 
 **Lien CI.** Le job `api` exécutera le handler via un test d'intégration (fixture JPEG, plus HEIC si delegate présent) — c'est le layer qui aurait dû attraper l'absence d'extension image en prod et l'échec HEIC (cf [ADR 0019](0019-durcissement-ci-cd.md)).
+
+## Amendements
+
+- 2026-10-04 — Jusqu'au 2026-10-04, aucun process n'exécutait `messenger:consume` en production : les vignettes n'étaient pas générées et le « traitement asynchrone dans un worker Messenger » de cet ADR n'était pas en place. Corrigé par le worker de l'[ADR 0029](0029-worker-messenger-prod.md).
+- 2026-10-04 — Le test d'intégration annoncé dans « Lien CI » n'existait pas ; `GenerateThumbnailHandlerTest` (créé le 2026-10-04) couvre la génération avec une fixture JPEG.

@@ -3,6 +3,7 @@
 - **Status** : Accepted
 - **Date** : 2026-05-04
 - **Deciders** : Maxime
+- **Contrôle** : `apps/web/vitest.config.ts`
 - **Supersedes** : choix initial implicite « Vitest + happy-dom » mentionné dans le plan Phase 0
 
 ## Context

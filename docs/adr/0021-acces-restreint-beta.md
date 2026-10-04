@@ -3,6 +3,7 @@
 - **Status** : Accepted
 - **Date** : 2026-06-01
 - **Deciders** : Maxime
+- **Contrôle** : `apps/api/tests/Integration/Api/Auth/OAuth/GoogleExchangeTest.php`, `apps/api/tests/Integration/Api/Auth/OAuth/GoogleCallbackTest.php`, `apps/api/tests/Unit/Auth/UseCase/AuthentifierViaGoogleUseCaseTest.php`
 - **Lié à** : [ADR 0013](0013-oauth-google-auto-link.md) (OAuth Google auto-link), [ADR 0003](0003-tokens-opaques-mobile.md) (tokens opaques mobile)
 
 ## Context
