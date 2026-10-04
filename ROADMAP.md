@@ -177,19 +177,16 @@ Bucket Cloudflare R2, endpoints Symfony pour pre-signed URLs, upload direct depu
 
 ## Phase 9 — Bêta payante V1 (en parallèle dès Phase 6)
 
-**Validation du critère** acté en [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md). Cette phase démarre en parallèle de Phase 6 (recrutement testeurs, landing, juridique) et culmine en septembre 2026 par l'onboarding effectif.
+**Validation du critère** décidée dans l'[ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md) ; le détail (critères chiffrés, tarification, budget juridique, recrutement) est hors du dépôt public, sur Notion. Cette phase démarre en parallèle de Phase 6 (testeurs, landing, juridique) et culmine en septembre 2026 par l'onboarding effectif.
 
 ### Sous-étapes
 
-- **9.1 Landing + waitlist** (2-3 j) : page Next.js séparée, formulaire d'attente, positionnement « carnet de chantier » (pas « secrétaire vocal », pas d'IA mentionnée — cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)).
-- **9.2 Juridique** (~1-2 sem) : CGU / CGV / DPA chez avocat (~1.5-2.5 k€), clauses spécifiques non-conformité PDP, mention assurance pro.
-- **9.3 Pricing acté** : freemium (tier gratuit limité 1-2 chantiers actifs, photos limitées, pas de logo personnalisé) + abonnement 20-30 €/mois HT (acté avant ouverture bêta payante — vision Notion avril).
-- **9.4 Recrutement** (~2-4 sem en // des phases précédentes) : 5 artisans bêta dont **au moins 2 hors réseau bigouden direct** (mitigation faux positif politesse, cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)). Réseau bigouden + Toulouse + appel ouvert via réseau pro.
+- **9.1 Landing + waitlist** (2-3 j) : page Next.js séparée, formulaire d'attente, sans promesse d'IA (cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)).
+- **9.2 Juridique** (~1-2 sem) : CGU / CGV / DPA chez avocat, clauses spécifiques non-conformité PDP, mention assurance pro.
+- **9.3 Tarification** : définie hors du dépôt (Notion), actée avant l'ouverture de la bêta payante.
+- **9.4 Recrutement** (~2-4 sem en // des phases précédentes) : testeurs bêta, détail du recrutement sur Notion.
 - **9.5 Onboarding manuel** (1 par 1 en visio) puis 3-4 semaines d'usage réel.
-- **9.6 Évaluation critère** : interviews verbatim + observation terrain. Conditions cumulatives :
-  - **3/5** déclarent gagner du temps **en saisie manuelle**
-  - **2/5** acceptent abonnement payant symbolique (10-15 €/mois minimum)
-  - Pas de feedback récurrent « la magie LLM aurait sauvé ce truc »
+- **9.6 Évaluation du critère** : interviews et observation terrain ; conditions chiffrées sur Notion.
 
 **Critère de sortie** : si critère levé → V1.2 priorisée (magie LLM). Sinon → rétro avant V1.1, le socle est revu.
 
@@ -200,7 +197,7 @@ Bucket Cloudflare R2, endpoints Symfony pour pre-signed URLs, upload direct depu
 À détailler en fin de Phase 9 selon le retour bêta.
 
 - **V1.1 — UX fluidifiée** (~2-3 sem) : templates de tâches récurrentes, raccourcis (réutiliser dernier matériau), Whisper local pour transcription brute offline (sans LLM structurant, cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)), rappels locaux enrichis. Pas de magie LLM.
-- **V1.2 — Magie LLM** (~4-6 sem, conditionnée au critère 9.6) : nouvel ADR sur stack LLM (Whisper API vs local, Claude vs OpenAI, schémas structurés). Structuration vocale, récap auto journée, descriptifs générés. Chrono auto géofencé. Premier coût variable LLM 5-10 €/mois/utilisateur (intégré au pricing).
+- **V1.2 — Magie LLM** (~4-6 sem, conditionnée au critère 9.6) : nouvel ADR sur stack LLM (Whisper API vs local, Claude vs OpenAI, schémas structurés). Structuration vocale, récap auto journée, descriptifs générés. Chrono auto géofencé. Premier coût variable LLM par utilisateur (à intégrer à la tarification).
 - **V1.3 — Intelligence personnelle** (~3-4 sem) : planning kanban, vue calendrier, stats personnelles, détection chantiers à risque (depuis historique), stock van + liste de courses.
 - **V2** : AR comme `Source: AR` sur entité `Mesure` existante (pas de refacto), client dans l'expérience (signature, portail), partenariat / intégration PDP (Pennylane, Sellsy, ou Chorus Pro direct), catalogue produits visualisable AR (partenariats fabricants).
 
