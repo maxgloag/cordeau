@@ -1,0 +1,61 @@
+# Workflow agentique — détails
+
+> Chargé à la demande. Le [CLAUDE.md](../CLAUDE.md) racine garde les règles qui comptent à chaque session et renvoie ici pour le détail. Contenu déplacé tel quel depuis le CLAUDE.md racine (#151).
+
+## Surveillance CI — détails
+
+Le hook `.claude/settings.json` + [scripts/ci-watch.sh](../scripts/ci-watch.sh) avec `asyncRewake` **ne se déclenche pas** dans la version Claude Code actuelle (testé 2026-05-14, aucun log écrit après push ; aucun réveil observé sur une dizaine de pushs le 2026-10-04). Le script reste utile en CLI manuel.
+
+**Avec worktrees** : quand on travaille dans un worktree (cf `superpowers:using-git-worktrees`), le `gh run list --branch <branch>` doit refléter la branche **du worktree actif**, pas celle du repo principal. Le `gh run watch` lancé en `run_in_background` est local au worktree courant ; la notification de fin remonte dans la session qui l'a lancé.
+
+## Protocole de démarrage de phase
+
+À dérouler **dans l'ordre** au début de chaque nouvelle phase de [ROADMAP.md](../ROADMAP.md). Aucune ligne de code métier tant que les étapes 1 à 5 ne sont pas faites.
+
+1. **Charger le contexte** : `CLAUDE.md` racine + `apps/*/CLAUDE.md` concernés, section de la phase dans `ROADMAP.md`, ADRs liés, memories Serena (`project_overview`, `architecture`, `conventions`) et auto-memories pertinentes
+2. **Explorer le verticale précédent** comme modèle de référence (Serena `get_symbols_overview` / `list_dir`, pas Grep+Read exhaustif)
+3. **Rédiger un plan** dans `~/.claude/plans/` : sous-étapes, fichiers à créer/modifier (chemins précis), patterns à réutiliser, tests prévus, critères de done, estimation par sous-étape, vérification end-to-end, et **mesure de vélocité attendue** vs phase précédente. Ce plan est macro phase-level ; en cours de phase, chaque story non triviale (> 3 étapes) déclenche en plus un plan story-level via `superpowers:writing-plans` (cf section [Automatisation skills](../CLAUDE.md#automatisation-skills))
+4. **Trancher les décisions structurantes ouvertes** avec l'utilisateur (`AskUserQuestion`) — modélisation de domaine, choix de libs, frontières de contexte
+5. **Rédiger les ADRs** correspondants dans `docs/adr/NNNN-titre.md` et mettre à jour [docs/adr/README.md](adr/README.md) — toujours **avant** le code
+6. **Créer la milestone GitHub** de la phase + **une issue par sous-étape** (templates existants), liées à la milestone
+7. **Une branche par sous-étape** : `feat/<n>-<slug>`, squash merge sur `main` après PR + CI verte
+8. **En cours de phase** : à chaque sous-étape, surveiller la duplication révélée ; refactor dès qu'un pattern devient évident, pas à la fin
+9. **Fin de phase** : mise à jour de `ROADMAP.md` (✅), `CLAUDE.md` racine, memories Serena (`architecture`, `conventions`), auto-memories pertinentes. Lancer `./scripts/check-docs.sh` (CI : job `format`) et corriger les écarts entre la doc et le code. Vérifier le critère de sortie de la phase **avant** de basculer sur la suivante
+
+Si un signal de vélocité ou d'archi se dégrade (cf critère de sortie de chaque phase), **stop** et rétro avant de continuer.
+
+## Skills superpowers (harness Claude Code)
+
+Les skills `superpowers:*` sont chargés au démarrage de session via le harness, donc disponibles sans installation côté projet. Ceux explicitement attendus dans le workflow Cordeau :
+
+- **Avant toute nouvelle feature ou composant** (spec floue, design ouvert, choix d'archi à explorer) → `superpowers:brainstorming` avant de planifier ou coder. Sauf si la spec Notion est déjà validée et fermée
+- **Plan macro par phase + plan par story non triviale** → `superpowers:writing-plans`. Le plan macro phase-level est couvert par l'étape 3 du [protocole de démarrage de phase](../CLAUDE.md#protocole-de-démarrage-de-phase). En plus, pour chaque story dont l'implémentation dépasse 3 étapes non triviales, rédiger un plan story-level dans `~/.claude/plans/<slug>.md` (hors-repo, éphémère, non versionné). Frontière avec l'issue GitHub : l'issue (template `feature.yml`) capture le **quoi** (critères d'acceptation, contexte produit, références) ; le plan capture le **comment** (séquence d'étapes ordonnées, fichiers exacts, tests par étape, critère de done par étape, vérification end-to-end). En deçà de 3 étapes, le template issue suffit.
+- **Investigations indépendantes en parallèle** → `superpowers:dispatching-parallel-agents` dès que 2+ explorations peuvent se mener sans état partagé. Cas d'usage Cordeau : auditer N bounded contexts en parallèle au moment d'un refactor, vérifier une convention sur N fichiers, charger plusieurs ADRs + memories en début de phase, investiguer cause racine sur deux layers techniques distincts en debug. Anti-patterns : ne pas dispatcher pour de l'implémentation (uniquement lecture/exploration), ne pas dispatcher des tâches dépendantes — si l'output d'un agent conditionne le prompt d'un autre, c'est séquentiel
+- **Spike exploratoire ou implémentation longue à isoler** → `superpowers:using-git-worktrees`. Trigger : on veut tester une approche sans polluer la branche en cours, ou comparer deux approches sur la même story. **Préférer l'outil natif `EnterWorktree`** (cleanup auto via `ExitWorktree`) à `git worktree add` manuel. Anti-patterns : pas de worktree pour un fix court (< 30 min, surcharge cognitive supérieure au gain) ; pas de worktrees orphelins (cleanup systématique via `ExitWorktree` en fin de spike). Implication CI watch : un worktree = une branche distincte = un `gh run watch` séparé (cf section [Surveillance CI automatique](../CLAUDE.md#surveillance-ci-automatique))
+- **Avant d'écrire l'implémentation d'une story** → `superpowers:test-driven-development` (red → green → refactor, cohérent avec la règle "Pas de feature shippée sans test sur le domaine")
+- **Sur tout bug, test qui échoue, ou comportement inattendu** → `superpowers:systematic-debugging` avant de proposer un fix. Si le bug sort du dev local, enchaîner avec l'audit système de test (cf [Bug-fix : protocole double-fix](../CLAUDE.md#bug-fix--protocole-double-fix))
+- **Avant de dire "c'est fait" / d'ouvrir une PR** → `superpowers:verification-before-completion` (lancer les commandes de vérification — tsc, tests, lint — et confirmer le output, pas se contenter d'asserter)
+- **À réception d'une code review** (PR commentée par /review, /ultrareview, ou humain) → `superpowers:receiving-code-review` avant d'implémenter les suggestions (vérifier la rigueur technique avant l'agrément performatif)
+
+Si une de ces règles s'applique mais que tu juges qu'elle ne sert à rien dans le cas précis, l'expliquer plutôt que de l'appliquer aveuglément.
+
+## Retours d'expérience
+
+Le workflow n'est pas figé : quand une friction ou une erreur révèle un défaut de process, **la règle correspondante est ajoutée ici dans la même PR (et résumée en une ligne dans le CLAUDE.md racine si elle doit s'appliquer à chaque session)** (ou, si elle demande une décision, une issue + un ADR). Pas de leçon qui reste seulement dans une conversation. Entrées datées, les plus récentes en bas.
+
+**2026-10-03 — nuit d'autonomie (#123, #153, #155, #156, #78)**
+
+- **Claude ne fusionne pas ses propres PR** : le classifieur du mode auto bloque ce merge, même après revue locale. Le circuit voulu est PR → CI + revue `PR Review` → auto-merge ([ADR 0025](adr/0025-reviewer-claude-auto-merge.md)). Ne jamais contourner un refus du classifieur par un autre outil ; le signaler et continuer le reste.
+- **Premier maillon d'une chaîne de confiance** (workflow du reviewer, `CODEOWNERS`, `.claude/`) : toujours `needs-human`, et fusionné par le fondateur. Une PR ne doit jamais pouvoir réécrire son propre contrôle.
+- **PR Dependabot** : le reviewer ne les relit pas (pas de secrets Dependabot). Pratique : reprendre leur contenu dans une PR du propriétaire (qui passe par le reviewer), puis fermer les PR Dependabot avec un lien. Ne pas fermer avant que la PR de reprise soit fusionnée.
+- **Mise à jour de dépendances** : `pnpm update -r` réécrit les manifestes de façon non voulue (épingle `react` à la valeur d'un override, sort des plages Expo). Relire le diff des `package.json`, lancer `expo install --check` côté mobile et comparer au résultat de `main`, vérifier `pnpm audit`, `type-check`, `lint`, les tests et `expo export`. Une nouvelle version de Prettier peut reformater des fichiers existants : les reformater dans la même PR.
+- **Montée de version d'un outil de contrat** (API Platform, openapi-typescript) : le contrat OpenAPI committé et les types partagés sont contrôlés par la CI (#154). Regénérer avec `pnpm --filter @cordeau/shared generate`, jamais à la main.
+- **Contrainte de framework hors du repo** : une restriction posée par un plugin local (Symfony Flex) n'existe pas pour Dependabot. Toute contrainte qui compte doit vivre dans le manifeste (`conflict`) **et** avoir un garde CI (#158).
+- **Commits** : ne jamais masquer la sortie des hooks (`> /dev/null`) : un échec de commitlint ou de Prettier est passé inaperçu. Types autorisés par commitlint : `feat, fix, chore, docs, refactor, test, perf, ci, build, revert` (pas `style`).
+- **`/simplify` avant `gh pr create`** : peut être omis quand le diff ne contient que de la configuration, des lockfiles, de la documentation ou du code généré. Le dire explicitement dans la description de la PR.
+- **Protection `strict` de `main`** : plusieurs PR prêtes en même temps obligent à les mettre à jour une par une, et chaque mise à jour relance une revue (quota Pro). Suivi : #163.
+- **Sessions autonomes** : tester une commande Bash triviale en premier. Si tout Bash est bloqué, ne pas boucler : écrire le plan de reprise dans `~/.claude/plans/` et le signaler.
+- **Une affirmation sur la prod se vérifie sur la prod** : l'ADR 0027 a affirmé que `SYMFONY_TRUSTED_PROXIES` n'était pas configuré, parce qu'il n'était ni dans `.env` ni dans `fly.toml` ; il l'était, comme secret Fly. Avant d'écrire qu'une configuration d'exécution est absente, la lire sur la prod (`flyctl secrets list`, `flyctl status`, `flyctl logs`) ; si l'accès manque (`flyctl auth whoami`), le dire au lieu de supposer. Après un déploiement qui corrige une faille, vérifier les endpoints publics (`/health`, 401 sans jeton) et l'état de la release.
+- **Hook Stop de vérification** (#137) : [scripts/stop-verify.sh](../scripts/stop-verify.sh), branché dans `.claude/settings.json`, bloque la fin de tour (code 2) si PHPStan (fichiers PHP modifiés), `tests/Unit`, les tests d'intégration modifiés ou `tsc` + tests liés (web, mobile) sont rouges. Mesuré : ~0,4 s sans changement, ~1,5 s sur du PHP, ~3,5 s sur du web. Les tests d'intégration non modifiés restent à la CI (ils exigent Postgres). Il compare à l'ancêtre commun avec `origin/main` : un tour qui commite avant de s'arrêter reste contrôlé. Après un blocage, la correction est revérifiée ; au bout de 3 blocages consécutifs dans la même session, la fin de tour est libérée. `CORDEAU_SKIP_STOP_VERIFY=1` désactive le hook ponctuellement.
+- **Un transport de test `in-memory` masque l'absence de consommateur** (#124, ADR 0029) : en prod, `messenger:consume` ne tournait nulle part, donc aucune vignette photo n'était générée et aucun objet R2 supprimé, sans qu'un test ne le voie. Tout message routé vers `async` exige un process `worker` dans `apps/api/fly.toml` ; `ConsommateurMessengerTest` échoue sinon. Un nouveau message asynchrone se teste de bout en bout : émission (transport `in-memory`) et handler.
+- **Smoke test de l'image de prod** (#139) : [scripts/smoke-image.sh](../scripts/smoke-image.sh), job CI `ci / image` (Docker requis en local ; 1 min 10 s mesuré en local, build compris ; durée en CI à relever sur les premiers runs). Il construit l'image puis rejoue les commandes **lues dans `apps/api/fly.toml`** (release, process `app`, process `worker`) contre un Postgres jetable : extensions PHP, `composer check-platform-reqs`, `/health` à 200, `/api/chantiers` à 401, handlers Messenger câblés, worker qui consomme. Une extension utilisée par le code (ex. `bcmath`) mais absente du `Dockerfile` fait échouer le job : l'ajouter au `install-php-extensions`. Toute modification de `fly.toml` ou du `Dockerfile` se vérifie en local avec ce script avant la PR.
