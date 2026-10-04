@@ -9,7 +9,14 @@ primary_region = "cdg"  # Paris — latence < 30ms depuis France
   dockerfile = "Dockerfile"
 
 [deploy]
-  release_command = "php bin/console doctrine:migrations:migrate --no-interaction"
+  # Migrations, puis création de la table du transport Messenger (idempotent) : cf ADR 0029
+  release_command = "sh -c 'php bin/console doctrine:migrations:migrate --no-interaction && php bin/console messenger:setup-transports --no-interaction'"
+
+# Une fois [processes] présent, Fly le traite comme la liste complète : `app` y figure explicitement.
+# `app` reproduit le CMD de l'image FrankenPHP ; `worker` consomme la file Messenger (cf ADR 0029).
+[processes]
+  app = "--config /etc/caddy/Caddyfile --adapter caddyfile"
+  worker = "php bin/console messenger:consume async --time-limit=3600 --memory-limit=400M -vv"
 
 [env]
   APP_ENV = "prod"
@@ -40,3 +47,14 @@ primary_region = "cdg"  # Paris — latence < 30ms depuis France
   memory = "256mb"
   cpu_kind = "shared"
   cpus = 1
+
+# --time-limit fait sortir le worker proprement (code 0) : la politique par défaut
+# (on-failure) le laisserait arrêté. `always` le relance.
+[[restart]]
+  policy = "always"
+  processes = ["worker"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  processes = ["worker"]
