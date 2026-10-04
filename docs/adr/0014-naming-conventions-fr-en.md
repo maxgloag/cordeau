@@ -3,6 +3,7 @@
 - **Status** : Accepted
 - **Date** : 2026-05-22
 - **Deciders** : Maxime
+- **Contrôle** : `scripts/check-conventions.sh` (identifiants non accentués)
 - **Lié à** : [ADR 0002](0002-architecture-hexagonale.md), [docs/THESAURUS.md](../THESAURUS.md)
 
 ## Context

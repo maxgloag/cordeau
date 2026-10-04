@@ -3,6 +3,7 @@
 - **Status** : Accepted (choix du fondateur le 2026-10-04, parmi trois options)
 - **Date** : 2026-10-04
 - **Deciders** : Maxime
+- **Contrôle** : `apps/api/tests/Unit/Infrastructure/Messenger/ConsommateurMessengerTest.php`, `scripts/smoke-image.sh`
 - **Lié à** : issue #124, [ADR 0023](0023-traitement-image-imagick-heic.md) (vignettes), [ADR 0004](0004-cloudflare-r2-stockage.md) (stockage R2)
 
 ## Context

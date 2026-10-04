@@ -1,6 +1,6 @@
 # ADR 0022 — Hoisting pnpm pour le toolchain Metro (monorepo)
 
-- **Status** : Accepted
+- **Status** : Informational
 - **Date** : 2026-06-10
 - **Deciders** : Maxime
 - **Lié à** : [ADR 0019](0019-durcissement-ci-cd.md) (le job `mobile` doit attraper les erreurs de bundling), `apps/mobile/CLAUDE.md` (stack Expo)
@@ -63,3 +63,7 @@ On adopte la configuration officielle Expo pour les monorepos pnpm, plutôt que 
 **Implications sécurité.** La surface **diminue** : on retire un script `postinstall` qui réécrivait du code tiers dans `node_modules` (vecteur d'exécution de code à l'install). Aucune nouvelle dépendance externe, aucun secret ni donnée personnelle touchés.
 
 **Lien CI.** Le job `mobile` exécute déjà un vrai bundling check (`expo export` iOS + Android, ajouté par l'[ADR 0019](0019-durcissement-ci-cd.md)). Ce garde-fou avait été **neutralisé** par le `postinstall` patch (commit `5aff929`), qui s'appliquait aussi en CI et masquait le toolchain cassé. La suppression du patch lui rend sa capacité de détection ; la correction par hoisting est désormais validée par ce même check.
+
+## Amendements
+
+- 2026-10-04 — Statut `Informational` : la configuration (`.npmrc`) est la vérité ; son motif est repris en commentaire dans ce fichier.

@@ -3,6 +3,7 @@
 - **Status** : Accepted (feu vert du fondateur le 2026-10-03 ; les actions manuelles ci-dessous restent à faire)
 - **Date** : 2026-10-03
 - **Deciders** : Maxime
+- **Contrôle** : `apps/api/tests/Integration/Observability/SentryConfigurationTest.php`, `apps/api/tests/Unit/Infrastructure/Observability/SentryBeforeSendTest.php`
 - **Lié à** : issue #175, [ADR 0019](0019-durcissement-ci-cd.md) (dépendances), [ADR 0027](0027-rate-limiting-login.md)
 
 ## Context

@@ -3,6 +3,7 @@
 - **Status** : Accepted
 - **Date** : 2026-10-03
 - **Deciders** : Maxime
+- **Contrôle** : `apps/api/tests/Integration/Api/Auth/LoginThrottlingTest.php`
 - **Lié à** : [ADR 0021](0021-acces-restreint-beta.md) (« Décisions différées »), [ADR 0003](0003-tokens-opaques-mobile.md), issue #63
 
 ## Context

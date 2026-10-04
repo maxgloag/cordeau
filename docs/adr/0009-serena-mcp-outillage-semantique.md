@@ -1,6 +1,6 @@
 # 0009 — Adoption de Serena (MCP) pour l'outillage sémantique
 
-- **Status** : Accepted
+- **Status** : Informational
 - **Date** : 2026-05-14
 - **Deciders** : Maxime
 
@@ -62,3 +62,7 @@ Les memories Serena (`.serena/memories/`) sont versionnées : elles font partie 
 
 - Les Language Servers peuvent être à la traîne sur les versions très récentes (PHP 8.5, TS 5.x). À surveiller, fallback grep si l'indexation devient bruyante
 - Les memories Serena peuvent diverger du code si pas mises à jour. Convention : mettre à jour les memories au même moment que `CLAUDE.md` à chaque fin de phase
+
+## Amendements
+
+- 2026-10-04 — Statut `Informational` : outillage d'agent, sans décision applicative à faire respecter.

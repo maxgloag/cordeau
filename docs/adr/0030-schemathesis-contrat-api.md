@@ -3,6 +3,7 @@
 - **Status** : Accepted (choix du fondateur le 2026-10-04 : périmètre « Schemathesis seul », en observation d'abord)
 - **Date** : 2026-10-04
 - **Deciders** : Maxime
+- **Contrôle** : `scripts/smoke-image.sh`
 - **Lié à** : issue #131, [ADR 0029](0029-worker-messenger-prod.md) (smoke test de l'image, #139), [ADR 0019](0019-durcissement-ci-cd.md) (dépendances)
 
 ## Context

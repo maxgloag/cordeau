@@ -3,6 +3,7 @@
 - **Status** : Accepted
 - **Date** : 2026-05-03
 - **Deciders** : Maxime
+- **Contrôle** : `apps/api/deptrac.yaml`
 
 ## Context
 

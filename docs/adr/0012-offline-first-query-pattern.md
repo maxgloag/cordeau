@@ -1,8 +1,9 @@
 # ADR 0012 — Pattern offline-first : queryFn hybride SQLite/API + useOfflineMutation
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-04)
 - **Date** : 2026-05-15
 - **Deciders** : Maxime
+- **Contrôle** : non contrôlé
 - **Lié à** : [ADR 0005](0005-offline-first-sqlite-drizzle.md)
 
 ## Context
@@ -156,3 +157,8 @@ Conséquence côté mobile : `useOfflineMutation` injecte automatiquement `{ ...
 - Résolution de conflits multi-utilisateurs → Phase 8+
 - Sync bidirectionnelle "push serveur → mobile" (WebSocket / SSE) → Phase 8+
 - `BackgroundFetch` iOS → si les artisans remontent le problème de données obsolètes après une longue nuit sans ouvrir l'app
+
+## Amendements
+
+- 2026-10-04 — Le polling du worker de synchronisation est de 5 s (`POLL_INTERVAL_MS`, `apps/mobile/hooks/useSyncWorker.ts`), comme dans la seconde section de cet ADR ; les « 30 s » de la première section sont erronés.
+- 2026-10-04 — Le code de `queryFnHybride` ci-dessus est obsolète : l'implémentation (`apps/mobile/lib/sync.ts`) met le cache à jour par `setQueryData` et n'appelle pas `invalidateQueries` dans une queryFn (règle de `apps/mobile/CLAUDE.md`).

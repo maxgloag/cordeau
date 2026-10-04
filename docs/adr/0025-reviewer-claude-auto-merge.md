@@ -3,6 +3,7 @@
 - **Status** : Accepted
 - **Date** : 2026-10-02
 - **Deciders** : Maxime
+- **Contrôle** : `.github/workflows/pr-review.yml`
 - **Lié à** : [ADR 0019](0019-durcissement-ci-cd.md) (durcissement CI/CD), issue #156
 
 ## Context
