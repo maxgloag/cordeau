@@ -65,11 +65,19 @@ Squash merge sur `main`. `main` est protégée : PR obligatoire, CI verte requis
 
 ### ADRs
 
-Toute décision structurante (choix de lib, pattern d'archi, migration) → un ADR dans `docs/adr/`. Format : `NNNN-titre-court.md` avec `Status`, `Date`, `Deciders`, `Context`, `Decision`, `Consequences`. L'index est dans [docs/adr/README.md](docs/adr/README.md).
+Un ADR consigne une décision **coûteuse à défaire** ou qui engage le fondateur, dans `docs/adr/`. Format : `NNNN-titre-court.md` avec `Status`, `Date`, `Deciders`, `Context`, `Decision`, `Consequences`. L'index est dans [docs/adr/README.md](docs/adr/README.md).
 
-**Avant** d'introduire une décision non triviale, écrire l'ADR. Pas après.
+**ADR obligatoire, avant le code et non après**, quand la décision :
 
-Section **Implications sécurité** optionnelle, **obligatoire** si la décision touche : auth/sessions/tokens, permissions/RBAC, secrets, données personnelles, stockage de fichiers, données financières, ajout d'une dépendance externe. Couvrir au minimum : surface d'attaque ajoutée, secrets manipulés, données personnelles touchées (et leur base légale RGPD), points de fuite potentiels.
+- est coûteuse à défaire : modèle de données, topologie d'infra, auth et tokens, argent ;
+- ajoute un service externe, un secret, une dépendance qui traite des données d'auth ou personnelles, ou un flux de données hors de nos systèmes ;
+- oblige le fondateur à arbitrer entre des options aux compromis réels.
+
+**Pas d'ADR** pour : appliquer un ADR existant ; de l'outillage de dev ou de CI facile à retirer (un outil en observation, par exemple) ; une correction de conformité. Une section « Décision » dans la description de la PR suffit : quoi, pourquoi, comment revenir en arrière.
+
+**Préférer un contrôle automatique à un texte** (test, job CI, script) dès qu'une règle peut échouer en machine : un contrôle bloque, un document se lit ou non.
+
+Section **Implications sécurité** de l'ADR **obligatoire** si la décision touche : auth/sessions/tokens, permissions/RBAC, secrets, données personnelles, stockage de fichiers, données financières, service ou dépendance externe. Couvrir au minimum : surface d'attaque ajoutée, secrets manipulés, données personnelles touchées (et leur base légale RGPD), points de fuite potentiels. Un outillage de CI sans ADR garde cette analyse (surface, secrets, version épinglée) dans la description de la PR.
 
 ### Tests
 
@@ -127,7 +135,7 @@ sleep 3 && gh run list --branch <branch> --workflow CI --limit 1 --json database
 2. Explorer le verticale précédent comme modèle
 3. Rédiger le plan macro dans `~/.claude/plans/`
 4. Trancher les décisions structurantes avec l'utilisateur (`AskUserQuestion`)
-5. Rédiger les ADRs, avant le code
+5. Rédiger les ADRs requis (règle ci-dessus), avant le code
 6. Créer la milestone et une issue par sous-étape
 7. Une branche par sous-étape, squash merge après PR + CI verte
 8. En cours de phase : refactor dès qu'un pattern devient évident
@@ -162,7 +170,7 @@ Si une de ces règles s'applique mais que tu juges qu'elle ne sert à rien dans 
 ## Aide-mémoire pour Claude Code
 
 - Avant de proposer une lib externe : vérifier si elle est déjà dans le stack acté (cf ADRs)
-- Avant de proposer une décision structurante : proposer un ADR d'abord
+- Avant de proposer une décision qui relève de la règle des ADR : proposer l'ADR d'abord ; sinon, la décider dans la PR
 - Pour explorer le projet : **Serena (MCP)** pour la navigation sémantique (find_symbol, find_referencing_symbols, get_symbols_overview, rename_symbol) — voir [ADR 0009](docs/adr/0009-serena-mcp-outillage-semantique.md). Tomber sur grep/Read uniquement pour la recherche en texte plein (commentaires, strings, docs) ou l'édition de petits blocs. Pour les versions de libs externes, utiliser le serveur MCP Context7
 - Serena tient ses propres memories versionnées dans `.serena/memories/` (project_overview, architecture, conventions). À lire en début de tâche complexe, et à mettre à jour en fin de phase au même rythme que `CLAUDE.md`
 - Quand l'utilisateur référence une page Notion, utiliser le serveur MCP Notion (workspace Cordeau uniquement)
