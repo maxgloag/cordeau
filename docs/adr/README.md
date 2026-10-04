@@ -9,9 +9,10 @@ Chaque ADR est un fichier markdown nommé `NNNN-titre-court.md`. Structure type 
 ```markdown
 # NNNN — Titre
 
-- **Status** : Proposed | Accepted | Deprecated | Superseded by ADR-XXXX
+- **Status** : Proposed | Accepted | Accepted (amendé le YYYY-MM-DD) | Superseded by ADR-XXXX | Informational | Rejected
 - **Date** : YYYY-MM-DD
 - **Deciders** : Maxime
+- **Contrôle** : <fichier, test ou job CI qui applique la décision> | non contrôlé
 
 ## Context
 
@@ -23,17 +24,35 @@ La décision retenue, énoncée clairement.
 
 ## Consequences
 
-Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
+Bénéfices attendus, coûts, trade-offs, risques résiduels.
+
+## Amendements
+
+- YYYY-MM-DD — ce qui n'est plus vrai, et ce qui l'est aujourd'hui.
 ```
+
+La ligne **Contrôle** et la section **Amendements** sont facultatives.
+
+### Statuts
+
+- **Proposed** : en attente de la décision du fondateur.
+- **Accepted** : décidé et appliqué.
+- **Accepted (amendé le …)** : décidé ; une partie de l'énoncé a dérivé et une note datée en bas le dit.
+- **Superseded by ADR-XXXX** : la décision elle-même a changé ; l'ADR qui la remplace est cité.
+- **Informational** : trace d'outillage ou de diagnostic, sans décision à faire respecter ; la configuration est la vérité.
+- **Rejected** : examiné et écarté, conservé pour mémoire.
+
+### Un ADR se corrige sans s'effacer
+
+L'énoncé d'origine reste, daté. Quand une affirmation cesse d'être vraie, on ajoute une ligne à **Amendements** et on passe le statut en `Accepted (amendé le …)`. Quand c'est la décision qui change, on écrit un nouvel ADR et l'ancien passe en `Superseded`.
+
+### Un contrôle vaut mieux qu'un texte
+
+Si la décision peut être vérifiée par une machine (test, job CI, Deptrac, script), l'ADR cite ce contrôle sur la ligne **Contrôle**, et `scripts/check-docs.sh` vérifie que le fichier cité existe. Sans contrôle, l'ADR le dit (`non contrôlé`) : le lecteur sait qu'il lit une intention.
 
 ## Quand écrire un ADR
 
-- Choix de framework, lib structurante, ou pattern d'architecture
-- Migration de data store, changement de modèle de données critique
-- Décision de sécurité (auth, gestion de clés, RBAC)
-- Trade-off non évident qui mérite d'être expliqué à un futur soi
-
-**Avant** d'introduire la décision dans le code, pas après. L'ADR force la clarté.
+La règle vit dans le [CLAUDE.md](../../CLAUDE.md#adrs) (décision coûteuse à défaire, service ou secret externe, arbitrage du fondateur) ; elle n'est pas recopiée ici.
 
 ## Index
 
