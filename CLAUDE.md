@@ -79,7 +79,7 @@ Un ADR consigne une décision **coûteuse à défaire** ou qui engage le fondate
 
 **Pas d'ADR** pour : appliquer un ADR existant ; de l'outillage de dev ou de CI facile à retirer (un outil en observation, par exemple) ; une correction de conformité. Une section « Décision » dans la description de la PR suffit : quoi, pourquoi, comment revenir en arrière.
 
-**Préférer un contrôle automatique à un texte** (test, job CI, script) dès qu'une règle peut échouer en machine : un contrôle bloque, un document se lit ou non.
+**Préférer un contrôle automatique à un texte** (test, job CI, script) dès qu'une règle peut échouer en machine : un contrôle bloque, un document se lit ou non. Un ADR cite le contrôle qui l'applique (ligne `Contrôle`) ou dit `non contrôlé` ; s'il dérive, on l'amende par une note datée, on ne l'efface pas ([docs/adr/README.md](docs/adr/README.md)).
 
 Section **Implications sécurité** de l'ADR **obligatoire** si la décision touche : auth/sessions/tokens, permissions/RBAC, secrets, données personnelles, stockage de fichiers, données financières, service ou dépendance externe. Couvrir au minimum : surface d'attaque ajoutée, secrets manipulés, données personnelles touchées (et leur base légale RGPD), points de fuite potentiels. Un outillage de CI sans ADR garde cette analyse (surface, secrets, version épinglée) dans la description de la PR.
 
