@@ -165,6 +165,14 @@ else
   else
     fail "process app : une erreur de validation répond $VALIDATION au lieu de 422. Logs : $(docker logs "$APP" 2>&1 | grep -E 'critical|Uncaught' | grep -v 'Full authentication' | tail -2 | cut -c1-300)"
   fi
+  # Un corps JSON invalide doit répondre 400 (#189 : exception_to_status écrasait les valeurs par défaut).
+  MALFORMED=$(curl -s -o /dev/null -w '%{http_code}' -m 20 -X POST "http://127.0.0.1:$PORT/api/clients" \
+    -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"nom":' || true)
+  if [ "$MALFORMED" = "400" ]; then
+    ok "process app : un corps JSON invalide répond 400"
+  else
+    fail "process app : un corps JSON invalide répond $MALFORMED au lieu de 400"
+  fi
 fi
 
 # --- 4. Messenger : handlers câblés et worker qui consomme la file ---

@@ -9,6 +9,7 @@ use App\Tests\Factory\ChantierFactory;
 use App\Tests\Factory\PhotoFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -219,6 +220,48 @@ final class ChantierApiTest extends WebTestCase
         );
 
         self::assertResponseStatusCodeSame(422);
+    }
+
+    /** @return iterable<string, array{array<string, mixed>}> */
+    public static function donneesMetierInvalides(): iterable
+    {
+        yield 'code postal français à 2 chiffres' => [['adresseCodePostal' => '52']];
+        yield 'rue faite d\'espaces' => [['adresseRue' => '   ']];
+        yield 'surface hors bornes' => [['surfaceM2' => 6.51951355523653e+307]];
+    }
+
+    /** @param array<string, mixed> $surcharge */
+    #[Test]
+    #[DataProvider('donneesMetierInvalides')]
+    public function post_avec_donnees_metier_invalides_retourne_422(array $surcharge): void
+    {
+        $client = static::createClient();
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request(
+            'POST',
+            '/api/chantiers',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode($surcharge + ['adresseRue' => '1 rue de la Paix', 'adresseCodePostal' => '75002', 'adresseVille' => 'Paris']) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(422);
+    }
+
+    #[Test]
+    public function post_avec_cle_json_en_syntaxe_de_chemin_retourne_400(): void
+    {
+        $client = static::createClient();
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request(
+            'POST',
+            '/api/chantiers',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: '{"[a": 1}',
+        );
+
+        self::assertResponseStatusCodeSame(400);
     }
 
     #[Test]
