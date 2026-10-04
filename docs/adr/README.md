@@ -63,9 +63,9 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0023](0023-traitement-image-imagick-heic.md)              | Traitement d'images serveur via Imagick (HEIC) pour les vignettes           | Accepted |
 | [0024](0024-affinements-modelisation-lot-tache-phase-6.md) | Affinements de modélisation Lot / Tâche (Phase 6)                           | Accepted |
 | [0025](0025-reviewer-claude-auto-merge.md)                 | Reviewer Claude automatisé et auto-merge des PR                             | Accepted |
-| [0026](0026-tokens-web-xss-csp.md)                         | Exposition XSS des tokens web : CSP d'abord, cookie HttpOnly sous condition | Rejected |
+| [0026](0026-tokens-web-xss-csp.md)                         | Exposition XSS des tokens web : CSP d'abord, cookie HttpOnly sous condition | Proposed |
 | [0027](0027-rate-limiting-login.md)                        | Rate limiting du login : limiteur par compte, appelé depuis le contrôleur   | Accepted |
 | [0028](0028-sentry-api.md)                                 | Remontée des erreurs de l'API vers Sentry, avec filtrage des données        | Accepted |
 | [0029](0029-worker-messenger-prod.md)                      | Un process worker Fly consomme la file Messenger en production              | Accepted |
 | [0030](0030-schemathesis-contrat-api.md)                   | Schemathesis contre l'image de production, en observation                   | Accepted |
-| [0031](0031-invariants-dans-des-vo-meme-en-mode-leger.md)  | Les invariants vivent dans des value objects, y compris en mode léger       | Proposed |
+| [0031](0031-invariants-dans-des-vo-meme-en-mode-leger.md)  | Les invariants vivent dans des value objects, y compris en mode léger       | Rejected |
