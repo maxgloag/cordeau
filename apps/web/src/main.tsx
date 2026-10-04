@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import * as Sentry from "@sentry/react";
+import "./lib/zod-config";
 import { routeTree } from "./routeTree.gen";
 import { initSentry } from "./lib/sentry";
 import "./index.css";

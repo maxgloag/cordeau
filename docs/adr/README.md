@@ -82,7 +82,7 @@ La règle vit dans le [CLAUDE.md](../../CLAUDE.md#adrs) (décision coûteuse à 
 | [0023](0023-traitement-image-imagick-heic.md)              | Traitement d'images serveur via Imagick (HEIC) pour les vignettes           | Accepted      |
 | [0024](0024-affinements-modelisation-lot-tache-phase-6.md) | Affinements de modélisation Lot / Tâche (Phase 6)                           | Accepted      |
 | [0025](0025-reviewer-claude-auto-merge.md)                 | Reviewer Claude automatisé et auto-merge des PR                             | Accepted      |
-| [0026](0026-tokens-web-xss-csp.md)                         | Exposition XSS des tokens web : CSP d'abord, cookie HttpOnly sous condition | Proposed      |
+| [0026](0026-tokens-web-xss-csp.md)                         | Exposition XSS des tokens web : CSP d'abord, cookie HttpOnly sous condition | Accepted      |
 | [0027](0027-rate-limiting-login.md)                        | Rate limiting du login : limiteur par compte, appelé depuis le contrôleur   | Accepted      |
 | [0028](0028-sentry-api.md)                                 | Remontée des erreurs de l'API vers Sentry, avec filtrage des données        | Accepted      |
 | [0029](0029-worker-messenger-prod.md)                      | Un process worker Fly consomme la file Messenger en production              | Accepted      |

@@ -1,8 +1,9 @@
 # ADR 0026 — Exposition XSS des tokens web : CSP d'abord, cookie HttpOnly sous condition de domaine
 
-- **Status** : Proposed (décision du fondateur attendue)
+- **Status** : Accepted (temps 1 appliqué le 2026-10-04 ; temps 2 en attente)
 - **Date** : 2026-10-03
 - **Deciders** : Maxime
+- **Contrôle** : `apps/web/public/_headers`, `apps/web/src/test/en-tetes-securite.test.ts`
 - **Lié à** : [ADR 0003](0003-tokens-opaques-mobile.md) (tokens opaques), [ADR 0013](0013-oauth-google-auto-link.md) (OAuth Google), issue #128, issue #63 (rate limiting login)
 
 ## Context
@@ -61,3 +62,11 @@ Le mobile n'est pas concerné : il utilise le stockage sécurisé de l'OS (ADR 0
 **Négatives / à surveiller** : la CSP demande de maintenir la liste des origines autorisées à chaque ajout de service externe ; le temps 2 dépend d'une décision d'infrastructure (domaine) qui n'est pas encore prise ; tant qu'il n'est pas fait, une dépendance compromise reste capable de voler un refresh token de 30 jours.
 
 **Questions pour le fondateur** : (1) Une CSP ou des en-têtes sont-ils déjà posés dans Cloudflare Pages ? (2) Un domaine propre est-il prévu pour le web et l'API avant la bêta ? (3) Valide-t-on cette décision en deux temps ?
+
+## Amendements
+
+- 2026-10-04 — **Temps 1 appliqué** : `apps/web/public/_headers` pose `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` (appliqués) et une CSP en `Content-Security-Policy-Report-Only` (non bloquante). Validée avec un vrai Chromium sur le build de la page de connexion : 0 violation. Le passage en enforcement reste une décision du fondateur, après observation.
+- 2026-10-04 — **Pas de `report-uri`** : la clé publique du projet Sentry web n'est pas dans le dépôt (le DSN web est un secret Cloudflare). Les violations ne sont visibles que dans la console du navigateur.
+- 2026-10-04 — **Correction de l'audit** : la phrase « `index.html` ne charge aucun script ni style externe » est exacte pour `index.html`, mais la feuille de style principale importe Google Fonts (`apps/web/src/index.css`). La CSP autorise donc `fonts.googleapis.com` (styles) et `fonts.gstatic.com` (polices). Héberger les polices en local supprimerait cette requête vers Google à chaque visite.
+- 2026-10-04 — **Zod** : Zod 4 sonde `new Function("")` pour activer sa compilation JIT ; sous une CSP stricte, ce test est signalé comme violation. `z.config({ jitless: true })` (`apps/web/src/lib/zod-config.ts`) supprime la sonde sans changer la validation.
+- 2026-10-04 — **Temps 2 (cookie HttpOnly)** : non fait, toujours conditionné à un domaine commun pour le web et l'API.
