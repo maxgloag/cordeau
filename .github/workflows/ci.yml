@@ -50,6 +50,9 @@ jobs:
       - name: Cohérence doc / code
         run: ./scripts/check-docs.sh
 
+      - name: Conventions (identifiants, actions épinglées)
+        run: ./scripts/check-conventions.sh
+
   audit:
     name: ci / audit deps (js)
     runs-on: ubuntu-latest

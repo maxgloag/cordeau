@@ -71,7 +71,7 @@ Si une entité légère acquiert des règles métier → bascule planifiée vers
 - PHPStan niveau 9 doit passer sans `@phpstan-ignore`
 - Pas de `public` properties — passer par le constructeur ou des méthodes nommées
 - Identifiants métier en français, primitives de framework en anglais — partage par couche fixé par l'[ADR 0014](../../docs/adr/0014-naming-conventions-fr-en.md). Exemples : `Chantier`, `Client`, `Lot`, `Tache`, `Mesure`, `Materiau`, `Pointage`, `Devis`, `Facture`, `Avenant`, `lierClient()`, `StatutChantier::EN_PREPARATION`, `ModeFacturation::SURFACE`, `EtatMateriau::UTILISE` ; mais `ChantierRepository`, `CreerChantierProcessor`, `execute()`
-- Pas d'accents dans les identifiers (classes, méthodes, champs, énums, fichiers, routes, tables, colonnes). `Metre`, pas `Mètre`. `cloturer`, pas `clôturer`. Détail des règles dans l'[ADR 0014](../../docs/adr/0014-naming-conventions-fr-en.md)
+- Pas d'accents dans les identifiers (classes, méthodes, champs, énums, fichiers, routes, tables, colonnes). `Metre`, pas `Mètre`. `cloturer`, pas `clôturer`. Détail des règles dans l'[ADR 0014](../../docs/adr/0014-naming-conventions-fr-en.md) ; `scripts/check-conventions.sh` (CI, job `format`) échoue sur un identifiant ou un nom de fichier accentué de `apps/api/src`
 
 ### Pièges de la stdlib PHP invisibles pour PHPStan
 
