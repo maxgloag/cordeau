@@ -14,7 +14,7 @@ apps/
 packages/
   shared/     Types TypeScript partagés (générés via openapi-typescript)
 docs/
-  adr/        Architecture Decision Records (0001 à 0030)
+  adr/        Architecture Decision Records (0001 à 0031)
 scripts/      Outils dev (ci-watch.sh, etc.)
 .serena/      Config Serena (project.yml + memories versionnées)
 .claude/      Hooks et settings Claude Code
