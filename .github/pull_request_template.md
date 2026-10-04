@@ -18,6 +18,6 @@
 
 - [ ] Tests passent (`pnpm test` / `php bin/phpunit`)
 - [ ] Lint propre (`pnpm lint` / `./vendor/bin/phpstan analyse`)
-- [ ] ADR rédigé si décision structurante introduite
+- [ ] ADR rédigé si la règle des ADR l'exige (`CLAUDE.md`), sinon la décision est dans cette description
 - [ ] `CLAUDE.md` mis à jour si nouveau pattern à documenter
 - [ ] Spec Notion passée au statut `Livrée` si applicable
