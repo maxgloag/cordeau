@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\Client\Payload;
 
+use App\Shared\ValueObject\Adresse;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class CreerClientPayload
@@ -32,5 +33,15 @@ final class CreerClientPayload
         #[Assert\Uuid]
         public readonly ?string $uuid = null,
     ) {
+    }
+
+    public function toAdresse(): Adresse
+    {
+        return new Adresse(
+            rue: $this->adresseRue,
+            codePostal: $this->adresseCodePostal,
+            ville: $this->adresseVille,
+            pays: $this->adressePays,
+        );
     }
 }

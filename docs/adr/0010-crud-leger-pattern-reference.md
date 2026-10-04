@@ -62,6 +62,8 @@ La bascule est un refactor planifié, pas une dette : on extrait le port, le use
 
 Quand un VO est utilisé par plusieurs bounded contexts (cas typique : `Adresse` réutilisé par Chantier et Client), on le promeut sous `apps/api/src/Shared/ValueObject/` plutôt que de le laisser sous le contexte d'origine. Pas de duplication, pas de cross-import entre contextes pairs.
 
+**Application (#194)** : tout contexte léger qui reçoit une adresse la valide par `Shared/ValueObject/Adresse`, et aucun invariant (format, borne) n'est écrit dans un Payload ou un Processor. `Client` s'y conformait mal (chaînes brutes) jusqu'à #194.
+
 ## Consequences
 
 ### Bénéfices attendus

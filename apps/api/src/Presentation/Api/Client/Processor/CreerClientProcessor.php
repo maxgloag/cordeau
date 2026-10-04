@@ -43,16 +43,18 @@ final class CreerClientProcessor implements ProcessorInterface
             );
         }
 
+        $adresse = $data->toAdresse();
+
         $client = new Client(
             id: $id,
             proprietaire: $user,
             nom: $data->nom,
             email: $data->email,
             telephone: $this->normaliserTelephone($data->telephone),
-            adresseRue: $data->adresseRue,
-            adresseCodePostal: $data->adresseCodePostal,
-            adresseVille: $data->adresseVille,
-            adressePays: $data->adressePays,
+            adresseRue: $adresse->rue,
+            adresseCodePostal: $adresse->codePostal,
+            adresseVille: $adresse->ville,
+            adressePays: $adresse->pays,
             notes: $data->notes,
             creeLe: $now,
             modifieLe: $now,

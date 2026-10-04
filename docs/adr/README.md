@@ -68,4 +68,4 @@ Bénéfices attendus, coûts, trade-offs assumés, risques résiduels.
 | [0028](0028-sentry-api.md)                                 | Remontée des erreurs de l'API vers Sentry, avec filtrage des données        | Accepted |
 | [0029](0029-worker-messenger-prod.md)                      | Un process worker Fly consomme la file Messenger en production              | Accepted |
 | [0030](0030-schemathesis-contrat-api.md)                   | Schemathesis contre l'image de production, en observation                   | Accepted |
-| [0031](0031-invariants-dans-des-vo-meme-en-mode-leger.md)  | Les invariants vivent dans des value objects, y compris en mode léger       | Proposed |
+| [0031](0031-invariants-dans-des-vo-meme-en-mode-leger.md)  | Les invariants vivent dans des value objects, y compris en mode léger       | Rejected |

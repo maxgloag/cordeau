@@ -291,6 +291,83 @@ final class ClientApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    /** @return iterable<string, array{array<string, mixed>}> */
+    public static function adressesInvalides(): iterable
+    {
+        yield 'code postal français à 2 chiffres' => [['adresseCodePostal' => '52']];
+        yield 'rue faite d\'espaces' => [['adresseRue' => '   ']];
+        yield 'ville faite d\'espaces' => [['adresseVille' => '   ']];
+    }
+
+    /** @param array<string, mixed> $surcharge */
+    #[Test]
+    #[DataProvider('adressesInvalides')]
+    public function post_avec_adresse_invalide_retourne_422(array $surcharge): void
+    {
+        $httpClient = static::createClient();
+        $httpClient->loginUser(UserFactory::createOne()->_real());
+
+        $httpClient->request(
+            'POST',
+            '/api/clients',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode($surcharge + [
+                'nom' => 'ACME SARL',
+                'adresseRue' => '10 rue de la Paix',
+                'adresseCodePostal' => '75002',
+                'adresseVille' => 'Paris',
+            ]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(422);
+    }
+
+    /** @param array<string, mixed> $surcharge */
+    #[Test]
+    #[DataProvider('adressesInvalides')]
+    public function patch_avec_adresse_invalide_retourne_422_et_ne_modifie_rien(array $surcharge): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $httpClient->loginUser($user->_real());
+        $entite = ClientFactory::createOne([
+            'proprietaire' => $user,
+            'adresseRue' => '10 rue de la Paix',
+            'adresseCodePostal' => '75002',
+            'adresseVille' => 'Paris',
+        ]);
+
+        $httpClient->request(
+            'PATCH',
+            '/api/clients/' . $entite->id->toRfc4122(),
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
+            content: json_encode($surcharge) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(422);
+        $entite->_refresh();
+        self::assertSame('75002', $entite->adresseCodePostal);
+        self::assertSame('10 rue de la Paix', $entite->adresseRue);
+    }
+
+    #[Test]
+    public function patch_d_un_autre_champ_reste_possible_sur_une_adresse_ancienne_invalide(): void
+    {
+        $httpClient = static::createClient();
+        $user = UserFactory::createOne();
+        $httpClient->loginUser($user->_real());
+        $entite = ClientFactory::createOne(['proprietaire' => $user, 'adresseCodePostal' => '52', 'nom' => 'Ancien nom']);
+
+        $httpClient->request(
+            'PATCH',
+            '/api/clients/' . $entite->id->toRfc4122(),
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
+            content: json_encode(['nom' => 'Nouveau nom']) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(200);
+    }
+
     /** @return iterable<string, array{string}> */
     public static function corpsJsonInvalides(): iterable
     {
