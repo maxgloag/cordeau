@@ -63,6 +63,10 @@ Squash merge sur `main`. `main` est protégée : PR obligatoire, CI verte requis
 
 **Merge automatisé** ([ADR 0025](docs/adr/0025-reviewer-claude-auto-merge.md)) : le workflow `PR Review` relit chaque PR interne avec Claude, l'approuve si le verdict est `approve` et active l'auto-merge ; GitHub fusionne dès que la CI est verte. **Claude ne fusionne jamais lui-même** : il crée la PR, surveille la CI et la revue, et corrige si besoin. Une PR labellisée `needs-human` attend la décision du fondateur, qui la fusionne s'il l'accepte (`gh pr merge <n> --admin --squash`). Les PR qui touchent la racine de confiance du reviewer (`pr-review.yml`, `CODEOWNERS`, `.claude/`) sont toujours `needs-human`. Le workflow ne doit jamais exécuter le code de la PR (`pull_request_target`, cf ADR).
 
+### Descriptions de PR
+
+Courtes, dans le cadre de [.github/pull_request_template.md](.github/pull_request_template.md) : **quoi**, **pourquoi**, **comment c'est vérifié** et **ce qui ne l'est pas**. Ni récit d'enquête ni répétition du diff. Un `fix:` hors dev local ajoute la section « Audit système de test » (protocole double-fix). Critère : se relire en une minute.
+
 ### ADRs
 
 Un ADR consigne une décision **coûteuse à défaire** ou qui engage le fondateur, dans `docs/adr/`. Format : `NNNN-titre-court.md` avec `Status`, `Date`, `Deciders`, `Context`, `Decision`, `Consequences`. L'index est dans [docs/adr/README.md](docs/adr/README.md).
