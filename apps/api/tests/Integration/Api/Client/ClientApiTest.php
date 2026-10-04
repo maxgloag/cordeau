@@ -7,6 +7,7 @@ namespace App\Tests\Integration\Api\Client;
 use App\Tests\Factory\ClientFactory;
 use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\Factories;
@@ -288,5 +289,32 @@ final class ClientApiTest extends WebTestCase
         $httpClient->loginUser(UserFactory::createOne()->_real());
         $httpClient->request('DELETE', '/api/clients/00000000-0000-7000-8000-000000000001');
         self::assertResponseStatusCodeSame(404);
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function corpsJsonInvalides(): iterable
+    {
+        yield 'octet NUL' => ["\x00"];
+        yield 'JSON tronqué' => ['{"nom":'];
+        yield 'surrogate isolé' => ['{"nom": "\\udace"}'];
+        yield 'clé en syntaxe de chemin ouvrant un crochet' => ['{"[a": 1}'];
+        yield 'clé en syntaxe de chemin commençant par un point' => ['{".a": 1}'];
+    }
+
+    #[Test]
+    #[DataProvider('corpsJsonInvalides')]
+    public function post_avec_corps_json_invalide_retourne_400(string $corps): void
+    {
+        $httpClient = static::createClient();
+        $httpClient->loginUser(UserFactory::createOne()->_real());
+
+        $httpClient->request(
+            'POST',
+            '/api/clients',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: $corps,
+        );
+
+        self::assertResponseStatusCodeSame(400);
     }
 }

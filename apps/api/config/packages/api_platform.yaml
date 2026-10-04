@@ -14,8 +14,19 @@ api_platform:
         jsonld: ['application/ld+json']
     patch_formats:
         json: ['application/merge-patch+json']
+    # Déclarer cette clé REMPLACE les correspondances par défaut d'API Platform (valeur par défaut
+    # de la configuration, pas fusionnée) : sans les trois premières lignes, un corps JSON invalide
+    # répond 500 au lieu de 400 (#189). À garder alignées sur le Configuration.php d'API Platform.
     exception_to_status:
+        Symfony\Component\Serializer\Exception\ExceptionInterface: 400
+        ApiPlatform\Metadata\Exception\InvalidArgumentException: 400
+        Doctrine\ORM\OptimisticLockException: 409
+        # Une clé JSON en syntaxe de chemin (`[a`, `.a`) fait lever cette exception à la dénormalisation.
+        Symfony\Component\PropertyAccess\Exception\InvalidPropertyPathException: 400
         App\Domain\Chantier\Exception\ChantierIntrouvableException: 404
+        # Invariants du domaine violés par la saisie (les payloads ne les revalident pas) : 422, jamais 500.
+        App\Shared\Exception\AdresseInvalideException: 422
+        App\Domain\Chantier\Exception\SurfaceInvalideException: 422
 
 when@prod:
     api_platform:
