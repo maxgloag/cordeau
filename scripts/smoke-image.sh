@@ -60,6 +60,14 @@ read_command RELEASE release
 read_command APP_CMD app
 read_command WORKER_CMD worker
 
+# --- 0. Contexte de build : l'état local ne doit pas fuiter dans l'image (#193) ---
+LEAKED=$(docker run --rm "$IMAGE" sh -c 'ls -a /app | grep -E "^\.env\..*local$|^\.env\.local" || true')
+if [ -z "$LEAKED" ]; then
+  ok "image : aucun fichier .env local embarqué"
+else
+  fail "image : fichiers d'environnement locaux embarqués ($(echo "$LEAKED" | tr '\n' ' ')) : vérifier apps/api/.dockerignore"
+fi
+
 # --- 1. Extensions PHP : tout ce que la config et le code déclarent doit être chargé ---
 NEEDED=$(
   python3 - <<'EOF'

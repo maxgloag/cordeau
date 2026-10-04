@@ -1,0 +1,18 @@
+# Contexte de build de l'image de production (#193). Sans ce fichier, `COPY . .` embarque l'état du
+# poste qui construit : cache Symfony compilé avec une ancienne configuration (jamais revérifié en
+# non-debug), fichiers .env locaux, dépendances de développement.
+
+# Dépôt et caches d'outils
+.git
+.phpunit.cache
+.deptrac.cache
+
+# Variables d'environnement locales : en production, les secrets viennent de Fly (`fly secrets`)
+.env.local
+.env.local.php
+.env.*.local
+
+# Dépendances et cache : l'image les reconstruit (composer install --no-dev, cache:warmup)
+vendor
+var
+node_modules
