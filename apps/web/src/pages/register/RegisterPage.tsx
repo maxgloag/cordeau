@@ -6,17 +6,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { register } from "@/lib/api";
 import type { ApiError } from "@/lib/api";
+import { emailInscriptionValide, motDePasseSchema } from "@/lib/regles-metier";
 import { RegisterView } from "./RegisterView";
 import type { RegisterFormValues } from "./RegisterView";
 
 const schema = z
   .object({
-    email: z.string().min(1, "Email requis").email("Email invalide"),
-    motDePasse: z
+    email: z
       .string()
-      .min(8, "8 caractères minimum")
-      .regex(/[A-Z]/, "Au moins une majuscule")
-      .regex(/[0-9]/, "Au moins un chiffre"),
+      .min(1, "Email requis")
+      .refine(emailInscriptionValide, "Email invalide"),
+    motDePasse: motDePasseSchema,
     confirmation: z.string().min(1, "Confirmation requise"),
   })
   .refine((data) => data.motDePasse === data.confirmation, {

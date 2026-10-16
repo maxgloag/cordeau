@@ -1,0 +1,77 @@
+{
+  "regle": "auth.email",
+  "description": "Email d'inscription : espaces de début et de fin retirés (trim PHP), puis obligatoire, format HTML5 de Symfony, 255 caractères au plus.",
+  "reference": ["apps/api/src/Auth/ReglesInscription.php"],
+  "cas": [
+    {
+      "nom": "email ordinaire",
+      "entree": {
+        "email": "jean@exemple.fr"
+      },
+      "valide": true
+    },
+    {
+      "nom": "espaces autour",
+      "entree": {
+        "email": "  jean@exemple.fr  "
+      },
+      "valide": true
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "email": ""
+      },
+      "valide": false
+    },
+    {
+      "nom": "espaces seuls",
+      "entree": {
+        "email": "   "
+      },
+      "valide": false
+    },
+    {
+      "nom": "extension d'une lettre",
+      "entree": {
+        "email": "a@b.c"
+      },
+      "valide": true
+    },
+    {
+      "nom": "point d'exclamation dans la partie locale",
+      "entree": {
+        "email": "jean!chantier@exemple.fr"
+      },
+      "valide": true
+    },
+    {
+      "nom": "sans point dans le domaine",
+      "entree": {
+        "email": "jean@exemple"
+      },
+      "valide": false
+    },
+    {
+      "nom": "caractère accentué",
+      "entree": {
+        "email": "élodie@exemple.fr"
+      },
+      "valide": false
+    },
+    {
+      "nom": "255 caractères",
+      "entree": {
+        "email": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@exemple.fr"
+      },
+      "valide": true
+    },
+    {
+      "nom": "256 caractères",
+      "entree": {
+        "email": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@exemple.fr"
+      },
+      "valide": false
+    }
+  ]
+}

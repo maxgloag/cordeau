@@ -12,24 +12,25 @@ import {
   listClients,
 } from "@/lib/api";
 import type { Chantier } from "@/lib/api";
+import {
+  champsAdresse,
+  surfaceValide,
+  verifierCodePostal,
+} from "@/lib/regles-metier";
 import { DashboardView } from "./DashboardView";
 import type { ChantierFormValues } from "./ChantierFormView";
 
-const chantierSchema = z.object({
-  adresseRue: z.string().min(1, "Adresse requise"),
-  adresseCodePostal: z
-    .string()
-    .min(1, "Code postal requis")
-    .regex(/^\d{5}$/, "Format invalide (5 chiffres)"),
-  adresseVille: z.string().min(1, "Ville requise"),
-  adressePays: z.string().min(1),
-  surfaceM2: z
-    .string()
-    .refine((v) => v === "" || (!isNaN(parseFloat(v)) && parseFloat(v) > 0), {
-      message: "Surface invalide",
-    }),
-  clientId: z.string(),
-});
+const chantierSchema = z
+  .object({
+    ...champsAdresse,
+    surfaceM2: z
+      .string()
+      .refine((v) => v === "" || surfaceValide(parseFloat(v)), {
+        message: "Surface invalide",
+      }),
+    clientId: z.string(),
+  })
+  .superRefine(verifierCodePostal);
 
 function makeDefaultValues(c?: Chantier): ChantierFormValues {
   return {

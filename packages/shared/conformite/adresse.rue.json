@@ -1,0 +1,73 @@
+{
+  "regle": "adresse.rue",
+  "description": "Rue d'une adresse : obligatoire, pas seulement des espaces au sens de trim() PHP, 255 caractères au plus.",
+  "reference": [
+    "apps/api/src/Shared/ValueObject/Adresse.php",
+    "apps/api/src/Presentation/Api/Chantier/Payload/CreerChantierPayload.php"
+  ],
+  "cas": [
+    {
+      "nom": "rue ordinaire",
+      "entree": {
+        "rue": "12 rue de la Paix"
+      },
+      "valide": true
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "rue": ""
+      },
+      "valide": false
+    },
+    {
+      "nom": "espaces seuls",
+      "entree": {
+        "rue": "   "
+      },
+      "valide": false
+    },
+    {
+      "nom": "tabulation et retour ligne seuls",
+      "entree": {
+        "rue": "\t\n"
+      },
+      "valide": false
+    },
+    {
+      "nom": "espace insécable seul : trim() PHP ne le retire pas",
+      "entree": {
+        "rue": " "
+      },
+      "valide": true
+    },
+    {
+      "nom": "255 caractères",
+      "entree": {
+        "rue": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valide": true
+    },
+    {
+      "nom": "256 caractères",
+      "entree": {
+        "rue": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valide": false
+    },
+    {
+      "nom": "255 caractères accentués (comptés en caractères, pas en octets)",
+      "entree": {
+        "rue": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé"
+      },
+      "valide": true
+    },
+    {
+      "nom": "255 emojis (comptés en caractères, pas en unités UTF-16)",
+      "entree": {
+        "rue": "🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠🏠"
+      },
+      "valide": true
+    }
+  ]
+}

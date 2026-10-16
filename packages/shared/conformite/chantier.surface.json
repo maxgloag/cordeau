@@ -1,0 +1,59 @@
+{
+  "regle": "chantier.surface",
+  "description": "Surface d'un chantier en m² : strictement positive, 100 000 au plus.",
+  "reference": [
+    "apps/api/src/Domain/Chantier/ValueObject/Surface.php",
+    "apps/api/src/Presentation/Api/Chantier/Payload/CreerChantierPayload.php"
+  ],
+  "cas": [
+    {
+      "nom": "surface ordinaire",
+      "entree": {
+        "surfaceM2": 12.5
+      },
+      "valide": true
+    },
+    {
+      "nom": "plus petite surface positive testée",
+      "entree": {
+        "surfaceM2": 0.01
+      },
+      "valide": true
+    },
+    {
+      "nom": "zéro",
+      "entree": {
+        "surfaceM2": 0
+      },
+      "valide": false
+    },
+    {
+      "nom": "négative",
+      "entree": {
+        "surfaceM2": -3
+      },
+      "valide": false
+    },
+    {
+      "nom": "maximum",
+      "entree": {
+        "surfaceM2": 100000
+      },
+      "valide": true
+    },
+    {
+      "nom": "au-delà du maximum",
+      "entree": {
+        "surfaceM2": 100000.01
+      },
+      "valide": false
+    },
+    {
+      "nom": "très grande",
+      "entree": {
+        "surfaceM2": 1000000000
+      },
+      "valide": false
+    }
+  ]
+}

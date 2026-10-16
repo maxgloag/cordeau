@@ -19,15 +19,15 @@ import {
   AuthDivider,
   GoogleSignInButton,
 } from "@/components/auth/GoogleSignInButton";
+import { emailInscriptionValide, motDePasseSchema } from "@/lib/regles-metier";
 
 const schema = z
   .object({
-    email: z.string().min(1, "Email requis").email("Email invalide"),
-    motDePasse: z
+    email: z
       .string()
-      .min(8, "8 caractères minimum")
-      .regex(/[A-Z]/, "Au moins une majuscule")
-      .regex(/[0-9]/, "Au moins un chiffre"),
+      .min(1, "Email requis")
+      .refine(emailInscriptionValide, "Email invalide"),
+    motDePasse: motDePasseSchema,
     confirmation: z.string().min(1, "Confirmation requise"),
   })
   .refine((d) => d.motDePasse === d.confirmation, {

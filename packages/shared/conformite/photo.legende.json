@@ -1,0 +1,44 @@
+{
+  "regle": "photo.legende",
+  "description": "Légende d'une photo : 280 caractères au plus.",
+  "reference": [
+    "apps/api/src/Presentation/Api/Photo/Payload/ModifierLegendePayload.php"
+  ],
+  "cas": [
+    {
+      "nom": "légende ordinaire",
+      "entree": {
+        "legende": "Mur porteur côté jardin"
+      },
+      "valide": true
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "legende": ""
+      },
+      "valide": true
+    },
+    {
+      "nom": "280 caractères",
+      "entree": {
+        "legende": "llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll"
+      },
+      "valide": true
+    },
+    {
+      "nom": "281 caractères",
+      "entree": {
+        "legende": "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll"
+      },
+      "valide": false
+    },
+    {
+      "nom": "280 caractères accentués",
+      "entree": {
+        "legende": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé"
+      },
+      "valide": true
+    }
+  ]
+}
