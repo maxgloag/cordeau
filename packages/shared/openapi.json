@@ -760,6 +760,405 @@
                 }
             }
         },
+        "/api/chantiers/{chantierId}/lots": {
+            "get": {
+                "operationId": "api_chantiers_chantierIdlots_get_collection",
+                "tags": [
+                    "Lot"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lot collection",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Lot"
+                                    }
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "Lot.jsonld collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchema"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Lot.jsonld"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Retrieves the collection of Lot resources.",
+                "description": "Retrieves the collection of Lot resources.",
+                "parameters": [
+                    {
+                        "name": "chantierId",
+                        "in": "path",
+                        "description": "Lot identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The collection page number",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            },
+            "post": {
+                "operationId": "api_chantiers_chantierIdlots_post",
+                "tags": [
+                    "Lot"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Lot resource created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lot"
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lot.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Lot resource.",
+                "description": "Creates a Lot resource.",
+                "parameters": [
+                    {
+                        "name": "chantierId",
+                        "in": "path",
+                        "description": "Lot identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new Lot resource",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Lot.CreerLotPayload"
+                            }
+                        },
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Lot.CreerLotPayload"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/lots/{id}": {
+            "get": {
+                "operationId": "api_lots_id_get",
+                "tags": [
+                    "Lot"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lot resource",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lot"
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lot.jsonld"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a Lot resource.",
+                "description": "Retrieves a Lot resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lot identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "api_lots_id_delete",
+                "tags": [
+                    "Lot"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Lot resource deleted"
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Removes the Lot resource.",
+                "description": "Removes the Lot resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lot identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
+            "patch": {
+                "operationId": "api_lots_id_patch",
+                "tags": [
+                    "Lot"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lot resource updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lot"
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lot.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Updates the Lot resource.",
+                "description": "Updates the Lot resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lot identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The updated Lot resource",
+                    "content": {
+                        "application/merge-patch+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Lot.ModifierLotPayload.jsonMergePatch"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
         "/api/chantiers/{chantierId}/photos": {
             "get": {
                 "operationId": "api_chantiers_chantierIdphotos_get_collection",
@@ -1168,6 +1567,345 @@
                         "application/ld+json": {
                             "schema": {
                                 "$ref": "#/components/schemas/PrepareUploadResource.PrepareUploadPayload"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/lots/{lotId}/taches": {
+            "get": {
+                "operationId": "api_lots_lotIdtaches_get_collection",
+                "tags": [
+                    "Tache"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tache collection",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Tache"
+                                    }
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "Tache.jsonld collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchema"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Tache.jsonld"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Retrieves the collection of Tache resources.",
+                "description": "Retrieves the collection of Tache resources.",
+                "parameters": [
+                    {
+                        "name": "lotId",
+                        "in": "path",
+                        "description": "Tache identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The collection page number",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            },
+            "post": {
+                "operationId": "api_lots_lotIdtaches_post",
+                "tags": [
+                    "Tache"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Tache resource created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tache"
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tache.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Tache resource.",
+                "description": "Creates a Tache resource.",
+                "parameters": [
+                    {
+                        "name": "lotId",
+                        "in": "path",
+                        "description": "Tache identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new Tache resource",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Tache.CreerTachePayload"
+                            }
+                        },
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Tache.CreerTachePayload"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/taches/{id}": {
+            "delete": {
+                "operationId": "api_taches_id_delete",
+                "tags": [
+                    "Tache"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Tache resource deleted"
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Removes the Tache resource.",
+                "description": "Removes the Tache resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Tache identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
+            "patch": {
+                "operationId": "api_taches_id_patch",
+                "tags": [
+                    "Tache"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tache resource updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tache"
+                                }
+                            },
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tache.jsonld"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Updates the Tache resource.",
+                "description": "Updates the Tache resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Tache identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The updated Tache resource",
+                    "content": {
+                        "application/merge-patch+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Tache.ModifierTachePayload.jsonMergePatch"
                             }
                         }
                     },
@@ -2017,6 +2755,164 @@
                     "@type"
                 ]
             },
+            "Lot": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "chantierId": {
+                        "type": "string"
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "mode": {
+                        "type": "string"
+                    },
+                    "unite": {
+                        "type": "string"
+                    },
+                    "estimation": {
+                        "type": "number",
+                        "nullable": true
+                    },
+                    "reel": {
+                        "type": "number",
+                        "nullable": true
+                    },
+                    "ordre": {
+                        "type": "integer"
+                    },
+                    "imprevus": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "Lot.CreerLotPayload": {
+                "type": "object",
+                "required": [
+                    "nom",
+                    "mode"
+                ],
+                "properties": {
+                    "nom": {
+                        "maxLength": 255,
+                        "type": "string"
+                    },
+                    "mode": {
+                        "enum": [
+                            "temps",
+                            "surface",
+                            "forfait"
+                        ],
+                        "type": "string"
+                    },
+                    "ordre": {
+                        "minimum": 0,
+                        "maximum": 2147483647,
+                        "type": "integer"
+                    },
+                    "estimation": {
+                        "minimum": 0,
+                        "maximum": 9999999999,
+                        "type": "number",
+                        "nullable": true
+                    },
+                    "uuid": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "Lot.ModifierLotPayload.jsonMergePatch": {
+                "type": "object",
+                "properties": {
+                    "nom": {
+                        "maxLength": 255,
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "mode": {
+                        "enum": [
+                            "temps",
+                            "surface",
+                            "forfait"
+                        ],
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "estimation": {
+                        "minimum": 0,
+                        "maximum": 9999999999,
+                        "type": "number",
+                        "nullable": true
+                    },
+                    "reel": {
+                        "minimum": 0,
+                        "maximum": 9999999999,
+                        "type": "number",
+                        "nullable": true
+                    }
+                }
+            },
+            "Lot.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "chantierId": {
+                                "type": "string"
+                            },
+                            "nom": {
+                                "type": "string"
+                            },
+                            "mode": {
+                                "type": "string"
+                            },
+                            "unite": {
+                                "type": "string"
+                            },
+                            "estimation": {
+                                "type": "number",
+                                "nullable": true
+                            },
+                            "reel": {
+                                "type": "number",
+                                "nullable": true
+                            },
+                            "ordre": {
+                                "type": "integer"
+                            },
+                            "imprevus": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
             "Photo": {
                 "type": "object",
                 "properties": {
@@ -2179,6 +3075,100 @@
                         }
                     }
                 ]
+            },
+            "Tache": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "lotId": {
+                        "type": "string"
+                    },
+                    "libelle": {
+                        "type": "string"
+                    },
+                    "faite": {
+                        "type": "boolean"
+                    },
+                    "faiteLe": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "ordre": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "Tache.CreerTachePayload": {
+                "type": "object",
+                "required": [
+                    "libelle"
+                ],
+                "properties": {
+                    "libelle": {
+                        "maxLength": 255,
+                        "type": "string"
+                    },
+                    "ordre": {
+                        "minimum": 0,
+                        "maximum": 2147483647,
+                        "type": "integer"
+                    },
+                    "uuid": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "Tache.ModifierTachePayload.jsonMergePatch": {
+                "type": "object",
+                "properties": {
+                    "faite": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "libelle": {
+                        "maxLength": 255,
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "Tache.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "lotId": {
+                                "type": "string"
+                            },
+                            "libelle": {
+                                "type": "string"
+                            },
+                            "faite": {
+                                "type": "boolean"
+                            },
+                            "faiteLe": {
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "ordre": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ]
             }
         },
         "responses": {},
@@ -2193,6 +3183,14 @@
         {
             "name": "Chantier",
             "description": "Resource 'Chantier' operations."
+        },
+        {
+            "name": "Lot",
+            "description": "Resource 'Lot' operations."
+        },
+        {
+            "name": "Tache",
+            "description": "Resource 'Tache' operations."
         },
         {
             "name": "Client",

@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Api;
 
 use App\Tests\Factory\ChantierFactory;
+use App\Tests\Factory\LotFactory;
 use App\Tests\Factory\PhotoFactory;
+use App\Tests\Factory\TacheFactory;
 use App\Tests\Factory\UserFactory;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -18,7 +21,8 @@ use Zenstruck\Foundry\Test\ResetDatabase;
  * de ce qui appartient à l'artisan A, et la réponse ne divulgue aucune donnée de A.
  *
  * Complète les tests d'isolation déjà présents (clients : ClientApiTest ; photos : prepare / confirm /
- * patch dans PhotoApiTest ; liste des chantiers : ChantierApiTest). Issu du spike #149.
+ * patch dans PhotoApiTest ; liste des chantiers : ChantierApiTest). Issu du spike #149. Les lots et
+ * les tâches (#101) héritent du périmètre de leur chantier.
  *
  * Pas de test de lecture d'une photo isolée : `GET /api/photos/{id}` n'est pas exposé (la route ne sert
  * qu'à la génération d'IRI) ; la lecture passe par la liste d'un chantier, testée ci-dessus.
@@ -31,6 +35,8 @@ final class IsolationEntreArtisansTest extends WebTestCase
 
     private const SECRET_RUE = '1 rue du Secret-de-A';
     private const SECRET_LEGENDE = 'Legende-secrete-de-A';
+    private const SECRET_LOT = 'Lot-secret-de-A';
+    private const SECRET_TACHE = 'Tache-secrete-de-A';
 
     #[Test]
     public function get_chantier_d_un_autre_artisan_est_refuse_sans_fuite(): void
@@ -129,6 +135,178 @@ final class IsolationEntreArtisansTest extends WebTestCase
         self::assertSame($photo->id->toRfc4122(), $photos[0]['id']);
     }
 
+    #[Test]
+    public function lister_les_lots_du_chantier_d_un_autre_artisan_est_refuse_sans_fuite(): void
+    {
+        $client = static::createClient();
+        [, $chantierId] = self::lotDeA();
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request('GET', '/api/chantiers/' . $chantierId->toRfc4122() . '/lots', server: ['HTTP_ACCEPT' => 'application/json']);
+
+        self::assertRefusSansFuite($client);
+    }
+
+    #[Test]
+    public function creer_un_lot_sur_le_chantier_d_un_autre_artisan_est_refuse_et_ne_cree_rien(): void
+    {
+        $client = static::createClient();
+        $chantier = ChantierFactory::createOne(['proprietaire' => UserFactory::createOne()]);
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request(
+            'POST',
+            '/api/chantiers/' . $chantier->id->toRfc4122() . '/lots',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['nom' => 'Lot pirate', 'mode' => 'forfait']) ?: '',
+        );
+
+        self::assertRefusSansFuite($client);
+        LotFactory::assert()->count(0);
+    }
+
+    #[Test]
+    public function creer_un_lot_avec_l_uuid_du_lot_d_un_autre_artisan_ne_le_detourne_pas(): void
+    {
+        $client = static::createClient();
+        [$lotId, $chantierDeA] = self::lotDeA();
+        $pirate = UserFactory::createOne();
+        $chantierDuPirate = ChantierFactory::createOne(['proprietaire' => $pirate]);
+        $client->loginUser($pirate->_real());
+
+        $client->request(
+            'POST',
+            '/api/chantiers/' . $chantierDuPirate->id->toRfc4122() . '/lots',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['nom' => 'Lot pirate', 'mode' => 'forfait', 'uuid' => $lotId->toRfc4122()]) ?: '',
+        );
+
+        self::assertResponseStatusCodeSame(409);
+        self::assertStringNotContainsString(self::SECRET_LOT, (string) $client->getResponse()->getContent());
+        LotFactory::assert()->exists(['id' => $lotId, 'chantierId' => $chantierDeA, 'nom' => self::SECRET_LOT]);
+    }
+
+    #[Test]
+    public function get_lot_d_un_autre_artisan_est_refuse_sans_fuite(): void
+    {
+        $client = static::createClient();
+        [$lotId] = self::lotDeA();
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request('GET', '/api/lots/' . $lotId->toRfc4122(), server: ['HTTP_ACCEPT' => 'application/json']);
+
+        self::assertRefusSansFuite($client);
+    }
+
+    #[Test]
+    public function patch_lot_d_un_autre_artisan_est_refuse_et_ne_modifie_rien(): void
+    {
+        $client = static::createClient();
+        [$lotId] = self::lotDeA();
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request(
+            'PATCH',
+            '/api/lots/' . $lotId->toRfc4122(),
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
+            content: json_encode(['nom' => 'Pirate']) ?: '',
+        );
+
+        self::assertRefusSansFuite($client);
+        LotFactory::assert()->exists(['id' => $lotId, 'nom' => self::SECRET_LOT]);
+    }
+
+    #[Test]
+    public function delete_lot_d_un_autre_artisan_est_refuse_et_ne_supprime_rien(): void
+    {
+        $client = static::createClient();
+        [$lotId] = self::lotDeA();
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request('DELETE', '/api/lots/' . $lotId->toRfc4122());
+
+        self::assertRefusSansFuite($client);
+        LotFactory::assert()->exists(['id' => $lotId]);
+        TacheFactory::assert()->count(1, ['lotId' => $lotId]);
+    }
+
+    #[Test]
+    public function lister_les_taches_du_lot_d_un_autre_artisan_est_refuse_sans_fuite(): void
+    {
+        $client = static::createClient();
+        [$lotId] = self::lotDeA();
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request('GET', '/api/lots/' . $lotId->toRfc4122() . '/taches', server: ['HTTP_ACCEPT' => 'application/json']);
+
+        self::assertRefusSansFuite($client);
+    }
+
+    #[Test]
+    public function creer_une_tache_dans_le_lot_d_un_autre_artisan_est_refuse_et_ne_cree_rien(): void
+    {
+        $client = static::createClient();
+        [$lotId] = self::lotDeA();
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request(
+            'POST',
+            '/api/lots/' . $lotId->toRfc4122() . '/taches',
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['libelle' => 'Tache pirate']) ?: '',
+        );
+
+        self::assertRefusSansFuite($client);
+        TacheFactory::assert()->count(1, ['lotId' => $lotId]);
+    }
+
+    #[Test]
+    public function patch_tache_d_un_autre_artisan_est_refuse_et_ne_modifie_rien(): void
+    {
+        $client = static::createClient();
+        [$lotId] = self::lotDeA();
+        $tache = TacheFactory::find(['lotId' => $lotId]);
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request(
+            'PATCH',
+            '/api/taches/' . $tache->id->toRfc4122(),
+            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
+            content: json_encode(['faite' => true, 'libelle' => 'Pirate']) ?: '',
+        );
+
+        self::assertRefusSansFuite($client);
+        TacheFactory::assert()->exists(['id' => $tache->id, 'libelle' => self::SECRET_TACHE, 'faite' => false]);
+    }
+
+    #[Test]
+    public function delete_tache_d_un_autre_artisan_est_refuse_et_ne_supprime_rien(): void
+    {
+        $client = static::createClient();
+        [$lotId] = self::lotDeA();
+        $tache = TacheFactory::find(['lotId' => $lotId]);
+        $client->loginUser(UserFactory::createOne()->_real());
+
+        $client->request('DELETE', '/api/taches/' . $tache->id->toRfc4122());
+
+        self::assertRefusSansFuite($client);
+        TacheFactory::assert()->exists(['id' => $tache->id]);
+    }
+
+    /**
+     * Un lot de l'artisan A, avec une tâche, sur un chantier de A.
+     *
+     * @return array{Uuid, Uuid} identifiants du lot et du chantier
+     */
+    private static function lotDeA(): array
+    {
+        $chantier = ChantierFactory::createOne(['proprietaire' => UserFactory::createOne(), 'adresseRue' => self::SECRET_RUE]);
+        $lot = LotFactory::createOne(['chantierId' => $chantier->id, 'nom' => self::SECRET_LOT]);
+        TacheFactory::createOne(['lotId' => $lot->id, 'libelle' => self::SECRET_TACHE]);
+
+        return [$lot->id, $chantier->id];
+    }
+
     private static function assertRefusSansFuite(KernelBrowser $client): void
     {
         $contenu = (string) $client->getResponse()->getContent();
@@ -136,5 +314,7 @@ final class IsolationEntreArtisansTest extends WebTestCase
         self::assertContains($client->getResponse()->getStatusCode(), [403, 404], 'Accès à la ressource d\'un autre artisan non refusé : ' . $client->getResponse()->getStatusCode());
         self::assertStringNotContainsString(self::SECRET_RUE, $contenu);
         self::assertStringNotContainsString(self::SECRET_LEGENDE, $contenu);
+        self::assertStringNotContainsString(self::SECRET_LOT, $contenu);
+        self::assertStringNotContainsString(self::SECRET_TACHE, $contenu);
     }
 }

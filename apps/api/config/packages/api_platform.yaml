@@ -24,9 +24,14 @@ api_platform:
         # Une clé JSON en syntaxe de chemin (`[a`, `.a`) fait lever cette exception à la dénormalisation.
         Symfony\Component\PropertyAccess\Exception\InvalidPropertyPathException: 400
         App\Domain\Chantier\Exception\ChantierIntrouvableException: 404
+        App\Domain\Chantier\Exception\LotIntrouvableException: 404
+        App\Domain\Chantier\Exception\TacheIntrouvableException: 404
         # Invariants du domaine violés par la saisie (les payloads ne les revalident pas) : 422, jamais 500.
         App\Shared\Exception\AdresseInvalideException: 422
         App\Domain\Chantier\Exception\SurfaceInvalideException: 422
+        App\Domain\Chantier\Exception\LotInvalideException: 422
+        App\Domain\Chantier\Exception\TacheInvalideException: 422
+        App\Domain\Chantier\Exception\ValeurLotInvalideException: 422
 
 when@prod:
     api_platform:
