@@ -57,10 +57,16 @@ if [ -n "$API_PHP" ] && command -v php >/dev/null 2>&1 && [ -x apps/api/vendor/b
   check "PHPStan (fichiers modifiés)" ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M $API_PHP
   # PHPUnit : tests unitaires (sans DB, < 1 s) + tests d'intégration modifiés.
   # Les autres tests d'intégration restent à la CI : ils exigent Postgres.
-  check "PHPUnit tests/Unit" php bin/phpunit tests/Unit
-  for T in $(printf '%s\n' "$API_PHP" | grep -E '^tests/Integration/.*Test\.php$'); do
-    check "PHPUnit $T" php bin/phpunit "$T"
-  done
+  # Sans Postgres local (worktree neuf, sandbox sans .env), PHPUnit échouerait à chaque
+  # fin de tour : on le saute, la CI fait foi.
+  if (exec 3<>/dev/tcp/127.0.0.1/5432) 2>/dev/null; then
+    check "PHPUnit tests/Unit" php bin/phpunit tests/Unit
+    for T in $(printf '%s\n' "$API_PHP" | grep -E '^tests/Integration/.*Test\.php$'); do
+      check "PHPUnit $T" php bin/phpunit "$T"
+    done
+  else
+    echo "PHPUnit sauté : pas de Postgres local, la CI fait foi." >&2
+  fi
   cd "$ROOT" || exit 0
 fi
 
