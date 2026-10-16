@@ -18,7 +18,7 @@ final class SupprimerLotUseCase
     }
 
     /**
-     * Les tâches du lot partent avec lui (clé étrangère ON DELETE CASCADE).
+     * Les tâches du lot partent avec lui (FK ON DELETE CASCADE, doublée dans le repository).
      *
      * @throws LotIntrouvableException si le lot n'appartient pas à $proprietaireId
      */
