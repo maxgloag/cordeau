@@ -152,7 +152,7 @@ Si un signal de vélocité ou d'archi se dégrade, **stop** et rétro avant de c
 
 Skills à invoquer automatiquement selon le contexte (sans qu'on ait à le demander) :
 
-- **Avant chaque `gh pr create`** → lancer `/simplify` sur les changements de la branche, puis intégrer les corrections suggérées avant d'ouvrir la PR
+- **Avant chaque `gh pr create`** → lancer `/simplify` sur les changements de la branche, en revue **séquentielle à un seul agent** (pas de sous-agents en parallèle : quota), puis intégrer les corrections suggérées avant d'ouvrir la PR. Sauté pour un correctif de moins de ~30 lignes (le dire dans la PR)
 - **Revue avant merge** → faite par le workflow `PR Review` (ADR 0025) : second avis en contexte frais sur chaque PR, plus revue sécurité si la PR touche auth/sessions, permissions/RBAC, secrets, données personnelles (clients, adresses, téléphones, photos identifiables, au titre RGPD), stockage de fichiers, données financières, dépendance externe ou workflows CI. Un finding sécurité high/critical → label `needs-human`, pas d'auto-merge. Après un verdict `request_changes`, Claude corrige et pousse : la revue repart automatiquement
 - **Pour toute question DB / Neon / queries / connexion / migration prod** → utiliser le skill `neon-postgres` au lieu de répondre depuis la mémoire
 - **Nouvel écran web ou mobile** → utiliser le skill `frontend-design` pour éviter le rendu "AI générique"
