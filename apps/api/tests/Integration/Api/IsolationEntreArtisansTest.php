@@ -154,12 +154,7 @@ final class IsolationEntreArtisansTest extends WebTestCase
         $chantier = ChantierFactory::createOne(['proprietaire' => UserFactory::createOne()]);
         $client->loginUser(UserFactory::createOne()->_real());
 
-        $client->request(
-            'POST',
-            '/api/chantiers/' . $chantier->id->toRfc4122() . '/lots',
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
-            content: json_encode(['nom' => 'Lot pirate', 'mode' => 'forfait']) ?: '',
-        );
+        self::postJson($client, '/api/chantiers/' . $chantier->id->toRfc4122() . '/lots', ['nom' => 'Lot pirate', 'mode' => 'forfait']);
 
         self::assertRefusSansFuite($client);
         LotFactory::assert()->count(0);
@@ -174,12 +169,7 @@ final class IsolationEntreArtisansTest extends WebTestCase
         $chantierDuPirate = ChantierFactory::createOne(['proprietaire' => $pirate]);
         $client->loginUser($pirate->_real());
 
-        $client->request(
-            'POST',
-            '/api/chantiers/' . $chantierDuPirate->id->toRfc4122() . '/lots',
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
-            content: json_encode(['nom' => 'Lot pirate', 'mode' => 'forfait', 'uuid' => $lotId->toRfc4122()]) ?: '',
-        );
+        self::postJson($client, '/api/chantiers/' . $chantierDuPirate->id->toRfc4122() . '/lots', ['nom' => 'Lot pirate', 'mode' => 'forfait', 'uuid' => $lotId->toRfc4122()]);
 
         self::assertResponseStatusCodeSame(409);
         self::assertStringNotContainsString(self::SECRET_LOT, (string) $client->getResponse()->getContent());
@@ -205,12 +195,7 @@ final class IsolationEntreArtisansTest extends WebTestCase
         [$lotId] = self::lotDeA();
         $client->loginUser(UserFactory::createOne()->_real());
 
-        $client->request(
-            'PATCH',
-            '/api/lots/' . $lotId->toRfc4122(),
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
-            content: json_encode(['nom' => 'Pirate']) ?: '',
-        );
+        self::patchJson($client, '/api/lots/' . $lotId->toRfc4122(), ['nom' => 'Pirate']);
 
         self::assertRefusSansFuite($client);
         LotFactory::assert()->exists(['id' => $lotId, 'nom' => self::SECRET_LOT]);
@@ -249,12 +234,7 @@ final class IsolationEntreArtisansTest extends WebTestCase
         [$lotId] = self::lotDeA();
         $client->loginUser(UserFactory::createOne()->_real());
 
-        $client->request(
-            'POST',
-            '/api/lots/' . $lotId->toRfc4122() . '/taches',
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
-            content: json_encode(['libelle' => 'Tache pirate']) ?: '',
-        );
+        self::postJson($client, '/api/lots/' . $lotId->toRfc4122() . '/taches', ['libelle' => 'Tache pirate']);
 
         self::assertRefusSansFuite($client);
         TacheFactory::assert()->count(1, ['lotId' => $lotId]);
@@ -268,12 +248,7 @@ final class IsolationEntreArtisansTest extends WebTestCase
         $tache = TacheFactory::find(['lotId' => $lotId]);
         $client->loginUser(UserFactory::createOne()->_real());
 
-        $client->request(
-            'PATCH',
-            '/api/taches/' . $tache->id->toRfc4122(),
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
-            content: json_encode(['faite' => true, 'libelle' => 'Pirate']) ?: '',
-        );
+        self::patchJson($client, '/api/taches/' . $tache->id->toRfc4122(), ['faite' => true, 'libelle' => 'Pirate']);
 
         self::assertRefusSansFuite($client);
         TacheFactory::assert()->exists(['id' => $tache->id, 'libelle' => self::SECRET_TACHE, 'faite' => false]);

@@ -47,13 +47,7 @@ final class AccesProprietaire
      */
     public function lot(Uuid $lotId, Uuid $proprietaireId): Lot
     {
-        $lot = $this->lotRepository->findById($lotId);
-
-        if ($lot === null || !$this->chantierAppartientA($lot->chantierId, $proprietaireId)) {
-            throw LotIntrouvableException::avecId($lotId);
-        }
-
-        return $lot;
+        return $this->lotDe($lotId, $proprietaireId) ?? throw LotIntrouvableException::avecId($lotId);
     }
 
     /**
@@ -63,22 +57,20 @@ final class AccesProprietaire
     {
         $tache = $this->tacheRepository->findById($tacheId);
 
-        if ($tache === null || !$this->lotAppartientA($tache->lotId, $proprietaireId)) {
+        if ($tache === null || $this->lotDe($tache->lotId, $proprietaireId) === null) {
             throw TacheIntrouvableException::avecId($tacheId);
         }
 
         return $tache;
     }
 
-    private function lotAppartientA(Uuid $lotId, Uuid $proprietaireId): bool
+    private function lotDe(Uuid $lotId, Uuid $proprietaireId): ?Lot
     {
         $lot = $this->lotRepository->findById($lotId);
+        if ($lot === null) {
+            return null;
+        }
 
-        return $lot !== null && $this->chantierAppartientA($lot->chantierId, $proprietaireId);
-    }
-
-    private function chantierAppartientA(Uuid $chantierId, Uuid $proprietaireId): bool
-    {
-        return $this->chantierRepository->findById($chantierId)?->appartientA($proprietaireId) ?? false;
+        return $this->chantierRepository->findById($lot->chantierId)?->appartientA($proprietaireId) === true ? $lot : null;
     }
 }

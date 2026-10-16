@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Api\Chantier\Payload;
 
 use App\Presentation\Api\Support\BornesColonnes;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class CreerTachePayload
@@ -18,5 +19,10 @@ final class CreerTachePayload
         #[Assert\Uuid]
         public readonly ?string $uuid = null,
     ) {
+    }
+
+    public function toId(): ?Uuid
+    {
+        return $this->uuid !== null ? Uuid::fromString($this->uuid) : null;
     }
 }

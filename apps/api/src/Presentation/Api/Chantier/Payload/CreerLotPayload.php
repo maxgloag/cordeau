@@ -7,6 +7,7 @@ namespace App\Presentation\Api\Chantier\Payload;
 use App\Domain\Chantier\Enum\ModeFacturation;
 use App\Domain\Chantier\ValueObject\Estimation;
 use App\Presentation\Api\Support\BornesColonnes;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class CreerLotPayload
@@ -43,5 +44,10 @@ final class CreerLotPayload
     public function toEstimation(): ?Estimation
     {
         return $this->estimation !== null ? new Estimation($this->estimation) : null;
+    }
+
+    public function toId(): ?Uuid
+    {
+        return $this->uuid !== null ? Uuid::fromString($this->uuid) : null;
     }
 }

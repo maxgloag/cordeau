@@ -12,7 +12,6 @@ use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\Test\Factories;
@@ -163,11 +162,7 @@ final class LotApiTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         $lots = self::decodeJson((string) $client->getResponse()->getContent());
-        self::assertSame(['Premier', 'Second'], array_map(static function (mixed $lot): mixed {
-            \assert(\is_array($lot));
-
-            return $lot['nom'];
-        }, $lots));
+        self::assertSame(['Premier', 'Second'], array_column($lots, 'nom'));
     }
 
     #[Test]
@@ -313,31 +308,5 @@ final class LotApiTest extends WebTestCase
         LotFactory::assert()->notExists(['id' => $lot->id]);
         TacheFactory::assert()->count(0, ['lotId' => $lot->id]);
         TacheFactory::assert()->count(1, ['lotId' => $autreLot->id]);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
-    private static function postJson(KernelBrowser $client, string $uri, array $payload): void
-    {
-        $client->request(
-            'POST',
-            $uri,
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
-            content: json_encode($payload) ?: '',
-        );
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
-    private static function patchJson(KernelBrowser $client, string $uri, array $payload): void
-    {
-        $client->request(
-            'PATCH',
-            $uri,
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
-            content: json_encode($payload) ?: '',
-        );
     }
 }

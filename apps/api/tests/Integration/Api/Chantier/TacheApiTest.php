@@ -12,7 +12,6 @@ use App\Tests\Factory\UserFactory;
 use App\Tests\Integration\Api\JsonTestHelper;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\Test\Factories;
@@ -114,11 +113,7 @@ final class TacheApiTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         $taches = self::decodeJson((string) $client->getResponse()->getContent());
-        self::assertSame(['Poncer', 'Peindre'], array_map(static function (mixed $tache): mixed {
-            \assert(\is_array($tache));
-
-            return $tache['libelle'];
-        }, $taches));
+        self::assertSame(['Poncer', 'Peindre'], array_column($taches, 'libelle'));
     }
 
     #[Test]
@@ -231,31 +226,5 @@ final class TacheApiTest extends WebTestCase
         $lot = LotFactory::createOne(['chantierId' => $chantier->id]);
 
         return [$user->_real(), $lot->id->toRfc4122()];
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
-    private static function postJson(KernelBrowser $client, string $uri, array $payload): void
-    {
-        $client->request(
-            'POST',
-            $uri,
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
-            content: json_encode($payload) ?: '',
-        );
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
-    private static function patchJson(KernelBrowser $client, string $uri, array $payload): void
-    {
-        $client->request(
-            'PATCH',
-            $uri,
-            server: ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/merge-patch+json'],
-            content: json_encode($payload) ?: '',
-        );
     }
 }
