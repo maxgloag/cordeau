@@ -1,0 +1,130 @@
+{
+  "regle": "adresse.codePostal",
+  "description": "Code postal : 5 chiffres en France ; ailleurs, obligatoire et 20 caractères au plus.",
+  "reference": [
+    "apps/api/src/Shared/ValueObject/Adresse.php",
+    "apps/api/src/Presentation/Api/Chantier/Payload/CreerChantierPayload.php"
+  ],
+  "cas": [
+    {
+      "nom": "5 chiffres en France",
+      "entree": {
+        "codePostal": "75011",
+        "pays": "FR"
+      },
+      "valide": true
+    },
+    {
+      "nom": "4 chiffres en France",
+      "entree": {
+        "codePostal": "7501",
+        "pays": "FR"
+      },
+      "valide": false
+    },
+    {
+      "nom": "6 chiffres en France",
+      "entree": {
+        "codePostal": "750111",
+        "pays": "FR"
+      },
+      "valide": false
+    },
+    {
+      "nom": "espace au milieu en France",
+      "entree": {
+        "codePostal": "75 011",
+        "pays": "FR"
+      },
+      "valide": false
+    },
+    {
+      "nom": "espace en tête en France",
+      "entree": {
+        "codePostal": " 75011",
+        "pays": "FR"
+      },
+      "valide": false
+    },
+    {
+      "nom": "retour ligne final en France",
+      "entree": {
+        "codePostal": "75011\n",
+        "pays": "FR"
+      },
+      "valide": false
+    },
+    {
+      "nom": "lettre en France",
+      "entree": {
+        "codePostal": "2A004",
+        "pays": "FR"
+      },
+      "valide": false
+    },
+    {
+      "nom": "chiffres non ASCII en France",
+      "entree": {
+        "codePostal": "٧٥٠١١",
+        "pays": "FR"
+      },
+      "valide": false
+    },
+    {
+      "nom": "vide en France",
+      "entree": {
+        "codePostal": "",
+        "pays": "FR"
+      },
+      "valide": false
+    },
+    {
+      "nom": "Belgique, 4 chiffres",
+      "entree": {
+        "codePostal": "1000",
+        "pays": "BE"
+      },
+      "valide": true
+    },
+    {
+      "nom": "Royaume-Uni, lettres et espace",
+      "entree": {
+        "codePostal": "SW1A 1AA",
+        "pays": "GB"
+      },
+      "valide": true
+    },
+    {
+      "nom": "hors France, vide",
+      "entree": {
+        "codePostal": "",
+        "pays": "DE"
+      },
+      "valide": false
+    },
+    {
+      "nom": "hors France, espaces seuls",
+      "entree": {
+        "codePostal": "   ",
+        "pays": "BE"
+      },
+      "valide": false
+    },
+    {
+      "nom": "hors France, 20 caractères",
+      "entree": {
+        "codePostal": "99999999999999999999",
+        "pays": "BE"
+      },
+      "valide": true
+    },
+    {
+      "nom": "hors France, 21 caractères",
+      "entree": {
+        "codePostal": "999999999999999999999",
+        "pays": "BE"
+      },
+      "valide": false
+    }
+  ]
+}

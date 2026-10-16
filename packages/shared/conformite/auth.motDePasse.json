@@ -1,0 +1,70 @@
+{
+  "regle": "auth.motDePasse",
+  "description": "Mot de passe d'inscription : 8 à 255 caractères, au moins une majuscule ASCII et un chiffre.",
+  "reference": ["apps/api/src/Auth/ReglesInscription.php"],
+  "cas": [
+    {
+      "nom": "mot de passe ordinaire",
+      "entree": {
+        "motDePasse": "Motdepasse1"
+      },
+      "valide": true
+    },
+    {
+      "nom": "7 caractères",
+      "entree": {
+        "motDePasse": "Motdep1"
+      },
+      "valide": false
+    },
+    {
+      "nom": "8 caractères",
+      "entree": {
+        "motDePasse": "Motdepa1"
+      },
+      "valide": true
+    },
+    {
+      "nom": "sans majuscule",
+      "entree": {
+        "motDePasse": "motdepasse1"
+      },
+      "valide": false
+    },
+    {
+      "nom": "sans chiffre",
+      "entree": {
+        "motDePasse": "Motdepasse"
+      },
+      "valide": false
+    },
+    {
+      "nom": "majuscule accentuée seulement",
+      "entree": {
+        "motDePasse": "Émotdepasse1"
+      },
+      "valide": false
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "motDePasse": ""
+      },
+      "valide": false
+    },
+    {
+      "nom": "255 caractères",
+      "entree": {
+        "motDePasse": "A1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valide": true
+    },
+    {
+      "nom": "256 caractères",
+      "entree": {
+        "motDePasse": "A1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valide": false
+    }
+  ]
+}

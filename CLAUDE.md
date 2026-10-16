@@ -89,6 +89,7 @@ Section **Implications sécurité** de l'ADR **obligatoire** si la décision tou
 - Use cases → tests d'intégration avec DB
 - API → tests d'intégration avec une vraie réponse HTTP
 - Pas de feature shippée sans test sur le domaine au minimum
+- **Toute règle métier dupliquée entre l'API et un client a ses fixtures de conformité** dans `packages/shared/conformite/` ([format](packages/shared/conformite/README.md)), jouées par PHPUnit, Vitest et Jest. L'API est la référence : un client qui diverge fait échouer son runner
 
 ### Bug-fix : protocole double-fix
 

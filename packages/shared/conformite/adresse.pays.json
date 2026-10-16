@@ -1,0 +1,59 @@
+{
+  "regle": "adresse.pays",
+  "description": "Pays : code ISO 3166-1 alpha-2 en majuscules.",
+  "reference": [
+    "apps/api/src/Shared/ValueObject/Adresse.php",
+    "apps/api/src/Presentation/Api/Chantier/Payload/CreerChantierPayload.php"
+  ],
+  "cas": [
+    {
+      "nom": "France",
+      "entree": {
+        "pays": "FR"
+      },
+      "valide": true
+    },
+    {
+      "nom": "Belgique",
+      "entree": {
+        "pays": "BE"
+      },
+      "valide": true
+    },
+    {
+      "nom": "minuscules",
+      "entree": {
+        "pays": "fr"
+      },
+      "valide": false
+    },
+    {
+      "nom": "alpha-3",
+      "entree": {
+        "pays": "FRA"
+      },
+      "valide": false
+    },
+    {
+      "nom": "une lettre",
+      "entree": {
+        "pays": "F"
+      },
+      "valide": false
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "pays": ""
+      },
+      "valide": false
+    },
+    {
+      "nom": "chiffre",
+      "entree": {
+        "pays": "F1"
+      },
+      "valide": false
+    }
+  ]
+}

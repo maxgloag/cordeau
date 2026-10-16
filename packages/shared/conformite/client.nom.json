@@ -1,0 +1,51 @@
+{
+  "regle": "client.nom",
+  "description": "Nom d'un client : non vide (NotBlank, sans trim), 255 caractères au plus.",
+  "reference": [
+    "apps/api/src/Presentation/Api/Client/Payload/CreerClientPayload.php"
+  ],
+  "cas": [
+    {
+      "nom": "nom ordinaire",
+      "entree": {
+        "nom": "Dupont"
+      },
+      "valide": true
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "nom": ""
+      },
+      "valide": false
+    },
+    {
+      "nom": "zéro seul",
+      "entree": {
+        "nom": "0"
+      },
+      "valide": true
+    },
+    {
+      "nom": "espaces seuls : acceptés par NotBlank sans normaliseur",
+      "entree": {
+        "nom": "   "
+      },
+      "valide": true
+    },
+    {
+      "nom": "255 caractères",
+      "entree": {
+        "nom": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+      },
+      "valide": true
+    },
+    {
+      "nom": "256 caractères",
+      "entree": {
+        "nom": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+      },
+      "valide": false
+    }
+  ]
+}

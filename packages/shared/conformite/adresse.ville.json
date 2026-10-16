@@ -1,0 +1,45 @@
+{
+  "regle": "adresse.ville",
+  "description": "Ville d'une adresse : obligatoire, pas seulement des espaces au sens de trim() PHP, 255 caractères au plus.",
+  "reference": [
+    "apps/api/src/Shared/ValueObject/Adresse.php",
+    "apps/api/src/Presentation/Api/Chantier/Payload/CreerChantierPayload.php"
+  ],
+  "cas": [
+    {
+      "nom": "ville ordinaire",
+      "entree": {
+        "ville": "Saint-Étienne"
+      },
+      "valide": true
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "ville": ""
+      },
+      "valide": false
+    },
+    {
+      "nom": "espaces seuls",
+      "entree": {
+        "ville": "  "
+      },
+      "valide": false
+    },
+    {
+      "nom": "255 caractères",
+      "entree": {
+        "ville": "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+      },
+      "valide": true
+    },
+    {
+      "nom": "256 caractères",
+      "entree": {
+        "ville": "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+      },
+      "valide": false
+    }
+  ]
+}
