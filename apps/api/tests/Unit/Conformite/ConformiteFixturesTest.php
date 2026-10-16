@@ -7,6 +7,8 @@ namespace App\Tests\Unit\Conformite;
 use App\Auth\ReglesInscription;
 use App\Domain\Chantier\Exception\SurfaceInvalideException;
 use App\Presentation\Api\Chantier\Payload\CreerChantierPayload;
+use App\Presentation\Api\Chantier\Payload\CreerLotPayload;
+use App\Presentation\Api\Chantier\Payload\CreerTachePayload;
 use App\Presentation\Api\Client\Payload\CreerClientPayload;
 use App\Presentation\Api\Photo\Payload\ModifierLegendePayload;
 use App\Shared\Exception\AdresseInvalideException;
@@ -97,6 +99,13 @@ final class ConformiteFixturesTest extends TestCase
                 ReglesInscription::contraintesMotDePasse(),
             )) === 0,
             'photo.legende' => $this->sansViolation(new ModifierLegendePayload(self::chaine($entree, 'legende'))),
+            'lot.nom' => $this->sansViolation(new CreerLotPayload(nom: self::chaine($entree, 'nom'), mode: 'temps')),
+            'lot.estimation' => $this->sansViolation(new CreerLotPayload(
+                nom: 'Maçonnerie',
+                mode: 'temps',
+                estimation: self::nombre($entree, 'estimation'),
+            )),
+            'tache.libelle' => $this->sansViolation(new CreerTachePayload(libelle: self::chaine($entree, 'libelle'))),
             default => self::fail(\sprintf('Règle « %s » sans implémentation dans le runner API.', $regle)),
         };
     }

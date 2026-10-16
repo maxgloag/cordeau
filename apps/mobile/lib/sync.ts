@@ -1,10 +1,22 @@
-import { fetchChantiers, fetchPhotos, listClients } from "./api";
+import {
+  fetchChantiers,
+  fetchLots,
+  fetchPhotos,
+  fetchTaches,
+  listClients,
+} from "./api";
 import {
   getPhotosForChantier,
   reconcilePhotos,
   upsertChantiers,
   upsertClients,
 } from "@/db/queries";
+import {
+  getLotsForChantier,
+  getTachesForLot,
+  reconcileLots,
+  reconcileTaches,
+} from "@/db/lotQueries";
 import type { QueryClient } from "@tanstack/react-query";
 
 export async function refreshChantiers(
@@ -33,6 +45,25 @@ export async function refreshPhotos(
     ["photos", chantierId],
     getPhotosForChantier(chantierId),
   );
+}
+
+export async function refreshLots(
+  queryClient: QueryClient,
+  chantierId: string,
+): Promise<void> {
+  reconcileLots(chantierId, await fetchLots(chantierId));
+  queryClient.setQueryData(
+    ["lots", chantierId],
+    getLotsForChantier(chantierId),
+  );
+}
+
+export async function refreshTaches(
+  queryClient: QueryClient,
+  lotId: string,
+): Promise<void> {
+  reconcileTaches(lotId, await fetchTaches(lotId));
+  queryClient.setQueryData(["taches", lotId], getTachesForLot(lotId));
 }
 
 let isRefreshing = false;

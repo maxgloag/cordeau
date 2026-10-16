@@ -4,10 +4,13 @@ import {
   codePostalValide,
   emailClientValide,
   emailInscriptionValide,
+  estimationLotValide,
   legendeValide,
+  libelleTacheValide,
   ligneAdresseValide,
   motDePasseValide,
   nomClientValide,
+  nomLotValide,
   paysValide,
   surfaceValide,
 } from "../lib/regles-metier";
@@ -41,6 +44,9 @@ const implementations: Record<
   "auth.email": (e) => emailInscriptionValide(chaine(e, "email")),
   "auth.motDePasse": (e) => motDePasseValide(chaine(e, "motDePasse")),
   "photo.legende": (e) => legendeValide(chaine(e, "legende")),
+  "lot.nom": (e) => nomLotValide(chaine(e, "nom")),
+  "lot.estimation": (e) => estimationLotValide(Number(e["estimation"])),
+  "tache.libelle": (e) => libelleTacheValide(chaine(e, "libelle")),
 };
 
 describe("fixtures de conformité", () => {

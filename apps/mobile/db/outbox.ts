@@ -1,7 +1,7 @@
 // TODO: migrate console.log to Sentry breadcrumbs en Phase 4+
-import { eq, and, lt } from "drizzle-orm";
+import { eq, and, lt, sql } from "drizzle-orm";
 import { db } from "./index";
-import { outbox, photos } from "./schema";
+import { lots, outbox, photos, taches } from "./schema";
 import type { OutboxEntityType, OutboxOperation, OutboxStatus } from "./schema";
 import {
   creerChantier,
@@ -12,6 +12,11 @@ import {
   supprimerClient,
   patchPhotoLegende,
   deletePhoto,
+  creerLot,
+  supprimerLot,
+  creerTache,
+  modifierTache,
+  supprimerTache,
 } from "@/lib/api";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -19,6 +24,8 @@ import {
   upsertChantiers,
   upsertClients,
 } from "./queries";
+import { getLotsForChantier, getTachesForLot } from "./lotQueries";
+import { estBloquee } from "./lotSync";
 import { randomUUID } from "expo-crypto";
 
 const MAX_RETRY = 10;
@@ -68,7 +75,9 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
       .select()
       .from(outbox)
       .where(and(eq(outbox.status, "pending" as OutboxStatus)))
-      .orderBy(outbox.createdAt)
+      // rowid départage deux entrées créées dans la même milliseconde : le lot
+      // doit partir avant ses tâches (cf ADR 0012).
+      .orderBy(outbox.createdAt, sql`rowid`)
       .all();
 
     if (entries.length === 0) {
@@ -77,8 +86,18 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
     }
     console.log(`[outbox] processOutbox start (${entries.length} pending)`);
 
+    // Entités dont l'entrée n'a pas abouti pendant ce passage : leurs enfants
+    // (tâches d'un lot, lots d'un chantier) attendent, sinon l'API répond 404.
+    const nonSynchronises = new Set<string>();
+
     for (const entry of entries) {
+      if (estBloquee(entry, nonSynchronises)) {
+        nonSynchronises.add(entry.entityId);
+        continue;
+      }
+
       if (entry.retryCount >= MAX_RETRY) {
+        nonSynchronises.add(entry.entityId);
         console.log(
           `[outbox] abandoned ${entry.entityType}/${entry.operation}/${entry.entityId} (max retry)`,
         );
@@ -94,7 +113,10 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
         MAX_BACKOFF_MS,
       );
       const lastAttempt = entry.lastAttemptAt ?? 0;
-      if (Date.now() - lastAttempt < delay && entry.retryCount > 0) continue;
+      if (Date.now() - lastAttempt < delay && entry.retryCount > 0) {
+        nonSynchronises.add(entry.entityId);
+        continue;
+      }
 
       db.update(outbox)
         .set({ status: "syncing" as OutboxStatus, lastAttemptAt: Date.now() })
@@ -120,7 +142,11 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
       } catch (err) {
         const status = (err as { status?: number }).status ?? 0;
         // 409 Conflict = idempotence : l'entite existe deja cote serveur avec ce UUID -> on considere synced
-        if (status === 409) {
+        // 404 sur un delete : deja supprime cote serveur (ex. tache supprimee avec son lot)
+        if (
+          status === 409 ||
+          (status === 404 && entry.operation === "delete")
+        ) {
           console.log(
             `[outbox] 409 -> synced ${entry.entityType}/${entry.operation}/${entry.entityId}`,
           );
@@ -130,6 +156,7 @@ export async function processOutbox(queryClient: QueryClient): Promise<void> {
             .run();
           continue;
         }
+        nonSynchronises.add(entry.entityId);
         const isClientError = status >= 400 && status < 500;
         const nextStatus: OutboxStatus = isClientError
           ? "abandoned"
@@ -217,6 +244,44 @@ async function pushEntry(
         ((old ?? []) as { id: string }[]).filter((c) => c.id !== entityId),
       );
     }
+  } else if (entityType === "lot") {
+    const chantierId = payload["chantierId"] as string;
+    if (operation === "create") {
+      await creerLot(
+        chantierId,
+        sans(payload, "chantierId") as Parameters<typeof creerLot>[1],
+      );
+      db.update(lots)
+        .set({ syncedAt: Date.now() })
+        .where(eq(lots.id, entityId))
+        .run();
+    } else if (operation === "delete") {
+      await supprimerLot(entityId);
+    }
+    queryClient.setQueryData(
+      ["lots", chantierId],
+      getLotsForChantier(chantierId),
+    );
+  } else if (entityType === "tache") {
+    const lotId = payload["lotId"] as string;
+    if (operation === "create") {
+      await creerTache(
+        lotId,
+        sans(payload, "lotId") as Parameters<typeof creerTache>[1],
+      );
+      db.update(taches)
+        .set({ syncedAt: Date.now() })
+        .where(eq(taches.id, entityId))
+        .run();
+    } else if (operation === "update") {
+      await modifierTache(
+        entityId,
+        sans(payload, "lotId") as Parameters<typeof modifierTache>[1],
+      );
+    } else if (operation === "delete") {
+      await supprimerTache(entityId);
+    }
+    queryClient.setQueryData(["taches", lotId], getTachesForLot(lotId));
   } else if (entityType === "photo") {
     const chantierId = payload["chantierId"] as string;
     if (operation === "update") {
@@ -237,6 +302,15 @@ async function pushEntry(
       getPhotosForChantier(chantierId),
     );
   }
+}
+
+// Le parent ne sert qu'à l'URL imbriquée et à l'ordre de sync : il ne part pas dans le corps.
+function sans(
+  payload: Record<string, unknown>,
+  cle: string,
+): Record<string, unknown> {
+  const { [cle]: _ignoree, ...reste } = payload;
+  return reste;
 }
 
 function cleanupSynced() {

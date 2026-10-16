@@ -7,6 +7,7 @@ const LONGUEUR_MAX_TEXTE = 255;
 const CODE_POSTAL_MAX = 20;
 const SURFACE_MAX_M2 = 100_000;
 export const LEGENDE_MAX = 280;
+const ESTIMATION_LOT_MAX = 9_999_999_999;
 
 // Motif "html5" de la contrainte Email de Symfony.
 const EMAIL_HTML5 =
@@ -76,6 +77,18 @@ export function motDePasseValide(motDePasse: string): boolean {
 
 export function legendeValide(legende: string): boolean {
   return longueur(legende) <= LEGENDE_MAX;
+}
+
+export function nomLotValide(nom: string): boolean {
+  return trimPhp(nom) !== "" && longueur(nom) <= LONGUEUR_MAX_TEXTE;
+}
+
+export function libelleTacheValide(libelle: string): boolean {
+  return trimPhp(libelle) !== "" && longueur(libelle) <= LONGUEUR_MAX_TEXTE;
+}
+
+export function estimationLotValide(estimation: number): boolean {
+  return estimation >= 0 && estimation <= ESTIMATION_LOT_MAX;
 }
 
 // Champs d'adresse des formulaires chantier et client, à compléter par verifierCodePostal.

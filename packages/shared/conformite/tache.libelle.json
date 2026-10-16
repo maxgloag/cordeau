@@ -1,0 +1,42 @@
+{
+  "regle": "tache.libelle",
+  "description": "Libellé d'une tâche : non vide après trim, 255 caractères au plus.",
+  "reference": "apps/api/src/Presentation/Api/Chantier/Payload/CreerTachePayload.php",
+  "cas": [
+    {
+      "nom": "libellé ordinaire",
+      "entree": {
+        "libelle": "Poser les rails"
+      },
+      "valide": true
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "libelle": ""
+      },
+      "valide": false
+    },
+    {
+      "nom": "espaces seuls",
+      "entree": {
+        "libelle": "   "
+      },
+      "valide": false
+    },
+    {
+      "nom": "255 caractères",
+      "entree": {
+        "libelle": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valide": true
+    },
+    {
+      "nom": "256 caractères",
+      "entree": {
+        "libelle": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valide": false
+    }
+  ]
+}

@@ -8,6 +8,11 @@ type Options<TPayload> = {
   entityType: OutboxEntityType;
   operation: OutboxOperation;
   buildLocal: (entityId: string, payload: TPayload) => void;
+  /**
+   * Anti double-envoi (500 ms) : actif par défaut pour les formulaires. À couper
+   * pour les gestes répétés sur des lignes différentes (cocher plusieurs tâches).
+   */
+  guard?: boolean;
 };
 
 export function useOfflineMutation<TPayload extends Record<string, unknown>>(
@@ -17,8 +22,9 @@ export function useOfflineMutation<TPayload extends Record<string, unknown>>(
   const inFlight = useRef(false);
 
   function mutate(payload: TPayload, entityId?: string): string | undefined {
-    if (inFlight.current) return undefined;
-    inFlight.current = true;
+    const guard = options.guard ?? true;
+    if (guard && inFlight.current) return undefined;
+    inFlight.current = guard;
     try {
       const id = entityId ?? randomUUID();
       options.buildLocal(id, payload);

@@ -1,0 +1,45 @@
+{
+  "regle": "lot.estimation",
+  "description": "Estimation d'un lot (heures, m² ou €) : entre 0 et 9 999 999 999.",
+  "reference": [
+    "apps/api/src/Presentation/Api/Chantier/Payload/CreerLotPayload.php",
+    "apps/api/src/Domain/Chantier/ValueObject/Estimation.php"
+  ],
+  "cas": [
+    {
+      "nom": "estimation ordinaire",
+      "entree": {
+        "estimation": 12.5
+      },
+      "valide": true
+    },
+    {
+      "nom": "zéro",
+      "entree": {
+        "estimation": 0
+      },
+      "valide": true
+    },
+    {
+      "nom": "négative",
+      "entree": {
+        "estimation": -1
+      },
+      "valide": false
+    },
+    {
+      "nom": "borne haute",
+      "entree": {
+        "estimation": 9999999999
+      },
+      "valide": true
+    },
+    {
+      "nom": "au-delà de la borne",
+      "entree": {
+        "estimation": 10000000000
+      },
+      "valide": false
+    }
+  ]
+}
