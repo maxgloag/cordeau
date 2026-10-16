@@ -1,6 +1,7 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-export type OutboxEntityType = "chantier" | "client" | "photo";
+export type OutboxEntityType =
+  "chantier" | "client" | "photo" | "lot" | "tache";
 export type OutboxOperation = "create" | "update" | "delete";
 export type OutboxStatus =
   "pending" | "syncing" | "synced" | "error" | "abandoned";
@@ -17,6 +18,27 @@ export const chantiers = sqliteTable("chantiers", {
   clientNom: text("client_nom"),
   syncedAt: integer("synced_at"),
   updatedAt: integer("updated_at"),
+});
+
+export const lots = sqliteTable("lots", {
+  id: text("id").primaryKey(),
+  chantierId: text("chantier_id").notNull(),
+  nom: text("nom").notNull(),
+  mode: text("mode").notNull(),
+  estimation: real("estimation"),
+  reel: real("reel"),
+  ordre: integer("ordre").notNull().default(0),
+  syncedAt: integer("synced_at"),
+});
+
+export const taches = sqliteTable("taches", {
+  id: text("id").primaryKey(),
+  lotId: text("lot_id").notNull(),
+  libelle: text("libelle").notNull(),
+  faite: integer("faite", { mode: "boolean" }).notNull().default(false),
+  faiteLe: text("faite_le"),
+  ordre: integer("ordre").notNull().default(0),
+  syncedAt: integer("synced_at"),
 });
 
 export const clients = sqliteTable("clients", {

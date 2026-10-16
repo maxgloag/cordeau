@@ -36,6 +36,7 @@ import {
 import { LEGENDE_MAX } from "@/lib/regles-metier";
 import { ChantierForm } from "@/components/ChantierForm";
 import { SubmitButton } from "@/components/SubmitButton";
+import { LotsSection } from "@/components/LotsSection";
 import {
   getAllChantiers,
   getAllClients,
@@ -390,6 +391,9 @@ export default function ChantierDetailScreen() {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Section Lots (optionnelle : un chantier sans lot reste valide) */}
+          {!isEditing && id && <LotsSection chantierId={id} />}
 
           {/* Section Photos */}
           <View className="mt-6 mb-4">

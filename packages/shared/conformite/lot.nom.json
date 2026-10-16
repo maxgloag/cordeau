@@ -1,0 +1,42 @@
+{
+  "regle": "lot.nom",
+  "description": "Nom d'un lot : non vide après trim, 255 caractères au plus.",
+  "reference": "apps/api/src/Presentation/Api/Chantier/Payload/CreerLotPayload.php",
+  "cas": [
+    {
+      "nom": "nom ordinaire",
+      "entree": {
+        "nom": "Démolition cloison"
+      },
+      "valide": true
+    },
+    {
+      "nom": "vide",
+      "entree": {
+        "nom": ""
+      },
+      "valide": false
+    },
+    {
+      "nom": "espaces seuls",
+      "entree": {
+        "nom": "   "
+      },
+      "valide": false
+    },
+    {
+      "nom": "255 caractères",
+      "entree": {
+        "nom": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valide": true
+    },
+    {
+      "nom": "256 caractères",
+      "entree": {
+        "nom": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "valide": false
+    }
+  ]
+}
