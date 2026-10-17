@@ -4,12 +4,12 @@ Guide de référence pour mettre en place l'environnement de développement loca
 
 ## Vue d'ensemble des 4 environnements
 
-| Environnement         | Secrets                        | Où vivent les variables          |
-| --------------------- | ------------------------------ | -------------------------------- |
-| **dev** (local)       | Dashlane (note `cordeau-dev`)  | Injectées par `bin/dev` (`dcli`) |
-| **test** (CI + local) | `.env.test.local` (gitignored) | Fichiers locaux                  |
-| **staging**           | Injectées par la plateforme    | Fly secrets / CF Pages env vars  |
-| **prod**              | Injectées par la plateforme    | Fly secrets / CF Pages env vars  |
+| Environnement         | Secrets                               | Où vivent les variables          |
+| --------------------- | ------------------------------------- | -------------------------------- |
+| **dev** (local)       | Dashlane (note `cordeau-dev`)         | Injectées par `bin/dev` (`dcli`) |
+| **test** (CI + local) | Aucun (`.env.test.local` sans secret) | Fichiers locaux                  |
+| **staging**           | Injectées par la plateforme           | Fly secrets / CF Pages env vars  |
+| **prod**              | Injectées par la plateforme           | Fly secrets / CF Pages env vars  |
 
 Chaque app (api, web, mobile) gère ses propres `.env`. Pas de `.env.staging` ni `.env.prod` dans le repo.
 
@@ -20,6 +20,7 @@ apps/api/
 ├── .env             # valeurs par défaut, committées (sans secrets)
 ├── .env.example     # template commenté pour setup initial
 ├── .env.local       # config propre au poste, sans aucun secret — gitignored
+├── .env.test.local  # idem pour les tests (DATABASE_URL) — gitignored
 └── bin/dev          # lance le serveur avec les secrets Dashlane
 
 apps/web/
@@ -100,7 +101,16 @@ bin/dev                                                    # Touch ID attendu
 
 Vérification : `curl http://localhost:8000/health` renvoie `{"status":"ok"}` (étape 5).
 
-Les tests (`bin/phpunit`) n'utilisent aucune valeur Dashlane : ils tournent sur la config `test` commitée, sans `.env.test.local`.
+#### Tests (`bin/phpunit`)
+
+Les tests n'utilisent aucune valeur Dashlane. En env `test`, Symfony ignore `.env.local` : sans `apps/api/.env.test.local`, ils échouent (`password authentication failed for user "app"`). Créer ce fichier (gitignoré, sans secret) avec la même `DATABASE_URL` que `.env.local` ; la base `cordeau_test` en est dérivée automatiquement.
+
+```bash
+cd apps/api
+# .env.test.local : DATABASE_URL="postgresql://cordeau:cordeau@127.0.0.1:5432/cordeau?serverVersion=18&charset=utf8"
+symfony console doctrine:database:create --env=test --if-not-exists
+symfony console doctrine:migrations:migrate --env=test --no-interaction
+```
 
 ### 2. apps/web
 
