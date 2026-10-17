@@ -4,12 +4,12 @@ Guide de référence pour mettre en place l'environnement de développement loca
 
 ## Vue d'ensemble des 4 environnements
 
-| Environnement         | Secrets                        | Où vivent les variables         |
-| --------------------- | ------------------------------ | ------------------------------- |
-| **dev** (local)       | `.env.local` (gitignored)      | Fichiers locaux                 |
-| **test** (CI + local) | `.env.test.local` (gitignored) | Fichiers locaux                 |
-| **staging**           | Injectées par la plateforme    | Fly secrets / CF Pages env vars |
-| **prod**              | Injectées par la plateforme    | Fly secrets / CF Pages env vars |
+| Environnement         | Secrets                        | Où vivent les variables          |
+| --------------------- | ------------------------------ | -------------------------------- |
+| **dev** (local)       | Dashlane (note `cordeau-dev`)  | Injectées par `bin/dev` (`dcli`) |
+| **test** (CI + local) | `.env.test.local` (gitignored) | Fichiers locaux                  |
+| **staging**           | Injectées par la plateforme    | Fly secrets / CF Pages env vars  |
+| **prod**              | Injectées par la plateforme    | Fly secrets / CF Pages env vars  |
 
 Chaque app (api, web, mobile) gère ses propres `.env`. Pas de `.env.staging` ni `.env.prod` dans le repo.
 
@@ -19,8 +19,8 @@ Chaque app (api, web, mobile) gère ses propres `.env`. Pas de `.env.staging` ni
 apps/api/
 ├── .env             # valeurs par défaut, committées (sans secrets)
 ├── .env.example     # template commenté pour setup initial
-├── .env.local       # ⚠️ secrets dev — gitignored, ne jamais committer
-└── .env.test.local  # ⚠️ secrets test — gitignored
+├── .env.local       # valeurs non secrètes propres au poste (ex. GOOGLE_CLIENT_ID) — gitignored
+└── bin/dev          # lance le serveur avec les secrets Dashlane
 
 apps/web/
 ├── .env
@@ -54,20 +54,36 @@ pnpm install           # Dépendances (à la racine du monorepo)
 
 ### 1. apps/api
 
-```bash
-cd apps/api
-cp .env.example .env.local
-```
+Plus aucun secret dans un fichier `.env*` : `APP_SECRET`, `GOOGLE_CLIENT_SECRET` et `SENTRY_DSN` vivent dans une note sécurisée Dashlane et sont injectés au lancement par `dcli exec`.
 
-Éditer `.env.local` et remplir :
+1. Installer la CLI : `brew install dashlane/tap/dashlane-cli`, puis `dcli sync` (connexion au compte).
+2. Exiger Touch ID à chaque lecture : `dcli configure user-presence --method biometrics`.
+3. Créer la note sécurisée `cordeau-dev`, champ `content`, au format JSON :
+
+   ```json
+   { "APP_SECRET": "…", "GOOGLE_CLIENT_SECRET": "…", "SENTRY_DSN": "…" }
+   ```
+
+   - `APP_SECRET` : `openssl rand -hex 32`
+   - `GOOGLE_CLIENT_SECRET` : secret du client OAuth « Cordeau Web » ([Google Cloud Console](https://console.cloud.google.com/apis/credentials))
+   - `SENTRY_DSN` : DSN du projet `cordeau-api` ([Sentry](https://cordeau.sentry.io) → Settings → Client Keys)
+
+4. Lancer : `apps/api/bin/dev` (les arguments sont transmis à `symfony serve`).
+
+`bin/dev` exporte les références `dl://cordeau-dev/content?json=<CLÉ>` puis lance `dcli exec -- symfony serve --no-tls`. `dcli` remplace les variables exportées qui commencent par `dl://` ; il ne lit pas les fichiers `.env`. Symfony Dotenv ne remplace pas une variable déjà présente dans l'environnement : les valeurs injectées priment.
+
+Le reste de la configuration non secrète garde les valeurs par défaut du `.env` commité. Pour les valeurs propres au poste (`GOOGLE_CLIENT_ID`, `GOOGLE_OAUTH_AUDIENCES`, public), `cp .env.example .env.local` puis les renseigner : les trois lignes `dl://` de `.env.example` documentent la référence et n'ont pas à être modifiées.
 
 | Variable                 | Valeur                                                | Source                                                                    |
 | ------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------- |
-| `APP_SECRET`             | `$(openssl rand -hex 32)`                             | Générer en local                                                          |
+| `APP_SECRET`             | `dl://cordeau-dev/content?json=APP_SECRET`            | Dashlane                                                                  |
+| `GOOGLE_CLIENT_SECRET`   | `dl://cordeau-dev/content?json=GOOGLE_CLIENT_SECRET`  | Dashlane                                                                  |
+| `SENTRY_DSN`             | `dl://cordeau-dev/content?json=SENTRY_DSN`            | Dashlane                                                                  |
 | `DATABASE_URL`           | `postgresql://cordeau:cordeau@127.0.0.1:5432/cordeau` | docker-compose                                                            |
-| `GOOGLE_CLIENT_SECRET`   | Secret du client `cordeau-dev`                        | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) |
+| `GOOGLE_CLIENT_ID`       | ID du client « Cordeau Web »                          | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) |
 | `GOOGLE_OAUTH_AUDIENCES` | iOS client ID                                         | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) |
-| `SENTRY_DSN`             | DSN du projet `cordeau-api`                           | [Sentry](https://cordeau.sentry.io) → Settings → Client Keys              |
+
+Les tests (`bin/phpunit`) n'utilisent aucune valeur Dashlane : ils tournent sur la config `test` commitée, sans `.env.test.local`.
 
 ### 2. apps/web
 
@@ -103,7 +119,8 @@ cp .env.example .env.local
 ```bash
 cd cordeau          # racine du monorepo
 docker compose up -d
-pnpm dev            # turbo run dev — lance api (8000) + web (5173) + mobile (Expo)
+apps/api/bin/dev    # API (8000) avec les secrets Dashlane, dans un terminal dédié
+pnpm dev --filter='!@cordeau/api'   # web (5173) + mobile (Expo), sans l'API (déjà lancée par bin/dev)
 ```
 
 ### 5. Vérifier
@@ -144,8 +161,9 @@ docker compose up -d
 
 **"GOOGLE_CLIENT_SECRET invalid"**
 
-- Vérifier que le secret du client dev (`cordeau-dev`) est dans `apps/api/.env.local`
-- Ne pas mélanger les credentials dev et prod
+- Lancer l'API via `apps/api/bin/dev` (et non `symfony serve` seul), sinon la variable reste la chaîne `dl://…`
+- Vérifier que la note Dashlane `cordeau-dev` contient la clé `GOOGLE_CLIENT_SECRET` du client « Cordeau Web »
+- Le client « Cordeau Web » sert aussi la prod (`cordeau-api.fly.dev`) : ne pas en faire tourner la rotation sans prévenir
 
 **"Database does not exist" en test**
 

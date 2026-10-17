@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Lance le serveur de dev avec les secrets injectés depuis Dashlane (note « cordeau-dev »).
+# dcli remplace les variables exportées valant « dl://… » ; rien n'est écrit sur disque.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+export APP_SECRET='dl://cordeau-dev/content?json=APP_SECRET'
+export GOOGLE_CLIENT_SECRET='dl://cordeau-dev/content?json=GOOGLE_CLIENT_SECRET'
+export SENTRY_DSN='dl://cordeau-dev/content?json=SENTRY_DSN'
+
+exec dcli exec -- symfony serve --no-tls "$@"
