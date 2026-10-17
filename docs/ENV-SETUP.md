@@ -19,7 +19,7 @@ Chaque app (api, web, mobile) gère ses propres `.env`. Pas de `.env.staging` ni
 apps/api/
 ├── .env             # valeurs par défaut, committées (sans secrets)
 ├── .env.example     # template commenté pour setup initial
-├── .env.local       # valeurs non secrètes propres au poste (ex. GOOGLE_CLIENT_ID) — gitignored
+├── .env.local       # config propre au poste, sans aucun secret — gitignored
 └── bin/dev          # lance le serveur avec les secrets Dashlane
 
 apps/web/
@@ -54,7 +54,9 @@ pnpm install           # Dépendances (à la racine du monorepo)
 
 ### 1. apps/api
 
-Plus aucun secret dans un fichier `.env*` : `APP_SECRET`, `GOOGLE_CLIENT_SECRET` et `SENTRY_DSN` vivent dans une note sécurisée Dashlane et sont injectés au lancement par `dcli exec`.
+**Règle : jamais de secret dans un fichier `.env*`** (`.env`, `.env.local`, `.env.example`…). `APP_SECRET`, `GOOGLE_CLIENT_SECRET` et `SENTRY_DSN` vivent dans une note sécurisée Dashlane et sont injectés au lancement par `dcli exec`.
+
+#### Secrets : Dashlane
 
 1. Installer la CLI : `brew install dashlane/tap/dashlane-cli`, puis `dcli sync` (connexion au compte).
 2. Exiger Touch ID à chaque lecture : `dcli configure user-presence --method biometrics`.
@@ -68,20 +70,35 @@ Plus aucun secret dans un fichier `.env*` : `APP_SECRET`, `GOOGLE_CLIENT_SECRET`
    - `GOOGLE_CLIENT_SECRET` : secret du client OAuth « Cordeau Web » ([Google Cloud Console](https://console.cloud.google.com/apis/credentials))
    - `SENTRY_DSN` : DSN du projet `cordeau-api` ([Sentry](https://cordeau.sentry.io) → Settings → Client Keys)
 
-4. Lancer : `apps/api/bin/dev` (les arguments sont transmis à `symfony serve`).
+`bin/dev` exporte les références `dl://cordeau-dev/content?json=<CLÉ>` puis lance `dcli exec -- symfony serve --no-tls` (les arguments sont transmis à `symfony serve`). `dcli` remplace les variables exportées qui commencent par `dl://` ; il ne lit pas les fichiers `.env`. Symfony Dotenv ne remplace pas une variable déjà présente dans l'environnement : les valeurs injectées priment.
 
-`bin/dev` exporte les références `dl://cordeau-dev/content?json=<CLÉ>` puis lance `dcli exec -- symfony serve --no-tls`. `dcli` remplace les variables exportées qui commencent par `dl://` ; il ne lit pas les fichiers `.env`. Symfony Dotenv ne remplace pas une variable déjà présente dans l'environnement : les valeurs injectées priment.
+#### `apps/api/.env.local` : config sans secret
 
-Le reste de la configuration non secrète garde les valeurs par défaut du `.env` commité. Pour les valeurs propres au poste (`GOOGLE_CLIENT_ID`, `GOOGLE_OAUTH_AUDIENCES`, public), `cp .env.example .env.local` puis les renseigner : les trois lignes `dl://` de `.env.example` documentent la référence et n'ont pas à être modifiées.
+`.env.local` reste nécessaire, mais ne contient que des valeurs non secrètes. Le `.env` commité garde le défaut Symfony `DATABASE_URL=…app:!ChangeMe!…`, qui échoue : il faut le surcharger.
 
-| Variable                 | Valeur                                                | Source                                                                    |
-| ------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------- |
-| `APP_SECRET`             | `dl://cordeau-dev/content?json=APP_SECRET`            | Dashlane                                                                  |
-| `GOOGLE_CLIENT_SECRET`   | `dl://cordeau-dev/content?json=GOOGLE_CLIENT_SECRET`  | Dashlane                                                                  |
-| `SENTRY_DSN`             | `dl://cordeau-dev/content?json=SENTRY_DSN`            | Dashlane                                                                  |
-| `DATABASE_URL`           | `postgresql://cordeau:cordeau@127.0.0.1:5432/cordeau` | docker-compose                                                            |
-| `GOOGLE_CLIENT_ID`       | ID du client « Cordeau Web »                          | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) |
-| `GOOGLE_OAUTH_AUDIENCES` | iOS client ID                                         | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) |
+```bash
+cd apps/api
+cp .env.example .env.local   # puis ne garder que les trois variables ci-dessous
+```
+
+| Variable                 | Valeur                                                                                                   |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`           | `"postgresql://cordeau:cordeau@127.0.0.1:5432/cordeau?serverVersion=18&charset=utf8"`                    |
+| `GOOGLE_CLIENT_ID`       | ID du client « Cordeau Web » ([Google Cloud Console](https://console.cloud.google.com/apis/credentials)) |
+| `GOOGLE_OAUTH_AUDIENCES` | ID du client « Cordeau iOS » ([Google Cloud Console](https://console.cloud.google.com/apis/credentials)) |
+
+Les ID client Google sont publics. Les trois lignes `dl://` de `.env.example` documentent les références Dashlane : ne pas les copier dans `.env.local` ni y coller de valeur.
+
+#### Migrer la base puis lancer
+
+```bash
+docker compose up -d                                       # Postgres + Redis (racine du monorepo)
+cd apps/api
+symfony console doctrine:migrations:migrate --no-interaction   # base de dev
+bin/dev                                                    # Touch ID attendu
+```
+
+Vérification : `curl http://localhost:8000/health` renvoie `{"status":"ok"}` (étape 5).
 
 Les tests (`bin/phpunit`) n'utilisent aucune valeur Dashlane : ils tournent sur la config `test` commitée, sans `.env.test.local`.
 
