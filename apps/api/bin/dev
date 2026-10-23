@@ -5,7 +5,13 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+if ! command -v dcli >/dev/null 2>&1; then
+    echo "bin/dev : dcli introuvable. Installer : brew install dashlane/tap/dashlane-cli (docs/ENV-SETUP.md)." >&2
+    exit 1
+fi
+
 export APP_SECRET='dl://cordeau-dev/content?json=APP_SECRET'
+export DATABASE_URL='dl://cordeau-dev/content?json=DATABASE_URL'
 export GOOGLE_CLIENT_SECRET='dl://cordeau-dev/content?json=GOOGLE_CLIENT_SECRET'
 export SENTRY_DSN='dl://cordeau-dev/content?json=SENTRY_DSN'
 

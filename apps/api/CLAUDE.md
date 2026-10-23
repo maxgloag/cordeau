@@ -9,11 +9,11 @@ Fichier `.php-version` présent → Symfony CLI utilise automatiquement PHP 8.5 
 ## Commandes
 
 ```bash
-symfony server:start --no-tls      # dev server sur http://localhost:8000
+bin/dev                            # dev server sur http://localhost:8000 (secrets Dashlane via dcli)
 php bin/console cache:clear        # vider le cache
 php bin/console debug:router       # routes enregistrées
-php bin/phpunit                    # tous les tests
-php bin/phpunit tests/Integration/ # tests d'intégration seuls
+bin/test                           # tous les tests (DATABASE_URL via dcli)
+bin/test tests/Integration/        # tests d'intégration seuls
 ./vendor/bin/phpstan analyse       # analyse statique
 ./vendor/bin/deptrac analyse       # enforcement archi hexagonale (cf ADR 0018)
 ../../scripts/smoke-image.sh      # smoke test de l'image de prod (Docker requis), cf ci-dessous
@@ -103,8 +103,8 @@ PHPStan niveau 9 ne les voit pas : ils se couvrent par des **tests de cas limite
 ## Environnement
 
 - `.env` : valeurs par défaut committées (sans secrets)
-- `.env.local` : valeurs dev locales non committées (credentials DB, etc.)
-- `.env.test.local` : credentials pour la DB de test
+- `.env.dev` / `.env.test` : valeurs non secrètes par environnement, committées (ID client Google publics inclus)
+- Pas de `.env.local` ni de `.env.test.local` : les secrets et `DATABASE_URL` viennent de la note Dashlane `cordeau-dev`. Lancer l'API avec `bin/dev`, les tests avec `bin/test` (nécessitent `dcli`)
 - En prod, les variables sont injectées par Fly.io via `fly secrets set` (pas de `.env.prod`). Procédure de rotation détaillée dans [docs/runbooks/rotation-secrets.md](../../docs/runbooks/rotation-secrets.md)
 
 **Setup initial** : consulter [docs/ENV-SETUP.md](../../docs/ENV-SETUP.md) pour la checklist complète et les sources des secrets.

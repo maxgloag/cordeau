@@ -4,12 +4,12 @@ Guide de référence pour mettre en place l'environnement de développement loca
 
 ## Vue d'ensemble des 4 environnements
 
-| Environnement         | Secrets                               | Où vivent les variables          |
-| --------------------- | ------------------------------------- | -------------------------------- |
-| **dev** (local)       | Dashlane (note `cordeau-dev`)         | Injectées par `bin/dev` (`dcli`) |
-| **test** (CI + local) | Aucun (`.env.test.local` sans secret) | Fichiers locaux                  |
-| **staging**           | Injectées par la plateforme           | Fly secrets / CF Pages env vars  |
-| **prod**              | Injectées par la plateforme           | Fly secrets / CF Pages env vars  |
+| Environnement         | Secrets                         | Où vivent les variables          |
+| --------------------- | ------------------------------- | -------------------------------- |
+| **dev** (local)       | Dashlane (note `cordeau-dev`)   | Injectées par `bin/dev` (`dcli`) |
+| **test** (CI + local) | `DATABASE_URL` seule (Dashlane) | Injectée par `bin/test` (`dcli`) |
+| **staging**           | Injectées par la plateforme     | Fly secrets / CF Pages env vars  |
+| **prod**              | Injectées par la plateforme     | Fly secrets / CF Pages env vars  |
 
 Chaque app (api, web, mobile) gère ses propres `.env`. Pas de `.env.staging` ni `.env.prod` dans le repo.
 
@@ -18,10 +18,11 @@ Chaque app (api, web, mobile) gère ses propres `.env`. Pas de `.env.staging` ni
 ```
 apps/api/
 ├── .env             # valeurs par défaut, committées (sans secrets)
+├── .env.dev         # valeurs dev non secrètes, committées (ID client Google publics)
+├── .env.test        # valeurs de test, committées
 ├── .env.example     # template commenté pour setup initial
-├── .env.local       # config propre au poste, sans aucun secret — gitignored
-├── .env.test.local  # idem pour les tests (DATABASE_URL) — gitignored
-└── bin/dev          # lance le serveur avec les secrets Dashlane
+├── bin/dev          # lance le serveur avec les secrets Dashlane
+└── bin/test         # lance PHPUnit avec DATABASE_URL depuis Dashlane
 
 apps/web/
 ├── .env
@@ -55,7 +56,7 @@ pnpm install           # Dépendances (à la racine du monorepo)
 
 ### 1. apps/api
 
-**Règle : jamais de secret dans un fichier `.env*`** (`.env`, `.env.local`, `.env.example`…). `APP_SECRET`, `GOOGLE_CLIENT_SECRET` et `SENTRY_DSN` vivent dans une note sécurisée Dashlane et sont injectés au lancement par `dcli exec`.
+**Règle : jamais de secret dans un fichier `.env*`** (`.env`, `.env.dev`, `.env.example`…). `APP_SECRET`, `DATABASE_URL`, `GOOGLE_CLIENT_SECRET` et `SENTRY_DSN` vivent dans une note sécurisée Dashlane et sont injectés au lancement par `dcli exec`.
 
 #### Secrets : Dashlane
 
@@ -64,52 +65,44 @@ pnpm install           # Dépendances (à la racine du monorepo)
 3. Créer la note sécurisée `cordeau-dev`, champ `content`, au format JSON :
 
    ```json
-   { "APP_SECRET": "…", "GOOGLE_CLIENT_SECRET": "…", "SENTRY_DSN": "…" }
+   {
+     "APP_SECRET": "…",
+     "DATABASE_URL": "…",
+     "GOOGLE_CLIENT_SECRET": "…",
+     "SENTRY_DSN": "…"
+   }
    ```
 
    - `APP_SECRET` : `openssl rand -hex 32`
+   - `DATABASE_URL` : URL du Postgres local de `docker compose`, avec son mot de passe (`postgresql://cordeau:<mot de passe>@127.0.0.1:5432/cordeau?serverVersion=18&charset=utf8`). Même valeur en dev et en test
    - `GOOGLE_CLIENT_SECRET` : secret du client OAuth « Cordeau Web » ([Google Cloud Console](https://console.cloud.google.com/apis/credentials))
    - `SENTRY_DSN` : DSN du projet `cordeau-api` ([Sentry](https://cordeau.sentry.io) → Settings → Client Keys)
 
-`bin/dev` exporte les références `dl://cordeau-dev/content?json=<CLÉ>` puis lance `dcli exec -- symfony serve --no-tls` (les arguments sont transmis à `symfony serve`). `dcli` remplace les variables exportées qui commencent par `dl://` ; il ne lit pas les fichiers `.env`. Symfony Dotenv ne remplace pas une variable déjà présente dans l'environnement : les valeurs injectées priment.
+`bin/dev` exporte les références `dl://cordeau-dev/content?json=<CLÉ>` puis lance `dcli exec -- symfony serve --no-tls` (les arguments sont transmis à `symfony serve`). `dcli` remplace les variables exportées qui commencent par `dl://` ; il ne lit pas les fichiers `.env`. Symfony Dotenv ne remplace pas une variable déjà présente dans l'environnement : les valeurs injectées priment (y compris sur le `DATABASE_URL` par défaut de `.env`). Sans `dcli`, `bin/dev` s'arrête avec un message ; sans Touch ID, `dcli` échoue et le serveur ne démarre pas.
 
-#### `apps/api/.env.local` : config sans secret
-
-`.env.local` reste nécessaire, mais ne contient que des valeurs non secrètes. Le `.env` commité garde le défaut Symfony `DATABASE_URL=…app:!ChangeMe!…`, qui échoue : il faut le surcharger.
-
-```bash
-cd apps/api
-cp .env.example .env.local   # puis ne garder que les trois variables ci-dessous
-```
-
-| Variable                 | Valeur                                                                                                   |
-| ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`           | `"postgresql://cordeau:cordeau@127.0.0.1:5432/cordeau?serverVersion=18&charset=utf8"`                    |
-| `GOOGLE_CLIENT_ID`       | ID du client « Cordeau Web » ([Google Cloud Console](https://console.cloud.google.com/apis/credentials)) |
-| `GOOGLE_OAUTH_AUDIENCES` | ID du client « Cordeau iOS » ([Google Cloud Console](https://console.cloud.google.com/apis/credentials)) |
-
-Les ID client Google sont publics. Les trois lignes `dl://` de `.env.example` documentent les références Dashlane : ne pas les copier dans `.env.local` ni y coller de valeur.
+Aucun fichier `.env.local` n'est nécessaire. `GOOGLE_CLIENT_ID` et `GOOGLE_OAUTH_AUDIENCES` (ID de clients OAuth, publics) sont dans `apps/api/.env.dev`, commité.
 
 #### Migrer la base puis lancer
 
 ```bash
 docker compose up -d                                       # Postgres + Redis (racine du monorepo)
 cd apps/api
-symfony console doctrine:migrations:migrate --no-interaction   # base de dev
+export DATABASE_URL='dl://cordeau-dev/content?json=DATABASE_URL'   # référence Dashlane, pas une valeur
+dcli exec -- symfony console doctrine:migrations:migrate --no-interaction   # base de dev
 bin/dev                                                    # Touch ID attendu
 ```
 
 Vérification : `curl http://localhost:8000/health` renvoie `{"status":"ok"}` (étape 5).
 
-#### Tests (`bin/phpunit`)
+#### Tests (`bin/test`)
 
-Les tests n'utilisent aucune valeur Dashlane. En env `test`, Symfony ignore `.env.local` : sans `apps/api/.env.test.local`, ils échouent (`password authentication failed for user "app"`). Créer ce fichier (gitignoré, sans secret) avec la même `DATABASE_URL` que `.env.local` ; la base `cordeau_test` en est dérivée automatiquement.
+`bin/test [args phpunit]` injecte `DATABASE_URL` depuis Dashlane puis lance `php bin/phpunit`. En env `test`, Doctrine ajoute le suffixe `_test` au nom de la base (`cordeau_test`) : la base de dev n'est pas touchée. Première fois, créer et migrer la base de test :
 
 ```bash
 cd apps/api
-# .env.test.local : DATABASE_URL="postgresql://cordeau:cordeau@127.0.0.1:5432/cordeau?serverVersion=18&charset=utf8"
-symfony console doctrine:database:create --env=test --if-not-exists
-symfony console doctrine:migrations:migrate --env=test --no-interaction
+export DATABASE_URL='dl://cordeau-dev/content?json=DATABASE_URL'
+dcli exec -- symfony console doctrine:database:create --env=test --if-not-exists
+dcli exec -- symfony console doctrine:migrations:migrate --env=test --no-interaction
 ```
 
 ### 2. apps/web
@@ -196,8 +189,9 @@ docker compose up -d
 
 ```bash
 cd apps/api
-symfony console doctrine:database:create --env=test
-symfony console doctrine:migrations:migrate --env=test --no-interaction
+export DATABASE_URL='dl://cordeau-dev/content?json=DATABASE_URL'
+dcli exec -- symfony console doctrine:database:create --env=test
+dcli exec -- symfony console doctrine:migrations:migrate --env=test --no-interaction
 ```
 
 **Mobile ne se connecte pas à l'API sur device physique**
