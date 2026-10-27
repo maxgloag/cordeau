@@ -279,3 +279,85 @@ export async function patchPhotoLegende(
 export async function deletePhoto(id: string): Promise<void> {
   return apiFetch<void>(`/api/photos/${id}`, { method: "DELETE" });
 }
+
+export type ModeFacturation = "temps" | "surface" | "forfait";
+
+export type Lot = {
+  id: string;
+  chantierId: string;
+  nom: string;
+  mode: ModeFacturation;
+  estimation: number | null;
+  reel: number | null;
+  ordre: number;
+};
+
+export type CreerLotPayload = {
+  nom: string;
+  mode: ModeFacturation;
+  ordre?: number;
+  estimation?: number | null;
+  uuid?: string | null;
+};
+
+export async function fetchLots(chantierId: string): Promise<Lot[]> {
+  return apiFetch<Lot[]>(`/api/chantiers/${chantierId}/lots`);
+}
+
+export async function creerLot(
+  chantierId: string,
+  payload: CreerLotPayload,
+): Promise<Lot> {
+  return apiFetch<Lot>(`/api/chantiers/${chantierId}/lots`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function supprimerLot(id: string): Promise<void> {
+  return apiFetch<void>(`/api/lots/${id}`, { method: "DELETE" });
+}
+
+export type Tache = {
+  id: string;
+  lotId: string;
+  libelle: string;
+  faite: boolean;
+  faiteLe: string | null;
+  ordre: number;
+};
+
+export type CreerTachePayload = {
+  libelle: string;
+  ordre?: number;
+  uuid?: string | null;
+};
+
+export async function fetchTaches(lotId: string): Promise<Tache[]> {
+  return apiFetch<Tache[]>(`/api/lots/${lotId}/taches`);
+}
+
+export async function creerTache(
+  lotId: string,
+  payload: CreerTachePayload,
+): Promise<Tache> {
+  return apiFetch<Tache>(`/api/lots/${lotId}/taches`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function modifierTache(
+  id: string,
+  payload: { faite?: boolean; libelle?: string },
+): Promise<Tache> {
+  return apiFetch<Tache>(`/api/taches/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/merge-patch+json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function supprimerTache(id: string): Promise<void> {
+  return apiFetch<void>(`/api/taches/${id}`, { method: "DELETE" });
+}

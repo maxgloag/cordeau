@@ -108,6 +108,58 @@ export interface paths {
         patch: operations["api_clients_id_patch"];
         trace?: never;
     };
+    "/api/chantiers/{chantierId}/lots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of Lot resources.
+         * @description Retrieves the collection of Lot resources.
+         */
+        get: operations["api_chantiers_chantierIdlots_get_collection"];
+        put?: never;
+        /**
+         * Creates a Lot resource.
+         * @description Creates a Lot resource.
+         */
+        post: operations["api_chantiers_chantierIdlots_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/lots/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a Lot resource.
+         * @description Retrieves a Lot resource.
+         */
+        get: operations["api_lots_id_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Removes the Lot resource.
+         * @description Removes the Lot resource.
+         */
+        delete: operations["api_lots_id_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Updates the Lot resource.
+         * @description Updates the Lot resource.
+         */
+        patch: operations["api_lots_id_patch"];
+        trace?: never;
+    };
     "/api/chantiers/{chantierId}/photos": {
         parameters: {
             query?: never;
@@ -190,6 +242,54 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/lots/{lotId}/taches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of Tache resources.
+         * @description Retrieves the collection of Tache resources.
+         */
+        get: operations["api_lots_lotIdtaches_get_collection"];
+        put?: never;
+        /**
+         * Creates a Tache resource.
+         * @description Creates a Tache resource.
+         */
+        post: operations["api_lots_lotIdtaches_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/taches/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Removes the Tache resource.
+         * @description Removes the Tache resource.
+         */
+        delete: operations["api_taches_id_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Updates the Tache resource.
+         * @description Updates the Tache resource.
+         */
+        patch: operations["api_taches_id_patch"];
         trace?: never;
     };
 }
@@ -452,6 +552,48 @@ export interface components {
             "@id": string;
             "@type": string;
         };
+        Lot: {
+            id?: string;
+            chantierId?: string;
+            nom?: string;
+            mode?: string;
+            unite?: string;
+            estimation?: number | null;
+            reel?: number | null;
+            ordre?: number;
+            imprevus?: {
+                [key: string]: string;
+            }[];
+        };
+        "Lot.CreerLotPayload": {
+            nom: string;
+            /** @enum {string} */
+            mode: "temps" | "surface" | "forfait";
+            ordre?: number;
+            estimation?: number | null;
+            /** Format: uuid */
+            uuid?: string | null;
+        };
+        "Lot.ModifierLotPayload.jsonMergePatch": {
+            nom?: string | null;
+            /** @enum {string|null} */
+            mode?: "temps" | "surface" | "forfait" | null;
+            estimation?: number | null;
+            reel?: number | null;
+        };
+        "Lot.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            chantierId?: string;
+            nom?: string;
+            mode?: string;
+            unite?: string;
+            estimation?: number | null;
+            reel?: number | null;
+            ordre?: number;
+            imprevus?: {
+                [key: string]: string;
+            }[];
+        };
         Photo: {
             id?: string;
             chantierId?: string;
@@ -495,6 +637,32 @@ export interface components {
         "PrepareUploadResource.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             uploadUrl?: string;
             remoteKey?: string;
+        };
+        Tache: {
+            id?: string;
+            lotId?: string;
+            libelle?: string;
+            faite?: boolean;
+            faiteLe?: string | null;
+            ordre?: number;
+        };
+        "Tache.CreerTachePayload": {
+            libelle: string;
+            ordre?: number;
+            /** Format: uuid */
+            uuid?: string | null;
+        };
+        "Tache.ModifierTachePayload.jsonMergePatch": {
+            faite?: boolean | null;
+            libelle?: string | null;
+        };
+        "Tache.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            lotId?: string;
+            libelle?: string;
+            faite?: boolean;
+            faiteLe?: string | null;
+            ordre?: number;
         };
     };
     responses: never;
@@ -913,6 +1081,216 @@ export interface operations {
             };
         };
     };
+    api_chantiers_chantierIdlots_get_collection: {
+        parameters: {
+            query?: {
+                /** @description The collection page number */
+                page?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Lot identifier */
+                chantierId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lot collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lot"][];
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
+                        member: components["schemas"]["Lot.jsonld"][];
+                    };
+                };
+            };
+        };
+    };
+    api_chantiers_chantierIdlots_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Lot identifier */
+                chantierId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new Lot resource */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Lot.CreerLotPayload"];
+                "application/ld+json": components["schemas"]["Lot.CreerLotPayload"];
+            };
+        };
+        responses: {
+            /** @description Lot resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lot"];
+                    "application/ld+json": components["schemas"]["Lot.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_lots_id_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Lot identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lot resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lot"];
+                    "application/ld+json": components["schemas"]["Lot.jsonld"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_lots_id_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Lot identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lot resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_lots_id_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Lot identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated Lot resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["Lot.ModifierLotPayload.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description Lot resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lot"];
+                    "application/ld+json": components["schemas"]["Lot.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
     api_chantiers_chantierIdphotos_get_collection: {
         parameters: {
             query?: {
@@ -1112,6 +1490,181 @@ export interface operations {
             };
             /** @description Invalid input */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_lots_lotIdtaches_get_collection: {
+        parameters: {
+            query?: {
+                /** @description The collection page number */
+                page?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Tache identifier */
+                lotId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tache collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Tache"][];
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
+                        member: components["schemas"]["Tache.jsonld"][];
+                    };
+                };
+            };
+        };
+    };
+    api_lots_lotIdtaches_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tache identifier */
+                lotId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new Tache resource */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Tache.CreerTachePayload"];
+                "application/ld+json": components["schemas"]["Tache.CreerTachePayload"];
+            };
+        };
+        responses: {
+            /** @description Tache resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Tache"];
+                    "application/ld+json": components["schemas"]["Tache.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_taches_id_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tache identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tache resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_taches_id_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Tache identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated Tache resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["Tache.ModifierTachePayload.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description Tache resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Tache"];
+                    "application/ld+json": components["schemas"]["Tache.jsonld"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\Auth;
 
+use App\Auth\ReglesInscription;
 use App\Auth\RegistrationPolicy;
 use App\Entity\AuthToken;
 use App\Entity\User;
@@ -16,7 +17,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class RegisterController
@@ -43,25 +43,16 @@ final class RegisterController
             return new JsonResponse(['message' => 'Corps JSON invalide.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $email = isset($body['email']) && \is_string($body['email']) ? trim($body['email']) : '';
+        $email = isset($body['email']) && \is_string($body['email']) ? ReglesInscription::normaliserEmail($body['email']) : '';
         $motDePasse = isset($body['motDePasse']) && \is_string($body['motDePasse']) ? $body['motDePasse'] : '';
 
-        $violations = $this->validator->validate($email, [
-            new Assert\NotBlank(),
-            new Assert\Email(),
-            new Assert\Length(max: 255),
-        ]);
+        $violations = $this->validator->validate($email, ReglesInscription::contraintesEmail());
 
         if (\count($violations) > 0) {
             return new JsonResponse(['message' => 'Email invalide.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $violations = $this->validator->validate($motDePasse, [
-            new Assert\NotBlank(),
-            new Assert\Length(min: 8, max: 255),
-            new Assert\Regex(pattern: '/[A-Z]/', message: 'Le mot de passe doit contenir au moins une majuscule.'),
-            new Assert\Regex(pattern: '/[0-9]/', message: 'Le mot de passe doit contenir au moins un chiffre.'),
-        ]);
+        $violations = $this->validator->validate($motDePasse, ReglesInscription::contraintesMotDePasse());
 
         if (\count($violations) > 0) {
             $messages = [];

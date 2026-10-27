@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { Photo } from "@/lib/api";
+import { LEGENDE_MAX } from "@/lib/regles-metier";
 
 type Props = {
   photos: Photo[];
@@ -128,7 +129,7 @@ export function PhotoLightbox({
             onChange={(e) => setLegendeDraft(e.target.value)}
             onBlur={saveLegende}
             placeholder="Ajouter une légende"
-            maxLength={280}
+            maxLength={LEGENDE_MAX}
             className="flex-1 bg-transparent border-b border-white/30 text-white placeholder:text-gray-400 py-1 focus:outline-none focus:border-white"
           />
           <button

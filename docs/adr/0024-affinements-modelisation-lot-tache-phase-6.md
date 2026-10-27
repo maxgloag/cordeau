@@ -1,6 +1,6 @@
 # 0024 — Affinements de modélisation Lot / Tâche (Phase 6)
 
-- **Status** : Accepted
+- **Status** : Accepted (amendé le 2026-10-16)
 - **Date** : 2026-06-14
 - **Deciders** : Maxime
 - **Lié à** : [ADR 0015](0015-modele-chantier-lots-taches-mesures.md) (modèle socle), [ADR 0010](0010-crud-leger-pattern-reference.md) (CRUD léger), [ADR 0002](0002-architecture-hexagonale.md), [ADR 0014](0014-naming-conventions-fr-en.md)
@@ -65,3 +65,7 @@ final readonly class Imprevu {
 ### Risques résiduels
 
 - Changement de `mode` d'un Lot après saisie d'une estimation : la valeur conserverait une unité qui « change » de sens. **Tranché (6.1)** : `changerMode()` **réinitialise** `estimation` et `reel` à `null` dès que le mode change réellement (no-op si mode identique), pour éviter une valeur silencieusement fausse. Charge à l'UI (6.3/6.4) de prévenir l'artisan que changer le mode efface l'estimation/réel saisis.
+
+## Amendements
+
+- 2026-10-16 — « absence de couche Application dédiée » à `Tâche` (§1) n'est plus vrai depuis la 6.2 (#101) : la règle d'isolation entre artisans (#172, `apps/api/CLAUDE.md`) veut que les cas d'usage reçoivent le propriétaire courant, et le propriétaire d'une tâche se lit sur le chantier de son lot. `Tâche` a donc ses cas d'usage (`CreerTache`, `ListerTache`, `ModifierTache`, `SupprimerTache`), qui passent par `AccesProprietaire` comme ceux du `Lot`. Le reste du §1 (pas de VO, transitions simples) tient.

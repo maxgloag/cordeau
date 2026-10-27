@@ -25,7 +25,7 @@ La pensée stratégique et business vit sur Notion (vision, persona, roadmap bus
 | `apps/mobile`     | Expo SDK 54+ + expo-router + NativeWind + expo-sqlite/Drizzle     | [apps/mobile/CLAUDE.md](apps/mobile/CLAUDE.md) |
 | `packages/shared` | Types partagés (générés via openapi-typescript)                   | —                                              |
 
-Détails et justifications dans [docs/adr/](docs/adr/).
+Hébergement : API sur Fly.io (Paris), base Neon (Postgres managé), web sur Cloudflare Pages, photos sur Cloudflare R2, mobile via EAS. Détails et justifications dans [docs/adr/](docs/adr/).
 
 ## Commandes principales
 
@@ -89,6 +89,7 @@ Section **Implications sécurité** de l'ADR **obligatoire** si la décision tou
 - Use cases → tests d'intégration avec DB
 - API → tests d'intégration avec une vraie réponse HTTP
 - Pas de feature shippée sans test sur le domaine au minimum
+- **Toute règle métier dupliquée entre l'API et un client a ses fixtures de conformité** dans `packages/shared/conformite/` ([format](packages/shared/conformite/README.md)), jouées par PHPUnit, Vitest et Jest. L'API est la référence : un client qui diverge fait échouer son runner
 
 ### Bug-fix : protocole double-fix
 
@@ -113,17 +114,17 @@ Voir [docs/adr/0002-architecture-hexagonale.md](docs/adr/0002-architecture-hexag
 ## Discipline produit
 
 - **Verticales end-to-end**, pas horizontales : un bounded context complet sur les 3 plateformes avant de répliquer
-- **Phase 1 = moment de validation** : si quelque chose semble bancal, refactor MAINTENANT avant Phase 2
+- **Chaque phase est un moment de validation** : si quelque chose semble bancal, refactor MAINTENANT, avant la phase suivante
 - **Valider en saisie manuelle avant d'introduire la magie** : pas de feature « intelligente » (LLM, structuration vocale, géofencing, détection risques, automation) tant que le concept manuel n'a pas validé son utilité auprès des testeurs (cf [ADR 0017](docs/adr/0017-differer-ia-validation-manuelle.md)). Le wedge V1 est la combinaison modèle Chantier/Lots/Tâches/Mesures + UX mobile sans friction + offline-first, pas la magie en aval
 - **Démo perso hebdo** (vendredi) : lancer l'app comme un user
 
 ## Roadmap
 
-Plan d'attaque par phases dans [ROADMAP.md](ROADMAP.md). Statut courant : Phase 5 (Photos + R2) ✅ terminée (juin 2026, iOS on-device inclus) ; prochaine étape Phase 6 Lots/Tâches. Suivi résiduel : #87 (job CI build natif iOS). V1 ciblée septembre 2026 (bêta payante).
+Plan d'attaque par phases et état d'avancement : [ROADMAP.md](ROADMAP.md), seule source du statut. Ce fichier n'en porte aucun : il s'y périmerait.
 
 ## Surveillance CI automatique
 
-Après chaque `git push`, lancer `gh run watch <RUN_ID> --exit-status` en `run_in_background: true` : le harness notifie à la fin (~0 token tant qu'il tourne). Si la CI est rouge, récupérer les logs filtrés et proposer un fix. Le hook `asyncRewake` de `.claude/settings.json` ([scripts/ci-watch.sh](scripts/ci-watch.sh)) rapporte la CI du commit poussé après un `git push` (premier déclenchement observé le 2026-10-04, après la correction de son chemin, #181). La CI ne démarrant qu'à l'ouverture de la PR, le premier push d'une branche ne donne rien : suivre alors le run à la main. Cas des worktrees : [docs/workflow-agentique.md](docs/workflow-agentique.md#surveillance-ci--détails).
+Après chaque `git push`, lancer `gh run watch <RUN_ID> --exit-status` en `run_in_background: true` : le harness notifie à la fin (~0 token tant qu'il tourne). Si la CI est rouge, récupérer les logs filtrés et proposer un fix. Le hook `asyncRewake` de `.claude/settings.json` ([scripts/ci-watch.sh](scripts/ci-watch.sh)) rapporte la CI du commit poussé après un `git push`. La CI ne démarrant qu'à l'ouverture de la PR, le premier push d'une branche ne donne rien : suivre alors le run à la main. Historique du hook et cas des worktrees : [docs/workflow-agentique.md](docs/workflow-agentique.md#surveillance-ci--détails).
 
 RUN_ID après le push (**toujours `--workflow CI`** : sans filtre, le dernier run de la branche peut être `PR Review` ou `CodeQL`, et son succès ne dit rien de la CI) :
 
@@ -151,11 +152,10 @@ Si un signal de vélocité ou d'archi se dégrade, **stop** et rétro avant de c
 
 Skills à invoquer automatiquement selon le contexte (sans qu'on ait à le demander) :
 
-- **Avant chaque `gh pr create`** → lancer `/simplify` sur les changements de la branche, puis intégrer les corrections suggérées avant d'ouvrir la PR
+- **Avant chaque `gh pr create`** → lancer `/simplify` sur les changements de la branche, en revue **séquentielle à un seul agent** (pas de sous-agents en parallèle : quota), puis intégrer les corrections suggérées avant d'ouvrir la PR. Sauté pour un correctif de moins de ~30 lignes (le dire dans la PR)
 - **Revue avant merge** → faite par le workflow `PR Review` (ADR 0025) : second avis en contexte frais sur chaque PR, plus revue sécurité si la PR touche auth/sessions, permissions/RBAC, secrets, données personnelles (clients, adresses, téléphones, photos identifiables, au titre RGPD), stockage de fichiers, données financières, dépendance externe ou workflows CI. Un finding sécurité high/critical → label `needs-human`, pas d'auto-merge. Après un verdict `request_changes`, Claude corrige et pousse : la revue repart automatiquement
 - **Pour toute question DB / Neon / queries / connexion / migration prod** → utiliser le skill `neon-postgres` au lieu de répondre depuis la mémoire
-- **Phase 1.4 et 1.5 (UI web et mobile)** → utiliser le skill `frontend-design` quand on génère des écrans nouveaux pour éviter le rendu "AI générique"
-- **Phase 6 (Devis) et au-delà, queries SQL complexes** → consulter `supabase-postgres-best-practices` (best practices Postgres génériques)
+- **Nouvel écran web ou mobile** → utiliser le skill `frontend-design` pour éviter le rendu "AI générique"
 - **`/simplify` omis** : possible quand le diff ne contient que de la configuration, des lockfiles, de la documentation ou du code généré ; le dire dans la description de la PR
 
 ### Skills superpowers (harness Claude Code)

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Lance PHPUnit avec DATABASE_URL injectée depuis Dashlane (note « cordeau-dev »).
+# En env test, Doctrine ajoute le suffixe « _test » : la base de dev n'est pas touchée.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if ! command -v dcli >/dev/null 2>&1; then
+    echo "bin/test : dcli introuvable. Installer : brew install dashlane/tap/dashlane-cli (docs/ENV-SETUP.md)." >&2
+    exit 1
+fi
+
+export DATABASE_URL='dl://cordeau-dev/content?json=DATABASE_URL'
+
+exec dcli exec -- php bin/phpunit "$@"

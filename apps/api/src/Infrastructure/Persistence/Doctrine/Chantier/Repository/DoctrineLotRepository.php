@@ -11,7 +11,9 @@ use App\Domain\Chantier\ValueObject\Estimation;
 use App\Domain\Chantier\ValueObject\Imprevu;
 use App\Domain\Chantier\ValueObject\Reel;
 use App\Infrastructure\Persistence\Doctrine\Chantier\Entity\LotDoctrineEntity;
+use App\Infrastructure\Persistence\Doctrine\Chantier\Entity\TacheDoctrineEntity;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 final class DoctrineLotRepository implements LotRepository
@@ -79,8 +81,19 @@ final class DoctrineLotRepository implements LotRepository
             return;
         }
 
-        $this->entityManager->remove($entite);
-        $this->entityManager->flush();
+        // La FK ON DELETE CASCADE n'existe qu'en migration (le mapping n'a pas d'association) :
+        // suppression explicite, pour que la cascade tienne aussi sur un schéma issu du mapping.
+        $this->entityManager->wrapInTransaction(function () use ($entite, $id): void {
+            $this->entityManager->createQueryBuilder()
+                ->delete(TacheDoctrineEntity::class, 't')
+                ->where('t.lotId = :lotId')
+                ->setParameter('lotId', $id, UuidType::NAME)
+                ->getQuery()
+                ->execute();
+
+            $this->entityManager->remove($entite);
+            $this->entityManager->flush();
+        });
     }
 
     private function toDoctrine(Lot $lot): LotDoctrineEntity

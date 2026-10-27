@@ -3,8 +3,10 @@ import type { Photo } from "@/lib/api";
 import type { FileUploadState } from "@/hooks/usePhotoUpload";
 import { PhotoGalleryView } from "./PhotoGalleryView";
 import { PhotoLightbox } from "./PhotoLightbox";
+import { LotsSection } from "./LotsSection";
 
 type Props = {
+  chantierId: string;
   photos: Photo[];
   uploads: FileUploadState[];
   isLoading: boolean;
@@ -14,6 +16,7 @@ type Props = {
 };
 
 export function ChantierDetailView({
+  chantierId,
   photos,
   uploads,
   isLoading,
@@ -26,6 +29,8 @@ export function ChantierDetailView({
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Détail chantier</h1>
+
+      <LotsSection chantierId={chantierId} />
 
       <PhotoGalleryView
         photos={photos}

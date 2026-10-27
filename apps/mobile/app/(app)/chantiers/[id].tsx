@@ -33,8 +33,10 @@ import {
   chantierSchema,
   type ChantierFormValues,
 } from "@/lib/chantier";
+import { LEGENDE_MAX } from "@/lib/regles-metier";
 import { ChantierForm } from "@/components/ChantierForm";
 import { SubmitButton } from "@/components/SubmitButton";
+import { LotsSection } from "@/components/LotsSection";
 import {
   getAllChantiers,
   getAllClients,
@@ -57,6 +59,7 @@ function toFormValues(c: Chantier): ChantierFormValues {
     adresseRue: c.adresseRue,
     adresseCodePostal: c.adresseCodePostal,
     adresseVille: c.adresseVille,
+    adressePays: c.adressePays,
     surfaceM2: c.surfaceM2 != null ? String(c.surfaceM2) : "",
     clientId: c.clientId ?? "",
   };
@@ -113,6 +116,7 @@ export default function ChantierDetailScreen() {
       adresseRue: "",
       adresseCodePostal: "",
       adresseVille: "",
+      adressePays: "FR",
       surfaceM2: "",
       clientId: "",
     },
@@ -236,7 +240,7 @@ export default function ChantierDetailScreen() {
         adresseRue: values.adresseRue,
         adresseCodePostal: values.adresseCodePostal,
         adresseVille: values.adresseVille,
-        adressePays: chantier.adressePays,
+        adressePays: values.adressePays,
         surfaceM2:
           values.surfaceM2 !== "" ? parseFloat(values.surfaceM2) : null,
         statut: chantier.statut,
@@ -387,6 +391,9 @@ export default function ChantierDetailScreen() {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Section Lots (optionnelle : un chantier sans lot reste valide) */}
+          {!isEditing && id && <LotsSection chantierId={id} />}
 
           {/* Section Photos */}
           <View className="mt-6 mb-4">
@@ -543,7 +550,7 @@ function LightboxFooter({
         onBlur={save}
         placeholder="Ajouter une légende"
         placeholderTextColor="#9CA3AF"
-        maxLength={280}
+        maxLength={LEGENDE_MAX}
         returnKeyType="done"
         onSubmitEditing={save}
         className="text-white text-base border-b border-white/30 pb-1 mb-3"

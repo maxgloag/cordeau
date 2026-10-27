@@ -1,0 +1,93 @@
+{
+  "regle": "client.email",
+  "description": "Email d'un client : facultatif (chaîne vide = absent) ; sinon format HTML5 de Symfony, 255 caractères au plus.",
+  "reference": [
+    "apps/api/src/Presentation/Api/Client/Payload/CreerClientPayload.php"
+  ],
+  "cas": [
+    {
+      "nom": "absent",
+      "entree": {
+        "email": ""
+      },
+      "valide": true
+    },
+    {
+      "nom": "email ordinaire",
+      "entree": {
+        "email": "jean@exemple.fr"
+      },
+      "valide": true
+    },
+    {
+      "nom": "sous-domaine et +",
+      "entree": {
+        "email": "jean.dupont+chantier@mail.exemple.fr"
+      },
+      "valide": true
+    },
+    {
+      "nom": "apostrophe",
+      "entree": {
+        "email": "o'brien@exemple.fr"
+      },
+      "valide": true
+    },
+    {
+      "nom": "extension d'une lettre",
+      "entree": {
+        "email": "a@b.c"
+      },
+      "valide": true
+    },
+    {
+      "nom": "sans point dans le domaine",
+      "entree": {
+        "email": "jean@exemple"
+      },
+      "valide": false
+    },
+    {
+      "nom": "deux arobases",
+      "entree": {
+        "email": "jean@@exemple.fr"
+      },
+      "valide": false
+    },
+    {
+      "nom": "espace",
+      "entree": {
+        "email": "jean @exemple.fr"
+      },
+      "valide": false
+    },
+    {
+      "nom": "deux points consécutifs dans le domaine",
+      "entree": {
+        "email": "jean@exemple..fr"
+      },
+      "valide": false
+    },
+    {
+      "nom": "domaine commençant par un tiret",
+      "entree": {
+        "email": "jean@-exemple.fr"
+      },
+      "valide": false
+    },
+    {
+      "nom": "caractère accentué",
+      "entree": {
+        "email": "élodie@exemple.fr"
+      },
+      "valide": false
+    },
+    {
+      "nom": "256 caractères",
+      "entree": {
+        "email": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@exemple.frx"
+      },
+      "valide": false
+    }
+  ]
+}
