@@ -63,7 +63,7 @@ Toute décision structurante → ADR dans `docs/adr/NNNN-titre-court.md` **avant
 - V1.3 : intelligence personnelle (planning, stats, stock van)
 - V2 : AR comme source de Mesure, client dans expérience, partenariat PDP
 
-**Critère de validation V1.2** (porte d'entrée magie LLM) : 3/5 testeurs disent gagner du temps en saisie manuelle, 2/5 payent, aucun feedback récurrent « la dictée vocale aurait sauvé ce truc ».
+**Critère de validation V1.2** (porte d'entrée magie LLM) : défini hors du dépôt (Notion), cf [ADR 0017](../../docs/adr/0017-differer-ia-validation-manuelle.md) ; la valeur doit être démontrée en saisie manuelle, sans magie.
 
 ## Pas de hacks
 
