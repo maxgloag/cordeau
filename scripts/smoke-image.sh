@@ -35,7 +35,16 @@ cleanup() {
 }
 trap cleanup EXIT
 
-[ "${SKIP_BUILD:-}" = "1" ] || docker build --quiet -t "$IMAGE" apps/api >/dev/null
+# Sortie complète du build gardée et rejouée en cas d'échec : `--quiet` ne laissait que la
+# dernière ligne (« exit code: 1 »), sans le nom de l'extension fautive.
+if [ "${SKIP_BUILD:-}" != "1" ]; then
+  BUILD_LOG=$(mktemp)
+  if ! docker build --progress=plain -t "$IMAGE" apps/api >"$BUILD_LOG" 2>&1; then
+    tail -200 "$BUILD_LOG" >&2
+    echo "❌ docker build échoue (200 dernières lignes ci-dessus)" >&2
+    exit 1
+  fi
+fi
 
 # --- Lecture de fly.toml : une commande par ligne, découpée comme Fly le fait ---
 fly_command() { # $1 = release | <nom de process>
