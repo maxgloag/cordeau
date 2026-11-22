@@ -121,7 +121,7 @@ jobs:
           coverage: none
 
       - name: Cache Composer dependencies
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
         with:
           path: apps/api/vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('apps/api/composer.lock') }}
@@ -191,7 +191,7 @@ jobs:
       # Mémoïsation des tâches Turbo entre runs (lint/test/build).
       # Une PR qui ne touche pas le web rejoue le cache → job quasi instantané.
       - name: Cache Turbo
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-web-${{ github.sha }}
@@ -244,7 +244,7 @@ jobs:
           cache: pnpm
 
       - name: Cache Turbo
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-mobile-${{ github.sha }}
